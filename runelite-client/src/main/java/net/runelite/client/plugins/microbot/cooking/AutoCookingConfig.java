@@ -18,9 +18,16 @@ public interface AutoCookingConfig extends Config {
     String generalSection = "general";
 
     @ConfigSection(
+            name = "Combining",
+            description = "Combine items to make cooking item",
+            position = 1
+    )
+    String combiningSection = "combining";
+
+    @ConfigSection(
             name = "Cooking",
             description = "Cooking",
-            position = 1
+            position = 2
     )
     String cookingSection = "cooking";
 
@@ -47,6 +54,17 @@ public interface AutoCookingConfig extends Config {
     )
     default CookingActivity cookingActivity() {
         return CookingActivity.COOKING;
+    }
+
+    @ConfigItem(
+            name = "Item to Combine",
+            keyName = "itemToCombine",
+            position = 0,
+            description = "Item to Combine",
+            section = combiningSection
+    )
+    default CombiningItem itemToCombine() {
+        return CombiningItem.PLAIN_PIZZA;
     }
 
     @ConfigItem(

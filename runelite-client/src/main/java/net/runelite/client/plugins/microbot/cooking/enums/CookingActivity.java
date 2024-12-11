@@ -5,6 +5,8 @@ import lombok.Getter;
 @Getter
 public enum CookingActivity {
     COOKING,
+    COMBINING,
+    COMBINE_COOK
 //    REFILLING,
 //    WINE,
 //    BAKING,

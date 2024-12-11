@@ -2169,6 +2169,20 @@ public class Rs2Inventory {
         return currentInventorySize != size() || currentInventoryStackableSize != stackableSize();
     }
 
+    public static boolean whileInventoryIsChanging(Runnable actionWhileWaiting) {
+        final int currentInventorySize = size();
+        final int currentInventoryStackableSize = stackableSize();
+        sleepUntil(() ->  {
+            actionWhileWaiting.run();
+            while (currentInventorySize != size() || currentInventoryStackableSize != stackableSize()) {
+                Microbot.log("Inventory size is changing");
+                Rs2Random.between(600, 2100);
+            }
+            return currentInventorySize != size() || currentInventoryStackableSize != stackableSize();
+        });
+        return currentInventorySize != size() || currentInventoryStackableSize != stackableSize();
+    }
+
     /**
      * Moves the specified item to the specified slot in the inventory.
      *

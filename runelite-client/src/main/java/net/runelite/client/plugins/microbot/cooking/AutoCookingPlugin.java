@@ -12,6 +12,7 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.microbot.Microbot;
+import net.runelite.client.plugins.microbot.cooking.scripts.AutoCombiningScript;
 import net.runelite.client.plugins.microbot.cooking.scripts.AutoCookingScript;
 import net.runelite.client.plugins.microbot.util.mouse.VirtualMouse;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -30,6 +31,8 @@ public class AutoCookingPlugin extends Plugin {
     public static double version = 1.0;
     @Inject
     AutoCookingScript autoCookingScript;
+    @Inject
+    AutoCombiningScript autoCombiningScript;
     @Inject
     private AutoCookingConfig config;
     @Inject
@@ -58,6 +61,11 @@ public class AutoCookingPlugin extends Plugin {
         switch (config.cookingActivity()) {
             case COOKING:
                 autoCookingScript.run(config);
+                break;
+            case COMBINING:
+                autoCombiningScript.run(config);
+                break;
+            case COMBINE_COOK:
             default:
                 Microbot.log("Invalid Cooking Activity");
         }
@@ -65,6 +73,7 @@ public class AutoCookingPlugin extends Plugin {
 
     protected void shutDown() {
         autoCookingScript.shutdown();
+        autoCombiningScript.shutdown();
         overlayManager.remove(overlay);
     }
 }
