@@ -67,8 +67,8 @@ public class DoughMakerScript extends Script {
                 }
 
                 // check if player is in desired location
-                getPlayerState(config);
                 checkCurrentPlayerLocation();
+                getPlayerState(config);
                 if (!checkIfInDesiredLocation()) walkToDesiredLocation();
 
                 log.info("Current Location: {}", currentLocation);
@@ -234,8 +234,7 @@ public class DoughMakerScript extends Script {
             Rs2Random.wait(800, 1200);
             boolean makeDoughWidget = Rs2Widget.hasWidget("What sort of dough do you wish to make?");
             if (makeDoughWidget) {
-                log.info("keyPress: {}", config.doughItem().getKeyEvent());
-                Rs2Keyboard.keyPress(KeyEvent.VK_SPACE);
+                Rs2Keyboard.typeString(config.doughItem().getKey());
                 log.info("Make dough key has been pressed");
             }
             return true;
@@ -268,7 +267,7 @@ public class DoughMakerScript extends Script {
                 break;
             case PROCESSING:
                 if (currentLocation == Location.WHEAT_FIELD) {
-                    exitWheatField();
+                    openWheatFieldDoor();
                     walkNearCookingGuildDoor();
                     enterCookingGuild();
                     walkToCGThirdFloor();
@@ -322,16 +321,10 @@ public class DoughMakerScript extends Script {
 
     private void openWheatFieldDoor() {
         WallObject wheatFieldDoor = Rs2GameObject.findDoor(15512);
-        if (wheatFieldDoor != null) Rs2GameObject.interact(wheatFieldDoor, "Open");
-        log.info("Player has open wheat field door");
-    }
-
-    private void exitWheatField() {
-        WallObject wheatFieldDoor = Rs2GameObject.findDoor(15512);
-        if (wheatFieldDoor != null) Rs2GameObject.interact(wheatFieldDoor, "Open");
-
-        Rs2Walker.walkTo(Location.WHEAT_FIELD.getPoint());
-        log.info("Player is now outside wheat field");
+        if (wheatFieldDoor != null) {
+            Rs2GameObject.interact(wheatFieldDoor, "Open");
+            log.info("Player has open wheat field door");
+        } else log.info("Wheat field door is not available");
     }
 
     private void walkNearCookingGuildDoor() {
@@ -348,7 +341,7 @@ public class DoughMakerScript extends Script {
             Rs2GameObject.interact(entranceDoor, "Open");
             log.info("Player has enter Cooking Guild");
         }
-        Rs2Random.wait(2000, 3000);
+        Rs2Random.wait(2000, 3200);
     }
 
     private void exitCookingGuild() {
@@ -396,7 +389,7 @@ public class DoughMakerScript extends Script {
             }
 
             return false;
-        });
+        }, Rs2Random.between(4000, 5000));
     }
 
     private boolean playerIsInProvidedArea(WorldPoint point, int radius) {
@@ -428,12 +421,10 @@ public class DoughMakerScript extends Script {
     }
 
     private boolean hasGrainRemaining() {
-        if (currentLocation == Location.WHEAT_FIELD) {
-            return (Rs2Inventory.hasItem("Grain") && recollectedGrain >= 26);
-        } else if (currentLocation == Location.COOKING_GUILD_THIRD_FLOOR) {
+        if (currentLocation == Location.COOKING_GUILD_THIRD_FLOOR) {
             return Rs2Inventory.hasItem("Grain");
         }
-        return false;
+        return (Rs2Inventory.hasItem("Grain") && recollectedGrain >= 26);
     }
 
     private boolean playerHasMaterialsToCombine() {
