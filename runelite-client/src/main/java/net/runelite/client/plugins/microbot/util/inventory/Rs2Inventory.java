@@ -34,8 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static net.runelite.client.plugins.microbot.Microbot.log;
-import static net.runelite.client.plugins.microbot.util.Global.sleep;
-import static net.runelite.client.plugins.microbot.util.Global.sleepUntil;
+import static net.runelite.client.plugins.microbot.util.Global.*;
 
 public class Rs2Inventory {
 
@@ -2170,17 +2169,25 @@ public class Rs2Inventory {
     }
 
     public static boolean whileInventoryIsChanging(Runnable actionWhileWaiting) {
-        final int currentInventorySize = size();
-        final int currentInventoryStackableSize = stackableSize();
-        sleepUntil(() ->  {
+        int currentSize = 0;
+        int currentStackableSize = 0;
+        int newSize = 0;
+        int newStackableSize = 0;
+
+        do {
             actionWhileWaiting.run();
-            while (currentInventorySize != size() || currentInventoryStackableSize != stackableSize()) {
-                Microbot.log("Inventory size is changing");
-                Rs2Random.between(600, 2100);
-            }
-            return currentInventorySize != size() || currentInventoryStackableSize != stackableSize();
-        });
-        return currentInventorySize != size() || currentInventoryStackableSize != stackableSize();
+
+            currentSize = size();
+            currentStackableSize = stackableSize();
+            Rs2Random.wait(1600, 2000);
+            newSize = size();
+            newStackableSize = stackableSize();
+
+//            Microbot.log(String.format("current size: %d, new size: %d", currentSize, newSize));
+//            Microbot.log(String.format("stackable current size: %d, new size: %d", currentStackableSize, newStackableSize));
+        } while (currentSize != newSize || currentStackableSize != newStackableSize);
+
+        return currentSize == size() || currentStackableSize == stackableSize();
     }
 
     /**

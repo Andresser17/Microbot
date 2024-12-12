@@ -12,7 +12,6 @@ import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
-import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
 
 import java.awt.event.KeyEvent;
@@ -59,13 +58,6 @@ public class AutoCombiningScript extends Script {
                                 Rs2Inventory.whileInventoryIsChanging(() -> {
                                     log.info("Combining ingredients");
                                 });
-//                                sleepUntil(() -> {
-//                                    if (Rs2Inventory.contains(ingredient1.getId()) && hasNecessaryIngredients(combiningItem)) {
-//                                        log.info("Combining ingredients");
-//                                        return true;
-//                                    }
-//                                    return false;
-//                                });
 
                                 log.info("Sleep finished");
                             }
@@ -80,7 +72,7 @@ public class AutoCombiningScript extends Script {
                             Rs2Random.wait(800, 1600);
                         }
 
-                        if (!hasNecessaryIngredients(combiningItem)) {
+                        if (hasNecessaryIngredientsInBank(combiningItem)) {
                             Arrays.stream(combiningItem.getIngredients()).forEach((ingredient) -> Rs2Bank.withdrawX(ingredient.getId(), ingredient.getQuantityToWithdraw()));
                             Rs2Random.wait(800, 1600);
                         } else {
@@ -110,7 +102,7 @@ public class AutoCombiningScript extends Script {
     }
 
     private void getPlayerState(AutoCookingConfig config) {
-        if (hasNecessaryIngredients(config.itemToCombine())) {
+        if (hasNecessaryIngredientsInInventory(config.itemToCombine())) {
             playerState = PlayerState.COMBINING;
             return;
         }
@@ -118,9 +110,16 @@ public class AutoCombiningScript extends Script {
         playerState = PlayerState.BANKING;
     }
 
-    private boolean hasNecessaryIngredients(CombiningItem combiningItem) {
+    private boolean hasNecessaryIngredientsInInventory(CombiningItem combiningItem) {
         Ingredients[] ingredients = combiningItem.getIngredients();
         return Arrays.stream(ingredients).allMatch((ingredient) -> Rs2Inventory.hasItem(ingredient.getName(), true));
+    }
+
+    private boolean hasNecessaryIngredientsInBank(CombiningItem combiningItem) {
+        if (!Rs2Bank.isOpen()) return false;
+
+        Ingredients[] ingredients = combiningItem.getIngredients();
+        return Arrays.stream(ingredients).allMatch((ingredient) -> Rs2Bank.hasItem(ingredient.getName(), true));
     }
 
     private boolean hasCombinedItem(CombiningItem combiningItem) {
