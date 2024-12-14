@@ -3,6 +3,8 @@ package net.runelite.client.plugins.microbot.pvmfighter.loot;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
+import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.grounditem.LootingParameters;
 import net.runelite.client.plugins.microbot.util.grounditem.Rs2GroundItem;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
@@ -19,16 +21,8 @@ public class LootScript extends Script {
     public void run(PvmFighterConfig config) {
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                if (!super.run() || PvmFighterPlugin.fulfillConditionsToRun()) return;
-
-                if (!config.toggleLootItems()) return;
-
-                // Go to bank if inventory is full
-                if (Rs2Inventory.isFull() || Rs2Inventory.getEmptySlots() <= config.minFreeSlots()) {
-                    if (PvmFighterPlugin.playerState != PvmFighterState.BANKING)
-                        PvmFighterPlugin.playerState = PvmFighterState.BANKING;
-                    return;
-                }
+                if (!super.fulfillConditionsToRun() || PvmFighterScript.playerState != PlayerState.LOOTING) return;
+                if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
 
                 if (config.toggleLootItemsByValue()) {
                     lootItemsByValue(config);
@@ -50,7 +44,7 @@ public class LootScript extends Script {
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
-        }, 0, 200, TimeUnit.MILLISECONDS);
+        }, 0, 1000, TimeUnit.MILLISECONDS);
     }
 
     private void lootArrows(PvmFighterConfig config) {
@@ -185,10 +179,7 @@ public class LootScript extends Script {
                         .map(String::trim).toArray(String[]::new)
         );
 
-        Microbot.pauseAllScripts = true;
         sleepUntil(() -> Rs2GroundItem.lootItemsBasedOnNames(params));
-        PvmFighterPlugin.playerState = PvmFighterState.COMBAT;
-        Microbot.pauseAllScripts = false;
     }
 
     public void shutdown() {

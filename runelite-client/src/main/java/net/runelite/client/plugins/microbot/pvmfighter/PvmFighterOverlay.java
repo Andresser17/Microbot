@@ -52,9 +52,10 @@ public class PvmFighterOverlay extends OverlayPanel {
     public Dimension render(Graphics2D graphics) {
         if (attackableNpcs == null) return null;
 
+        // render area
         LocalPoint lp =  LocalPoint.fromWorld(Microbot.getClient(), config.centerLocation());
         if (lp != null) {
-            Polygon poly = Perspective.getCanvasTileAreaPoly(Microbot.getClient(), lp, config.attackRadius() * 2);
+            Polygon poly = Perspective.getCanvasTileAreaPoly(Microbot.getClient(), lp, config.attackRadius());
 
             if (poly != null)
             {

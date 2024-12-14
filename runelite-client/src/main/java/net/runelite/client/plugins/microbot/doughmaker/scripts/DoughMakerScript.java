@@ -23,7 +23,6 @@ import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
 
-import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +58,7 @@ public class DoughMakerScript extends Script {
         Rs2Antiban.setActivity(Activity.MAKING_DOUGH_AT_COOKS_GUILD);
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                if (!fulfillConditionsToRun() && Rs2AntibanSettings.actionCooldownActive) return;
+                if (!super.fulfillConditionsToRun() || Rs2AntibanSettings.actionCooldownActive) return;
 
                 if (init) {
                     checkPlayerInventory();
@@ -149,19 +148,6 @@ public class DoughMakerScript extends Script {
 
                             // combine items
                             if (!makeDough(config)) break;
-//                            Rs2Item bucketOfWater = Rs2Inventory.get(ItemID.BUCKET_OF_WATER);
-//                            Rs2Item potOfFlour = Rs2Inventory.get(ItemID.POT_OF_FLOUR);
-//                            if (potOfFlour != null && bucketOfWater != null && !Rs2Inventory.isFull()) {
-//                                log.info("Combining bucket of water and pot of flour");
-//                                Rs2Inventory.combine(bucketOfWater, potOfFlour);
-//                                Rs2Random.wait(800, 1200);
-//                                boolean makeDoughWidget = Rs2Widget.hasWidget("What sort of dough do you wish to make?");
-//                                if (makeDoughWidget) {
-//                                    log.info("keyPress: {}", config.doughItem().getKeyEvent());
-//                                    Rs2Keyboard.keyPress(32);
-//                                    log.info("Make dough key has been pressed");
-//                                }
-//                            } else break;
 
                             Rs2Random.wait(800, 1200);
                             checkPlayerInventory();
@@ -198,10 +184,6 @@ public class DoughMakerScript extends Script {
             }
         }, 0, 1000, TimeUnit.MILLISECONDS);
         return true;
-    }
-
-    public boolean fulfillConditionsToRun() {
-        return Microbot.isLoggedIn() && !Microbot.pauseAllScripts && super.isRunning();
     }
 
     private void checkCurrentPlayerLocation() {
@@ -322,8 +304,10 @@ public class DoughMakerScript extends Script {
     private void openWheatFieldDoor() {
         WallObject wheatFieldDoor = Rs2GameObject.findDoor(15512);
         if (wheatFieldDoor != null) {
+            Microbot.pauseAllScripts = true;
             Rs2GameObject.interact(wheatFieldDoor, "Open");
             log.info("Player has open wheat field door");
+            Microbot.pauseAllScripts = false;
         } else log.info("Wheat field door is not available");
     }
 
@@ -462,7 +446,6 @@ public class DoughMakerScript extends Script {
     }
 
     private boolean isReadyToBank(DoughItem doughItem) {
-//        return Rs2Inventory.hasItemAmount(doughItem.getItemId(), 26);
         return Rs2Inventory.hasItem(doughItem.getItemId()) && recollectedGrain == 0 && processedGrain == 0;
     }
 }

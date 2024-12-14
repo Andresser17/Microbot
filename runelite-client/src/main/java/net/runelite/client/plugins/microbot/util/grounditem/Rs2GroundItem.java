@@ -415,7 +415,7 @@ public class Rs2GroundItem {
     }
 
 
-    private static boolean hasLootableItems(Predicate<GroundItem> filter) {
+    public static boolean hasLootableItems(Predicate<GroundItem> filter) {
         List<GroundItem> groundItems = GroundItemsPlugin.getCollectedGroundItems().values().stream()
                 .filter(filter)
                 .collect(Collectors.toList());

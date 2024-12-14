@@ -20,6 +20,8 @@ import net.runelite.client.plugins.microbot.inventorysetups.InventorySetup;
 import net.runelite.client.plugins.microbot.inventorysetups.MInventorySetupsPlugin;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.pvmfighter.combat.*;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
+import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.combat.Rs2Combat;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.prayer.Rs2Prayer;
@@ -61,8 +63,9 @@ public class PvmFighterPlugin extends Plugin {
     @Getter
     @Setter
     public static int cooldown = 0;
+    private final PvmFighterScript pvmFighterScript = new PvmFighterScript();
     private final CannonScript cannonScript = new CannonScript();
-    private final AttackNpcScript attackNpc = new AttackNpcScript();
+    private final AttackNpcScript attackNpcScript = new AttackNpcScript();
     private final CombatPotionScript combatPotion = new CombatPotionScript();
     private final FoodScript foodScript = new FoodScript();
     private final PrayerPotionScript prayerPotionScript = new PrayerPotionScript();
@@ -88,7 +91,6 @@ public class PvmFighterPlugin extends Plugin {
     private MenuEntry lastClick;
     private Point lastMenuOpenedPoint;
     private WorldPoint trueTile;
-    public static PvmFighterState playerState = PvmFighterState.COMBAT;
 
     @Provides
     PvmFighterConfig provideConfig(ConfigManager configManager) {
@@ -106,8 +108,14 @@ public class PvmFighterPlugin extends Plugin {
         if (!config.toggleCenterTile() && Microbot.isLoggedIn())
             setCenter(Rs2Player.getWorldLocation());
 
+        PlayerLocation.COMBAT_FIELD.setWorldPoint(config.centerLocation(), config.attackRadius());
+        PlayerLocation.SAFE_SPOT.setWorldPoint(config.safeSpot(), 0);
+        PlayerLocation.NEAREST_BANK.setWorldPoint(Rs2Bank.getNearestBank().getWorldPoint(), 10);
+
+        pvmFighterScript.run(config);
+
         // Combat
-        attackNpc.run(config);
+        attackNpcScript.run(config);
         safeSpotScript.run(config);
 //        flickerScript.run(config);
 //        useSpecialAttackScript.run(config);
@@ -134,17 +142,17 @@ public class PvmFighterPlugin extends Plugin {
     }
 
     protected void shutDown() {
-        playerState = PvmFighterState.COMBAT;
+        pvmFighterScript.shutdown();
 
         // Combat
-        attackNpc.shutdown();
+        attackNpcScript.shutdown();
         safeSpotScript.shutdown();
 //        flickerScript.shutdown();
 //        useSpecialAttackScript.shutdown();
 //        cannonScript.shutdown();
         // Food & Potions
 //        combatPotion.shutdown();
-        foodScript.shutdown();
+//        foodScript.shutdown();
 //        prayerPotionScript.shutdown();
 //        antiPoisonScript.shutdown();
         // Loot
@@ -160,10 +168,6 @@ public class PvmFighterPlugin extends Plugin {
         resetLocation();
         overlayManager.remove(playerAssistOverlay);
         overlayManager.remove(playerAssistInfoOverlay);
-    }
-
-    public static boolean fulfillConditionsToRun() {
-        return !Microbot.isLoggedIn() || Microbot.pauseAllScripts || !Microbot.isLoggedIn();
     }
 
     private void resetLocation() {
@@ -187,8 +191,6 @@ public class PvmFighterPlugin extends Plugin {
                 "safeSpotLocation",
                 worldPoint
         );
-
-
     }
     //set Inventory Setup
     private void setInventorySetup(InventorySetup inventorySetup) {
@@ -229,8 +231,6 @@ public class PvmFighterPlugin extends Plugin {
     // on setting change
     @Subscribe
     public void onConfigChanged(ConfigChanged event) {
-
-
         if (event.getKey().equals("Safe Spot")) {
 
             if (!config.toggleSafeSpot()) {
@@ -321,6 +321,7 @@ public class PvmFighterPlugin extends Plugin {
         }
         return null;
     }
+
     public WorldPoint calculateMapPoint(Point point) {
         WorldMap worldMap = Microbot.getClient().getWorldMap();
         float zoom = worldMap.getWorldMapZoom();
@@ -336,6 +337,7 @@ public class PvmFighterPlugin extends Plugin {
 
         return mapPoint.dx(dx).dy(dy);
     }
+
     public Point mapWorldPointToGraphicsPoint(WorldPoint worldPoint) {
         WorldMap worldMap = Microbot.getClient().getWorldMap();
 
@@ -369,9 +371,6 @@ public class PvmFighterPlugin extends Plugin {
         return null;
     }
     private void onMenuOptionClicked(MenuEntry entry) {
-
-
-
         if (entry.getOption().equals(SET) && entry.getTarget().equals(CENTER_TILE)) {
             setCenter(trueTile);
         }

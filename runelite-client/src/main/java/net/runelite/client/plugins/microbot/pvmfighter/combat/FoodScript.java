@@ -4,6 +4,8 @@ import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.api.Skill;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
+import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
@@ -32,8 +34,7 @@ public class FoodScript extends Script {
         shieldName = "";
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                if (!super.run() || PvmFighterPlugin.fulfillConditionsToRun()) return;
-                if (!config.toggleFood()) return;
+                if (!super.fulfillConditionsToRun() || PvmFighterScript.playerState != PlayerState.EATING) return;
 
                 if (Rs2Inventory.hasItem("empty vial"))
                     Rs2Inventory.drop("empty vial");

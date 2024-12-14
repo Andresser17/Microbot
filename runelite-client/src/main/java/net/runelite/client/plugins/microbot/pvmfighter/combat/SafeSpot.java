@@ -5,6 +5,8 @@ import net.runelite.api.NPC;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
+import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
@@ -31,8 +33,7 @@ public class SafeSpot extends Script {
 
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                if (!super.run() || PvmFighterPlugin.fulfillConditionsToRun()) return;
-                if (!config.toggleSafeSpot()) return;
+                if (!super.fulfillConditionsToRun() || PvmFighterScript.playerState != PlayerState.SAFEKEEPING) return;
 
                 minimumHealth = config.minimumHealthSafeSpot();
                 currentSafeSpot = config.safeSpot();
@@ -45,10 +46,10 @@ public class SafeSpot extends Script {
                 }
 
                 // Player health is less than minimum configured
-                if (shouldRetreat() && !isPlayerAtSafeSpot(currentSafeSpot)) {
-                    PvmFighterPlugin.playerState = PvmFighterState.RETREAT;
-                    walkToSafeSpot();
-                }
+//                if (shouldRetreat() && !isPlayerAtSafeSpot(currentSafeSpot)) {
+//                    PvmFighterScript.playerState = PvmFighterState.RETREAT;
+//                    walkToSafeSpot();
+//                }
 
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());

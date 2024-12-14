@@ -610,7 +610,7 @@ public interface PvmFighterConfig extends Config {
             position = 0,
             section = banking
     )
-    default boolean bank() {
+    default boolean toggleBanking() {
         return false;
     }
 

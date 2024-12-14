@@ -198,6 +198,10 @@ public abstract class Script implements IScript {
         return true;
     }
 
+    public boolean fulfillConditionsToRun() {
+        return Microbot.isLoggedIn() && !Microbot.pauseAllScripts && isRunning();
+    }
+
     public void keyPress(char c) {
         Rs2Keyboard.keyPress(c);
     }

@@ -4,6 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
+import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.Rs2InventorySetup;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
@@ -55,46 +58,24 @@ enum ItemToKeep {
 
 @Slf4j
 public class BankerScript extends Script {
-    boolean initialized = false;
 
-    public void run(PvmFighterConfig config) {
+    public boolean run(PvmFighterConfig config) {
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                if (PvmFighterPlugin.fulfillConditionsToRun()) return;
-                if (!config.bank() || PvmFighterPlugin.playerState != PvmFighterState.BANKING) return;
+                if (!super.fulfillConditionsToRun() || PvmFighterScript.playerState != PlayerState.BANKING) return;
+                if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
 
                 if (needsBanking(config)) {
-                    walkToNearestBank();
-                    handleBanking(config);
-                } else {
-                    walkToCombatZone(config);
+                    if (Rs2Bank.openBank()) {
+                        depositAllExcept(config);
+                        withdrawUpkeepItems(config);
+                    }
                 }
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
-        }, 0, 600, TimeUnit.MILLISECONDS);
-    }
-
-    private void walkToNearestBank() {
-        WorldPoint nearestBank = Rs2Bank.getNearestBank().getWorldPoint();
-        Rs2Walker.walkTo(nearestBank, 8);
-        Microbot.pauseAllScripts = true;
-        sleepUntil(() -> nearestBank.equals(Rs2Player.getWorldLocation()));
-        log.info("Walk to nearest bank method finished");
-        Microbot.pauseAllScripts = false;
-    }
-
-    private void walkToCombatZone(PvmFighterConfig config) {
-        WorldPoint combatZone = config.centerLocation();
-        Rs2Walker.walkTo(combatZone, 8);
-        Microbot.pauseAllScripts = true;
-        sleepUntil(() -> combatZone.equals(Rs2Player.getWorldLocation()));
-        Microbot.pauseAllScripts = false;
-        PvmFighterPlugin.playerState = PvmFighterState.COMBAT;
-    }
-
-    public boolean goToBank() {
-        return Rs2Walker.walkTo(Rs2Bank.getNearestBank().getWorldPoint(), 8);
+        }, 0, 1000, TimeUnit.MILLISECONDS);
+        return true;
     }
 
     public boolean needsBanking(PvmFighterConfig config) {
@@ -157,17 +138,7 @@ public class BankerScript extends Script {
                 .anyMatch(item -> item.getIds().stream().mapToInt(Rs2Inventory::count).sum() == 0);
     }
 
-    public void handleBanking(PvmFighterConfig config) {
-        if (Rs2Bank.openBank()) {
-            depositAllExcept(config);
-            withdrawUpkeepItems(config);
-        }
-    }
-
     public void shutdown() {
         super.shutdown();
-        // reset the initialized flag
-        initialized = false;
-
     }
 }

@@ -6,6 +6,10 @@ import net.runelite.api.NPC;
 import net.runelite.api.Skill;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
+import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
+import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.camera.Rs2Camera;
 import net.runelite.client.plugins.microbot.util.combat.Rs2Combat;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
@@ -41,10 +45,10 @@ public class AttackNpcScript extends Script {
 
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                if (!super.run() || PvmFighterPlugin.fulfillConditionsToRun())
-                    return;
-
-                if (!config.toggleCombat()) return;
+                if (!super.fulfillConditionsToRun() || Rs2AntibanSettings.actionCooldownActive || PvmFighterScript.playerState != PlayerState.ATTACKING) return;
+                if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
+//                if (PvmFighterPlugin.getCooldown() > 0 || Rs2Combat.inCombat())
+//                    return;
 
                 List<String> npcsToAttack = Arrays.stream(config.attackableNpcs().split(","))
                         .map(String::trim)
@@ -65,8 +69,7 @@ public class AttackNpcScript extends Script {
                 }
                 messageShown = false;
 
-                attackableNpcs = Microbot.getClient().getNpcs().stream()
-                        .filter(npc -> !npc.isDead()
+                attackableNpcs = Rs2Npc.getNpcs().filter(npc -> !npc.isDead()
                                 && npc.getWorldLocation().distanceTo(config.centerLocation()) <= config.attackRadius()
                                 && (npc.getInteracting() == null
                                 || npc.getInteracting() == Microbot.getClient().getLocalPlayer())
@@ -78,56 +81,25 @@ public class AttackNpcScript extends Script {
                                         .distanceTo(Microbot.getClient().getLocalPlayer().getLocalLocation())))
                         .collect(Collectors.toList());
 
-                if (PvmFighterPlugin.getCooldown() > 0 || Rs2Combat.inCombat())
-                    return;
+                if (attackableNpcs.isEmpty()) return;
+                NPC npc = attackableNpcs.get(0);
 
-                if (!attackableNpcs.isEmpty()) {
-                    NPC npc = attackableNpcs.get(0);
+                if (!Rs2Camera.isTileOnScreen(npc.getLocalLocation()))
+                    Rs2Camera.turnTo(npc);
 
-                    if (!Rs2Camera.isTileOnScreen(npc.getLocalLocation()))
-                        Rs2Camera.turnTo(npc);
+                Rs2Npc.interact(npc, "attack");
+                Microbot.status = "Attacking " + npc.getName();
+                // Wait until player initialized combat
+                sleepUntil(Rs2Combat::inCombat, () -> {}, 10000, 1000);
+                // Wait until player finished combat
+                sleepUntil(() -> !Rs2Combat.inCombat(), () -> {}, 10000, 1000);
+                log.info("Combat finished");
+//                    PvmFighterPlugin.setCooldown(config.playStyle().getRandomTickInterval());
 
-                    Microbot.pauseAllScripts = true;
-                    Rs2Npc.interact(npc, "attack");
-                    Microbot.status = "Attacking " + npc.getName();
-                    // Wait until player initialized combat
-                    sleepUntil(Rs2Combat::inCombat);
-                    // Wait until player finished combat
-                    sleepUntil(() -> !Rs2Combat.inCombat());
-                    log.info("combat finished");
-                    Microbot.pauseAllScripts = false;
-                    PvmFighterPlugin.setCooldown(config.playStyle().getRandomTickInterval());
-
-//                    sleepUntil(Rs2Player::isInteracting, 1000);
-//                    sleepUntil(() -> Microbot.getClient().getLocalPlayer().isInteracting()
-//                            && Microbot.getClient().getLocalPlayer().getInteracting() instanceof NPC);
-
-//                    if (config.togglePrayer()) {
-//                        if (!config.toggleQuickPray()) {
-//                            AttackStyle attackStyle = AttackStyleMapper
-//                                    .mapToAttackStyle(Rs2NpcManager.getAttackStyle(npc.getId()));
-//                            if (attackStyle != null) {
-//                                switch (attackStyle) {
-//                                    case MAGE:
-//                                        Rs2Prayer.toggle(Rs2PrayerEnum.PROTECT_MAGIC, true);
-//                                        break;
-//                                    case MELEE:
-//                                        Rs2Prayer.toggle(Rs2PrayerEnum.PROTECT_MELEE, true);
-//                                        break;
-//                                    case RANGED:
-//                                        Rs2Prayer.toggle(Rs2PrayerEnum.PROTECT_RANGE, true);
-//                                        break;
-//                                }
-//                            }
-//                        } else {
-//                            Rs2Prayer.toggleQuickPrayer(true);
-//                        }
-//                    }
-                }
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
-        }, 0, 600, TimeUnit.MILLISECONDS);
+        }, 0, 1000, TimeUnit.MILLISECONDS);
     }
 
     public void shutdown() {
