@@ -21,6 +21,7 @@ import net.runelite.client.plugins.microbot.inventorysetups.MInventorySetupsPlug
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.pvmfighter.combat.*;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
+import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.combat.Rs2Combat;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
@@ -46,7 +47,7 @@ import java.util.stream.Collectors;
 @PluginDescriptor(
         name = PluginDescriptor.Mocrosoft + "PVM Fighter",
         description = "Microbot Fighter plugin",
-        tags = {"fight", "microbot", "misc", "combat", "playerassistant"},
+        tags = {"fight", "microbot", "misc", "combat", "pvmfighter"},
         enabledByDefault = false
 )
 @Slf4j
@@ -63,6 +64,9 @@ public class PvmFighterPlugin extends Plugin {
     @Getter
     @Setter
     public static int cooldown = 0;
+    public static boolean shutdownFlag = false;
+    @Getter
+    @Setter
     private final PvmFighterScript pvmFighterScript = new PvmFighterScript();
     private final CannonScript cannonScript = new CannonScript();
     private final AttackNpcScript attackNpcScript = new AttackNpcScript();
@@ -101,6 +105,7 @@ public class PvmFighterPlugin extends Plugin {
     protected void startUp() throws AWTException {
         Microbot.pauseAllScripts = false;
         cooldown = 0;
+        shutdownFlag = false;
         if (overlayManager != null) {
             overlayManager.add(playerAssistOverlay);
             overlayManager.add(playerAssistInfoOverlay);
@@ -109,33 +114,9 @@ public class PvmFighterPlugin extends Plugin {
             setCenter(Rs2Player.getWorldLocation());
 
         PlayerLocation.COMBAT_FIELD.setWorldPoint(config.centerLocation(), config.attackRadius());
-        PlayerLocation.SAFE_SPOT.setWorldPoint(config.safeSpot(), 0);
         PlayerLocation.NEAREST_BANK.setWorldPoint(Rs2Bank.getNearestBank().getWorldPoint(), 10);
 
         pvmFighterScript.run(config);
-
-        // Combat
-        attackNpcScript.run(config);
-        safeSpotScript.run(config);
-//        flickerScript.run(config);
-//        useSpecialAttackScript.run(config);
-//        cannonScript.run(config);
-        // Food & Potions
-//        combatPotion.run(config);
-        foodScript.run(config);
-//        prayerPotionScript.run(config);
-//        antiPoisonScript.run(config);
-        // Loot
-        lootScript.run(config);
-        // Prayer
-//        prayerScript.run(config);
-//        buryScatterScript.run(config);
-        // Skilling
-//        attackStyleScript.run(config);
-        // Gear
-
-        // Banking
-        bankerScript.run(config);
 
         Microbot.getSpecialAttackConfigs()
                 .setSpecialAttack(true);
@@ -143,27 +124,6 @@ public class PvmFighterPlugin extends Plugin {
 
     protected void shutDown() {
         pvmFighterScript.shutdown();
-
-        // Combat
-        attackNpcScript.shutdown();
-        safeSpotScript.shutdown();
-//        flickerScript.shutdown();
-//        useSpecialAttackScript.shutdown();
-//        cannonScript.shutdown();
-        // Food & Potions
-//        combatPotion.shutdown();
-//        foodScript.shutdown();
-//        prayerPotionScript.shutdown();
-//        antiPoisonScript.shutdown();
-        // Loot
-        lootScript.shutdown();
-        // Prayer
-//        prayerScript.shutdown();
-//        buryScatterScript.shutdown();
-        // Skilling
-//        attackStyleScript.shutdown();
-        // Banking
-        bankerScript.shutdown();
 
         resetLocation();
         overlayManager.remove(playerAssistOverlay);
@@ -178,7 +138,7 @@ public class PvmFighterPlugin extends Plugin {
     private void setCenter(WorldPoint worldPoint)
     {
         configManager.setConfiguration(
-                "PlayerAssistant",
+                PvmFighterConfig.GROUP,
                 "centerLocation",
                 worldPoint
         );
@@ -187,30 +147,29 @@ public class PvmFighterPlugin extends Plugin {
     private void setSafeSpot(WorldPoint worldPoint)
     {
         configManager.setConfiguration(
-                "PlayerAssistant",
-                "safeSpotLocation",
+                PvmFighterConfig.GROUP,
+                "SafeSpotLocation",
                 worldPoint
         );
     }
     //set Inventory Setup
     private void setInventorySetup(InventorySetup inventorySetup) {
         configManager.setConfiguration(
-                "PlayerAssistant",
+                PvmFighterConfig.GROUP,
                 "inventorySetupHidden",
                 inventorySetup
         );
     }
     private void addNpcToList(String npcName) {
         configManager.setConfiguration(
-                "PlayerAssistant",
+                PvmFighterConfig.GROUP,
                 "monster",
                 config.attackableNpcs() + npcName + ","
         );
-
     }
     private void removeNpcFromList(String npcName) {
         configManager.setConfiguration(
-                "PlayerAssistant",
+                PvmFighterConfig.GROUP,
                 "monster",
                 Arrays.stream(config.attackableNpcs().split(","))
                         .filter(n -> !n.equalsIgnoreCase(npcName))
@@ -222,22 +181,19 @@ public class PvmFighterPlugin extends Plugin {
         return menuTarget.replaceAll("<[^>]*>|\\(.*\\)", "").trim();
     }
 
-    @Subscribe
-    public void onChatMessage(ChatMessage event) {
-        if (event.getMessage().contains("reach that")) {
-            AttackNpcScript.skipNpc();
-        }
-    }
     // on setting change
     @Subscribe
     public void onConfigChanged(ConfigChanged event) {
-        if (event.getKey().equals("Safe Spot")) {
-
+        if (event.getKey().equals("SafeSpot")) {
             if (!config.toggleSafeSpot()) {
                 // reset safe spot to default
                 setSafeSpot(new WorldPoint(0, 0, 0));
             }
         }
+        if (event.getKey().equals("SafeSpotLocation")) {
+            PlayerLocation.SAFE_SPOT.setWorldPoint(config.safeSpot(), 0);
+        }
+
         if(event.getKey().equals("Combat")) {
             if (!config.toggleCombat() && config.toggleCenterTile()) {
                 setCenter(new WorldPoint(0, 0, 0));
@@ -245,7 +201,9 @@ public class PvmFighterPlugin extends Plugin {
             if (config.toggleCombat() && !config.toggleCenterTile()) {
                 setCenter(Rs2Player.getWorldLocation());
             }
-
+            if (!Objects.equals(config.playStyle().getName(), Rs2Antiban.getPlayStyle().getName())) {
+                Rs2Antiban.setPlayStyle(config.playStyle());
+            }
         }
         if (event.getKey().equals("InventorySetupName")) {
             InventorySetup inventorySetup = MInventorySetupsPlugin.getInventorySetups().stream().filter(Objects::nonNull).filter(x -> x.getName().equalsIgnoreCase(config.inventorySetup())).findFirst().orElse(null);
@@ -264,6 +222,11 @@ public class PvmFighterPlugin extends Plugin {
         //execute flicker script
         if(config.togglePrayer())
             flickerScript.onGameTick();
+
+        if (shutdownFlag) {
+            shutDown();
+            shutdownFlag = false;
+        }
     }
 
     @Subscribe

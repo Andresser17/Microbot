@@ -26,36 +26,27 @@ public class SafeSpot extends Script {
 
     public int minimumHealth = 10;
     public WorldPoint currentSafeSpot = null;
-    private boolean messageShown = false;
 
-    public boolean run(PvmFighterConfig config) {
-        AtomicReference<List<String>> npcsToAttack = new AtomicReference<>(Arrays.stream(Arrays.stream(config.attackableNpcs().split(",")).map(String::trim).toArray(String[]::new)).collect(Collectors.toList()));
+    public void run(PvmFighterConfig config) {
+        try {
+            if (!super.fulfillConditionsToRun() || PvmFighterScript.playerState != PlayerState.SAFEKEEPING) return;
 
-        mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
-            try {
-                if (!super.fulfillConditionsToRun() || PvmFighterScript.playerState != PlayerState.SAFEKEEPING) return;
-
-                minimumHealth = config.minimumHealthSafeSpot();
-                currentSafeSpot = config.safeSpot();
-                if (isDefaultSafeSpot(currentSafeSpot)) {
-                    if (!messageShown) {
-                        Microbot.showMessage("Please set a safe spot location");
-                        messageShown = true;
-                    }
-                    return;
-                }
-
-                // Player health is less than minimum configured
-//                if (shouldRetreat() && !isPlayerAtSafeSpot(currentSafeSpot)) {
-//                    PvmFighterScript.playerState = PvmFighterState.RETREAT;
-//                    walkToSafeSpot();
-//                }
-
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage());
+            minimumHealth = config.minimumHealthSafeSpot();
+            currentSafeSpot = config.safeSpot();
+            if (isDefaultSafeSpot(currentSafeSpot)) {
+                Microbot.showMessage("Please set a safe spot location");
+                PvmFighterPlugin.shutdownFlag = true;
+                return;
             }
-        }, 0, 600, TimeUnit.MILLISECONDS);
-        return true;
+
+            // Player health is less than minimum configured
+            if (shouldRetreat() && !isPlayerAtSafeSpot(currentSafeSpot)) {
+                PvmFighterScript.playerState = PlayerState.SAFEKEEPING;
+            }
+
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     private void walkToSafeSpot() {

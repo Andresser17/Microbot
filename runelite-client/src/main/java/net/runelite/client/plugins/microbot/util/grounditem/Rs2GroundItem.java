@@ -8,6 +8,7 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.grounditems.GroundItem;
 import net.runelite.client.plugins.grounditems.GroundItemsPlugin;
 import net.runelite.client.plugins.microbot.Microbot;
+import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.math.Random;
 import net.runelite.client.plugins.microbot.util.menu.NewMenuEntry;
@@ -284,11 +285,11 @@ public class Rs2GroundItem {
                 if (!Rs2Inventory.hasItem(groundItem.getId()))
                     return false;
             }
-            Microbot.pauseAllScripts = true;
+//            Microbot.pauseAllScripts = true;
             /** switched to waitForGroundItemDespawn instead of waitForInventoryChanges
              *  as waitForInventoryChanges can cause endless loops of trying to loot the same item
              *  even after it has been successfully looted by the player or another player.
-             *  Or if the player has a Open Herb Sack, Gem Bag or Seed Box etc it wont trigger an inventory change.
+             *  Or if the player has an Open Herb Sack, Gem Bag or Seed Box etc. it won't trigger an inventory change.
              */
 
             waitForGroundItemDespawn(() -> interact(groundItem), groundItem);
@@ -305,7 +306,7 @@ public class Rs2GroundItem {
             Microbot.pauseAllScripts = false;
             return true;
         }
-        // This is needed to make sure we dont get stuck in a endless pause if something goes wrong
+        // This is needed to make sure we don't get stuck in an endless pause if something goes wrong
         Microbot.pauseAllScripts = false;
         // If we reach this statement, we most likely still have items to loot, and we return false to the script
         // Script above can handle extra logic if the looting failed
@@ -339,14 +340,37 @@ public class Rs2GroundItem {
         return validateLoot(filter);
     }
 
-    public static boolean lootItemsBasedOnNames(LootingParameters params) {
-        final Predicate<GroundItem> filter = groundItem ->
-                groundItem.getLocation().distanceTo(Microbot.getClient().getLocalPlayer().getWorldLocation()) < params.getRange() &&
-                        (!params.isAntiLureProtection() || (params.isAntiLureProtection() && groundItem.getOwnership() == OWNERSHIP_SELF)) &&
-                        Arrays.stream(params.getNames()).anyMatch(name -> groundItem.getName().toLowerCase().contains(name.toLowerCase()));
-        List<GroundItem> groundItems = GroundItemsPlugin.getCollectedGroundItems().values().stream()
-                .filter(filter)
-                .collect(Collectors.toList());
+    public static List<GroundItem> getItemsToLootById(LootingParameters params) {
+        final Predicate<GroundItem> filter = (groundItem) -> {
+            boolean isInRange = params.getArea().contains(groundItem.getLocation());
+            boolean idMatch = Arrays.stream(params.getIds()).anyMatch(id -> id == groundItem.getId());
+            return isInRange && (!params.isAntiLureProtection() || (params.isAntiLureProtection() && groundItem.getOwnership() == OWNERSHIP_SELF)) && idMatch;
+        };
+
+        return GroundItemsPlugin.getCollectedGroundItems().values().stream().filter(filter).collect(Collectors.toList());
+    }
+
+    public static List<GroundItem> getItemsToLootByValue(LootingParameters params) {
+        final Predicate<GroundItem> filter = (groundItem) -> {
+            boolean valueIsInPriceRange = groundItem.getGePrice() > params.getMinValue() && (groundItem.getGePrice() / groundItem.getQuantity()) < params.getMaxValue();
+            boolean nameMatch = Arrays.stream(params.getNames()).anyMatch(name -> groundItem.getName().toLowerCase().contains(name.toLowerCase()));
+            return valueIsInPriceRange && (!params.isAntiLureProtection() || (params.isAntiLureProtection() && groundItem.getOwnership() == OWNERSHIP_SELF)) && nameMatch;
+        };
+
+        return GroundItemsPlugin.getCollectedGroundItems().values().stream().filter(filter).collect(Collectors.toList());
+    }
+
+    public static List<GroundItem> getItemsToLootByName(LootingParameters params) {
+        final Predicate<GroundItem> filter = (groundItem) -> {
+            boolean isInRange = params.getArea().contains(groundItem.getLocation());
+            boolean nameMatch = Arrays.stream(params.getNames()).anyMatch(name -> groundItem.getName().toLowerCase().contains(name.toLowerCase()));
+            return isInRange && (!params.isAntiLureProtection() || (params.isAntiLureProtection() && groundItem.getOwnership() == OWNERSHIP_SELF)) && nameMatch;
+        };
+
+         return GroundItemsPlugin.getCollectedGroundItems().values().stream().filter(filter).collect(Collectors.toList());
+    }
+
+    public static boolean lootItems(LootingParameters params, List<GroundItem> groundItems) {
         if (groundItems.size() < params.getMinItems()) return false;
         if (params.isDelayedLooting()) {
             // Get the ground item with the lowest despawn time
@@ -355,12 +379,57 @@ public class Rs2GroundItem {
             if (calculateDespawnTime(item) > 150) return false;
         }
 
-        for (GroundItem groundItem : groundItems) {
-            if (groundItem.getQuantity() < params.getMinQuantity()) continue;
+        Optional<GroundItem> optional = groundItems.stream().reduce((anteriorItem, currentItem) -> {
+            int distance1 = Rs2Player.getWorldLocation().distanceTo(anteriorItem.getLocation());
+            int distance2 = Rs2Player.getWorldLocation().distanceTo(currentItem.getLocation());
+
+            if (distance1 < distance2) return anteriorItem;
+            return currentItem;
+        });
+        if (optional.isPresent()) {
+            GroundItem closestItem = optional.get();
+            if (closestItem.getQuantity() < params.getMinQuantity()) return true;
             if (Rs2Inventory.getEmptySlots() <= params.getMinInvSlots()) return true;
-            coreLoot(groundItem);
+            coreLoot(closestItem);
         }
-        return validateLoot(filter);
+
+        return false;
+    }
+
+    public static boolean lootItemsBasedOnNames(LootingParameters params) {
+        final Predicate<GroundItem> filter = groundItem ->
+                groundItem.getLocation().distanceTo(Microbot.getClient().getLocalPlayer().getWorldLocation()) < params.getRange() &&
+                        (!params.isAntiLureProtection() || (params.isAntiLureProtection() && groundItem.getOwnership() == OWNERSHIP_SELF)) &&
+                        Arrays.stream(params.getNames()).anyMatch(name -> groundItem.getName().toLowerCase().contains(name.toLowerCase()));
+        List<GroundItem> groundItems = GroundItemsPlugin.getCollectedGroundItems().values().stream()
+                .filter(filter)
+                .collect(Collectors.toList());
+
+//        List<GroundItem> groundItems = getItemsToLootByName(params);
+
+        if (groundItems.size() < params.getMinItems()) return false;
+        if (params.isDelayedLooting()) {
+            // Get the ground item with the lowest despawn time
+            GroundItem item = groundItems.stream().min(Comparator.comparingInt(Rs2GroundItem::calculateDespawnTime)).orElse(null);
+            assert item != null;
+            if (calculateDespawnTime(item) > 150) return false;
+        }
+
+        Optional<GroundItem> optional = groundItems.stream().reduce((anteriorItem, currentItem) -> {
+            int distance1 = Rs2Player.getWorldLocation().distanceTo(anteriorItem.getLocation());
+            int distance2 = Rs2Player.getWorldLocation().distanceTo(currentItem.getLocation());
+
+            if (distance1 < distance2) return anteriorItem;
+            return currentItem;
+        });
+        if (optional.isPresent()) {
+            GroundItem closestItem = optional.get();
+            if (closestItem.getQuantity() < params.getMinQuantity()) return true;
+            if (Rs2Inventory.getEmptySlots() <= params.getMinInvSlots()) return true;
+            coreLoot(closestItem);
+            return true;
+        }
+        return false;
     }
 
     // Loot untradables
@@ -406,11 +475,25 @@ public class Rs2GroundItem {
             if (calculateDespawnTime(item) > 150) return false;
         }
 
-        for (GroundItem groundItem : groundItems) {
-            if (groundItem.getQuantity() < params.getMinQuantity()) continue;
+        Optional<GroundItem> optional = groundItems.stream().reduce((anteriorItem, currentItem) -> {
+            int distance1 = Rs2Player.getWorldLocation().distanceTo(anteriorItem.getLocation());
+            int distance2 = Rs2Player.getWorldLocation().distanceTo(currentItem.getLocation());
+
+            if (distance1 < distance2) return anteriorItem;
+            return currentItem;
+        });
+        if (optional.isPresent()) {
+            GroundItem closestItem = optional.get();
+            if (closestItem.getQuantity() < params.getMinQuantity()) return true;
             if (Rs2Inventory.getEmptySlots() <= params.getMinInvSlots()) return true;
-            coreLoot(groundItem);
+            coreLoot(closestItem);
         }
+
+//        for (GroundItem groundItem : groundItems) {
+//            if (groundItem.getQuantity() < params.getMinQuantity()) continue;
+//            if (Rs2Inventory.getEmptySlots() <= params.getMinInvSlots()) return true;
+//            coreLoot(groundItem);
+//        }
         return validateLoot(filter);
     }
 

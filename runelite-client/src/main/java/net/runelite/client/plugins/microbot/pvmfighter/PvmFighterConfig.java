@@ -3,8 +3,11 @@ package net.runelite.client.plugins.microbot.pvmfighter;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.config.*;
 import net.runelite.client.plugins.microbot.inventorysetups.InventorySetup;
-import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayStyle;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.CombatStyle;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PrayerStyle;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.RangedAmmo;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.Spell;
+import net.runelite.client.plugins.microbot.util.antiban.enums.PlayStyle;
 
 @ConfigGroup(PvmFighterConfig.GROUP)
 @ConfigInformation("1. Make sure to place the cannon first before starting the plugin. <br />" +
@@ -16,7 +19,7 @@ import net.runelite.client.plugins.microbot.pvmfighter.enums.PrayerStyle;
         "7. SafeSpot you can Shift Right-click the ground to select the tile. <br />" +
         "8. Right-click NPCs to add them to the attack list. <br />")
 public interface PvmFighterConfig extends Config {
-    String GROUP = "PlayerAssistant";
+    String GROUP = "PvmFighter";
 
     @ConfigSection(
             name = "Combat",
@@ -62,7 +65,7 @@ public interface PvmFighterConfig extends Config {
             closedByDefault = false
     )
     String prayerSection = "Prayer";
-    //Skilling section
+
     @ConfigSection(
             name = "Skilling",
             description = "Skilling",
@@ -128,7 +131,7 @@ public interface PvmFighterConfig extends Config {
 
     //safe spot
     @ConfigItem(
-            keyName = "Safe Spot",
+            keyName = "SafeSpot",
             name = "Safe Spot",
             description = "Shift Right-click the ground to select the safe spot tile",
             position = 5,
@@ -140,9 +143,9 @@ public interface PvmFighterConfig extends Config {
 
     // Player minimum HP if is bellow run to safe spot
     @ConfigItem(
-            keyName = "Safe spot minimum health",
-            name = "Minimum player health",
-            description = "if player health is less than the provided quantity, run to safe spot",
+            keyName = "SafeSpotMinimumHealth",
+            name = "Minimum player health (%)",
+            description = "if player health is less than the provided percentage, run to safe spot",
             position = 6,
             section = combatSection
     )
@@ -163,10 +166,43 @@ public interface PvmFighterConfig extends Config {
     }
 
     @ConfigItem(
+            keyName = "CombatStyle",
+            name = "Set Combat Style",
+            description = "Select between Melee, Ranged, and Magic.",
+            position = 8,
+            section = combatSection
+    )
+    default CombatStyle combatStyle() {
+        return CombatStyle.MELEE;
+    }
+
+    @ConfigItem(
+            keyName = "AmmoToUse",
+            name = "Ammo to use",
+            description = "Equip ammunition for ranged attack",
+            position = 9,
+            section = combatSection
+    )
+    default RangedAmmo ammoToUse() {
+        return RangedAmmo.BRONZE_BOLTS;
+    }
+
+    @ConfigItem(
+            keyName = "SpellToUse",
+            name = "Spell to use",
+            description = "Select attack spell",
+            position = 10,
+            section = combatSection
+    )
+    default Spell spellToUse() {
+        return Spell.WIND_STRIKE;
+    }
+
+    @ConfigItem(
             keyName = "ReachableNpcs",
             name = "Only attack reachable npcs",
             description = "Only attack npcs that we can reach with melee",
-            position = 8,
+            position = 11,
             section = combatSection
     )
     default boolean attackReachableNpcs() {
@@ -278,18 +314,6 @@ public interface PvmFighterConfig extends Config {
     default int maxPriceOfItemsToLoot() {
         return 10000000;
     }
-    // toggle scatter
-
-    @ConfigItem(
-            keyName = "Loot items by selected categories",
-            name = "Loot by following selected categories",
-            description = "Enable/Disable loot items that are from the following categories",
-            position = 2,
-            section = lootSection
-    )
-    default boolean toggleLootSelectedCategories() {
-        return false;
-    }
 
     @ConfigItem(
             keyName = "Loot arrows",
@@ -302,7 +326,6 @@ public interface PvmFighterConfig extends Config {
         return false;
     }
 
-    // toggle loot runes
     @ConfigItem(
             keyName = "Loot runes",
             name = "Loot runes",
@@ -314,7 +337,6 @@ public interface PvmFighterConfig extends Config {
         return false;
     }
 
-    // toggle loot coins
     @ConfigItem(
             keyName = "Loot coins",
             name = "Loot coins",
@@ -326,19 +348,6 @@ public interface PvmFighterConfig extends Config {
         return false;
     }
 
-    // toggle loot untreadables
-    @ConfigItem(
-            keyName = "Loot untradables",
-            name = "Loot untradables",
-            description = "Enable/disable loot untradables",
-            position = 5,
-            section = lootSection
-    )
-    default boolean toggleLootUntradables() {
-        return false;
-    }
-
-    // loot items by name
     @ConfigItem(
             keyName = "Loot items by name",
             name = "Loot items by their name",
@@ -368,7 +377,7 @@ public interface PvmFighterConfig extends Config {
             position = 96,
             section = lootSection
     )
-    default boolean toggleBuryBones() {
+    default boolean toggleLootBones() {
         return false;
     }
 
@@ -381,6 +390,18 @@ public interface PvmFighterConfig extends Config {
     )
     default boolean toggleScatter() {
         return false;
+    }
+
+    // delayed looting
+    @ConfigItem(
+            keyName = "minimumQuantityToLoot",
+            name = "Minimum Quantity",
+            description = "Minimum quantity of one item to loot.",
+            position = 98,
+            section = lootSection
+    )
+    default int minimumQuantityToLoot() {
+        return 3;
     }
 
     // delayed looting
@@ -826,7 +847,7 @@ public interface PvmFighterConfig extends Config {
 
     //hidden config item for safe spot location
     @ConfigItem(
-            keyName = "safeSpotLocation",
+            keyName = "SafeSpotLocation",
             name = "Safe Spot Location",
             description = "Safe Spot Location",
             hidden = true

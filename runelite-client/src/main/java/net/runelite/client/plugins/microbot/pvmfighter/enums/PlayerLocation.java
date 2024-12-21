@@ -39,7 +39,6 @@ public enum PlayerLocation {
     }
 
     public void setWorldPoint(WorldPoint point, int size) {
-//        this.area = new WorldArea(point.getX(), point.getY(), radius, radius, point.getPlane());
         this.area = getWorldAreaFromCenter(point, size, size);
         this.point = point;
     }
@@ -52,7 +51,7 @@ public enum PlayerLocation {
      * @param height      The height of the area in tiles.
      * @return The WorldArea object representing the rectangular area.
      */
-    public static WorldArea getWorldAreaFromCenter(WorldPoint centerPoint, int width, int height) {
+    private static WorldArea getWorldAreaFromCenter(WorldPoint centerPoint, int width, int height) {
         int halfWidth = width / 2;
         int halfHeight = height / 2;
 

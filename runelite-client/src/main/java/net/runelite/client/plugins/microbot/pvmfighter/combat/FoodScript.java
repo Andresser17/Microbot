@@ -26,49 +26,47 @@ public class FoodScript extends Script {
 
     String shieldName = "";
 
-    public boolean run(PvmFighterConfig config) {
+    public void run(PvmFighterConfig config) {
         weaponname = "";
         bodyName = "";
         legsName = "";
         helmName = "";
         shieldName = "";
-        mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
-            try {
-                if (!super.fulfillConditionsToRun() || PvmFighterScript.playerState != PlayerState.EATING) return;
+        try {
+            if (PvmFighterScript.playerState != PlayerState.EATING) return;
+            if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
 
-                if (Rs2Inventory.hasItem("empty vial"))
-                    Rs2Inventory.drop("empty vial");
-                double treshHold = (double) (Microbot.getClient().getBoostedSkillLevel(Skill.HITPOINTS) * 100) / Microbot.getClient().getRealSkillLevel(Skill.HITPOINTS);
-                if (Rs2Equipment.isWearingFullGuthan()) {
-                    if (treshHold > 80) //only unequip guthans if we have more than 80% hp
-                        unEquipGuthans();
+            if (Rs2Inventory.hasItem("empty vial"))
+                Rs2Inventory.drop("empty vial");
+            double treshHold = (double) (Microbot.getClient().getBoostedSkillLevel(Skill.HITPOINTS) * 100) / Microbot.getClient().getRealSkillLevel(Skill.HITPOINTS);
+            if (Rs2Equipment.isWearingFullGuthan()) {
+                if (treshHold > 80) //only unequip guthans if we have more than 80% hp
+                    unEquipGuthans();
+                return;
+            } else {
+                if (treshHold > 51) //return as long as we have more than 51% health and not guthan equipped
                     return;
-                } else {
-                    if (treshHold > 51) //return as long as we have more than 51% health and not guthan equipped
-                        return;
-                }
-                List<Rs2Item> foods = Microbot.getClientThread().runOnClientThread(Rs2Inventory::getInventoryFood);
-                if (foods == null || foods.isEmpty()) {
-                    if (!equipFullGuthans()) {
-                        Microbot.showMessage("No more food left & no guthans available. Please teleport");
-                        sleep(5000);
-                    }
-                    return;
-                }
-                for (Rs2Item food : foods) {
-                    Rs2Inventory.interact(food, "eat");
-                    sleep(1200, 2000);
-                    break;
-                }
-            } catch(Exception ex) {
-                System.out.println(ex.getMessage());
             }
-        }, 0, 600, TimeUnit.MILLISECONDS);
-        return true;
+            List<Rs2Item> foods = Microbot.getClientThread().runOnClientThread(Rs2Inventory::getInventoryFood);
+            if (foods == null || foods.isEmpty()) {
+                if (!equipFullGuthans()) {
+                    Microbot.showMessage("No more food left & no guthans available. Please teleport");
+                    sleep(5000);
+                }
+                return;
+            }
+            for (Rs2Item food : foods) {
+                Rs2Inventory.interact(food, "eat");
+                sleep(1200, 2000);
+                break;
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     private void unEquipGuthans() {
-        if (Rs2Equipment.hasGuthanWeaponEquiped()  && !weaponname.isEmpty()) {
+        if (Rs2Equipment.hasGuthanWeaponEquiped() && !weaponname.isEmpty()) {
             Rs2Inventory.equip(weaponname);
             if (shieldName != null)
                 Rs2Inventory.equip(shieldName);

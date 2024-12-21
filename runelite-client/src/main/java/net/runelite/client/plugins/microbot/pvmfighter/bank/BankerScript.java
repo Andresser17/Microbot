@@ -59,23 +59,20 @@ enum ItemToKeep {
 @Slf4j
 public class BankerScript extends Script {
 
-    public boolean run(PvmFighterConfig config) {
-        mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
-            try {
-                if (!super.fulfillConditionsToRun() || PvmFighterScript.playerState != PlayerState.BANKING) return;
-                if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
+    public void run(PvmFighterConfig config) {
+        try {
+            if (PvmFighterScript.playerState != PlayerState.BANKING) return;
+            if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
 
-                if (needsBanking(config)) {
-                    if (Rs2Bank.openBank()) {
-                        depositAllExcept(config);
-                        withdrawUpkeepItems(config);
-                    }
+            if (needsBanking(config)) {
+                if (Rs2Bank.openBank()) {
+                    depositAllExcept(config);
+                    withdrawUpkeepItems(config);
                 }
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage());
             }
-        }, 0, 1000, TimeUnit.MILLISECONDS);
-        return true;
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     public boolean needsBanking(PvmFighterConfig config) {

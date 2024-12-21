@@ -2182,9 +2182,6 @@ public class Rs2Inventory {
             Rs2Random.wait(1600, 2000);
             newSize = size();
             newStackableSize = stackableSize();
-
-//            Microbot.log(String.format("current size: %d, new size: %d", currentSize, newSize));
-//            Microbot.log(String.format("stackable current size: %d, new size: %d", currentStackableSize, newStackableSize));
         } while (currentSize != newSize || currentStackableSize != newStackableSize);
 
         return currentSize == size() || currentStackableSize == stackableSize();
