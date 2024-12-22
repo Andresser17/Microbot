@@ -110,6 +110,7 @@ public class PvmFighterPlugin extends Plugin {
             overlayManager.add(playerAssistOverlay);
             overlayManager.add(playerAssistInfoOverlay);
         }
+        if (Microbot.getClient() == null) return;
         if (!config.toggleCenterTile() && Microbot.isLoggedIn())
             setCenter(Rs2Player.getWorldLocation());
 

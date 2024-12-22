@@ -7,6 +7,7 @@ import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.CombatStyle;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.Spell;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
@@ -48,6 +49,10 @@ public class AttackNpcScript extends Script {
             if (PvmFighterScript.playerState != PlayerState.ATTACKING) return;
             if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
             if (PvmFighterPlugin.getCooldown() > 0) return;
+            if (config.toggleCenterTile() && config.centerLocation().getX() == 0 && config.centerLocation().getY() == 0) {
+                Microbot.showMessage("Please set a center location");
+                PvmFighterPlugin.shutdownFlag = true;
+            }
 
             switch (config.combatStyle()) {
                 case RANGED:
@@ -72,27 +77,14 @@ public class AttackNpcScript extends Script {
                     .map(String::trim)
                     .collect(Collectors.toList());
 
-            double healthPercentage = (double) Microbot.getClient().getBoostedSkillLevel(Skill.HITPOINTS) * 100
-                    / Microbot.getClient().getRealSkillLevel(Skill.HITPOINTS);
-            if (Rs2Inventory.getInventoryFood().isEmpty() && healthPercentage < 10)
-                return;
-
-            if (config.toggleCenterTile() && config.centerLocation().getX() == 0 && config.centerLocation().getY() == 0) {
-                Microbot.showMessage("Please set a center location");
-                PvmFighterPlugin.shutdownFlag = true;
-            }
-
-            attackableNpcs = Rs2Npc.getNpcs().filter(npc -> !npc.isDead()
-                            && npc.getWorldLocation().distanceTo(config.centerLocation()) <= config.attackRadius()
-                            && (npc.getInteracting() == null
-                            || npc.getInteracting() == Microbot.getClient().getLocalPlayer())
-                            && npcsToAttack.contains(npc.getName())
-                            && Rs2Npc.hasLineOfSight(npc))
-                    .sorted(Comparator
-                            .comparing((NPC npc) -> npc.getInteracting() == Microbot.getClient().getLocalPlayer() ? 0 : 1)
+            attackableNpcs = Rs2Npc.getNpcs().filter(npc -> {
+                boolean isInArea = PlayerLocation.COMBAT_FIELD.getArea().contains(npc.getWorldLocation());
+                boolean isInteracting = (npc.getInteracting() == null || npc.getInteracting() == Microbot.getClient().getLocalPlayer());
+                return npcsToAttack.contains(npc.getName()) && !npc.isDead() && isInArea && isInteracting && Rs2Npc.hasLineOfSight(npc);
+            }).sorted(Comparator.comparing((NPC npc) -> npc.getInteracting() == Microbot.getClient().getLocalPlayer() ? 0 : 1)
                             .thenComparingInt(npc -> npc.getLocalLocation()
-                                    .distanceTo(Microbot.getClient().getLocalPlayer().getLocalLocation())))
-                    .collect(Collectors.toList());
+                            .distanceTo(Rs2Player.getLocalLocation())))
+                            .collect(Collectors.toList());
 
             if (attackableNpcs.isEmpty()) return;
             NPC currentNpc = attackableNpcs.get(0);

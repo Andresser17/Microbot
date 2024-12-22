@@ -822,6 +822,18 @@ public interface PvmFighterConfig extends Config {
         return true;
     }
 
+    @ConfigItem(
+            keyName = "itemsToKeep",
+            name = "Items to keep",
+            description = "Items to keep by item name",
+            position = 10,
+            section = banking
+    )
+    default String[] itemsToKeep() {
+        return new String[]{};
+    }
+
+    // Hidden configurations
 
     // Hidden config item for inventory setup
     @ConfigItem(

@@ -58,25 +58,18 @@ enum ItemToKeep {
 
 @Slf4j
 public class BankerScript extends Script {
-
     public void run(PvmFighterConfig config) {
         try {
             if (PvmFighterScript.playerState != PlayerState.BANKING) return;
             if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
 
-            if (needsBanking(config)) {
-                if (Rs2Bank.openBank()) {
-                    depositAllExcept(config);
-                    withdrawUpkeepItems(config);
-                }
+            if (Rs2Bank.openBank()) {
+                depositAllExcept(config);
+                withdrawUpkeepItems(config);
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
-    }
-
-    public boolean needsBanking(PvmFighterConfig config) {
-        return isUpkeepItemDepleted(config) || Rs2Inventory.getEmptySlots() <= config.minFreeSlots();
     }
 
     public boolean withdrawUpkeepItems(PvmFighterConfig config) {

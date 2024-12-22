@@ -33,7 +33,10 @@ public enum PlayerLocation {
     public static PlayerLocation checkCurrentPlayerLocation() {
         Optional<PlayerLocation> currentLoc = stream().filter((location) -> {
             WorldArea area = location.getArea();
-            return area.contains(Rs2Player.getWorldLocation());
+            if (area != null) {
+                return area.contains(Rs2Player.getWorldLocation());
+            }
+            return false;
         }).findFirst();
         return currentLoc.orElse(PlayerLocation.OUTSIDE_POINT);
     }

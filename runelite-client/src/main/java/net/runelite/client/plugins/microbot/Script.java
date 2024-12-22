@@ -199,7 +199,7 @@ public abstract class Script implements IScript {
     }
 
     public boolean fulfillConditionsToRun() {
-        return Microbot.isLoggedIn() && !Microbot.pauseAllScripts && isRunning();
+        return Microbot.isLoggedIn() && !Microbot.pauseAllScripts && isRunning() && Microbot.getClient() != null;
     }
 
     public void keyPress(char c) {
