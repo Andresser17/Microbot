@@ -51,7 +51,7 @@ public class LootScript extends Script {
                 " arrow"
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
-        Rs2GroundItem.lootItems(params, groundItems);
+        Rs2GroundItem.lootItem(params, groundItems);
     }
 
     public static boolean hasArrowsToLoot(PvmFighterConfig config) {
@@ -79,7 +79,7 @@ public class LootScript extends Script {
                 " bones"
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
-        Rs2GroundItem.lootItems(params, groundItems);
+        Rs2GroundItem.lootItem(params, groundItems);
     }
 
     public static boolean hasBonesToLoot(PvmFighterConfig config) {
@@ -107,7 +107,7 @@ public class LootScript extends Script {
                 " rune"
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
-        Rs2GroundItem.lootItems(params, groundItems);
+        Rs2GroundItem.lootItem(params, groundItems);
     }
 
     public static boolean hasRunesToLoot(PvmFighterConfig config) {
@@ -135,7 +135,7 @@ public class LootScript extends Script {
                 ItemID.COINS_995
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootById(params);
-        Rs2GroundItem.lootItems(params, groundItems);
+        Rs2GroundItem.lootItem(params, groundItems);
     }
 
     public static boolean hasCoinsToLoot(PvmFighterConfig config) {
@@ -163,7 +163,7 @@ public class LootScript extends Script {
                 config.toggleOnlyLootMyItems()
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
-        Rs2GroundItem.lootItems(params, groundItems);
+        Rs2GroundItem.lootItem(params, groundItems);
     }
 
     public static boolean hasItemsToLootByValue(PvmFighterConfig config) {
@@ -193,7 +193,7 @@ public class LootScript extends Script {
                         .map(String::trim).toArray(String[]::new)
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
-        Rs2GroundItem.lootItems(params, groundItems);
+        Rs2GroundItem.lootItem(params, groundItems);
     }
 
     public static boolean hasItemsToLootByName(PvmFighterConfig config) {

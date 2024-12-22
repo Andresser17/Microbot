@@ -4,7 +4,7 @@ import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.looter.AutoLooterConfig;
 import net.runelite.client.plugins.microbot.looter.enums.DefaultLooterStyle;
-import net.runelite.client.plugins.microbot.looter.enums.LooterState;
+import net.runelite.client.plugins.microbot.looter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
@@ -22,14 +22,14 @@ import java.util.stream.Collectors;
 
 public class DefaultScript extends Script {
 
-    LooterState state = LooterState.LOOTING;
+    PlayerState state = PlayerState.LOOTING;
 
     public boolean run(AutoLooterConfig config) {
         Microbot.enableAutoRunOn = false;
-        initialPlayerLocation = null;
         Rs2Antiban.resetAntibanSettings();
         applyAntiBanSettings();
         Rs2Antiban.setActivity(Activity.GENERAL_COLLECTING);
+
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
                 if (!super.run()) return;
@@ -74,7 +74,7 @@ public class DefaultScript extends Script {
                             }
                         }
                         if (Rs2Inventory.getEmptySlots() <= config.minFreeSlots()) {
-                            state = LooterState.BANKING;
+                            state = PlayerState.BANKING;
                             return;
                         }
                         break;
@@ -86,7 +86,7 @@ public class DefaultScript extends Script {
                             if (!Rs2Bank.bankItemsAndWalkBackToOriginalPosition(Rs2Inventory.all().stream().map(Rs2Item::getName).collect(Collectors.toList()), initialPlayerLocation, config.minFreeSlots()))
                                 return;
                         }
-                        state = LooterState.LOOTING;
+                        state = PlayerState.LOOTING;
                         break;
                 }
 

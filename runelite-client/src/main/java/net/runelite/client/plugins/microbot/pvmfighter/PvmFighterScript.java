@@ -15,9 +15,13 @@ import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
 import net.runelite.client.plugins.microbot.util.antiban.enums.ActivityIntensity;
 import net.runelite.client.plugins.microbot.util.antiban.enums.PlayStyle;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
+import net.runelite.client.plugins.microbot.util.misc.Rs2Food;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -152,7 +156,16 @@ public class PvmFighterScript extends Script {
 
     private boolean needToEat(PvmFighterConfig config) {
         if (!config.toggleFood()) return false;
-        return !Rs2Inventory.getInventoryFood().isEmpty();
+
+        // get food that heal value is less than lost health
+        Optional<Rs2Item> foodToEat = Rs2Inventory.getInventoryFood().stream().filter(food -> {
+            Rs2Food foodValue = Rs2Food.getFoodById(food.id);
+            if (foodValue == null) return false;
+
+            return foodValue.getHeal() <= (Rs2Player.getMaxHealth() - Rs2Player.checkCurrentHealth());
+        }).findFirst();
+
+        return foodToEat.isPresent() && !Rs2Player.isFullHealth();
     }
 
     private boolean needToSafeKeep(PvmFighterConfig config) {
