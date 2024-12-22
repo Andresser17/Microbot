@@ -1,7 +1,6 @@
 package net.runelite.client.plugins.microbot.pvmfighter.combat;
 
 import net.runelite.api.EquipmentInventorySlot;
-import net.runelite.api.Skill;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
@@ -10,10 +9,12 @@ import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
-import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterPlugin;
+import net.runelite.client.plugins.microbot.util.math.Rs2Random;
+import net.runelite.client.plugins.microbot.util.misc.Rs2Food;
+import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Optional;
 
 import static net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment.get;
 
@@ -36,36 +37,42 @@ public class FoodScript extends Script {
             if (PvmFighterScript.playerState != PlayerState.EATING) return;
             if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
 
-            if (Rs2Inventory.hasItem("empty vial"))
-                Rs2Inventory.drop("empty vial");
-            double treshHold = (double) (Microbot.getClient().getBoostedSkillLevel(Skill.HITPOINTS) * 100) / Microbot.getClient().getRealSkillLevel(Skill.HITPOINTS);
+            double healthPercentage = Rs2Player.getHealthPercentage();
+            if (Rs2Inventory.hasItem("empty vial")) Rs2Inventory.drop("empty vial");
             if (Rs2Equipment.isWearingFullGuthan()) {
-                if (treshHold > 80) //only unequip guthans if we have more than 80% hp
-                    unEquipGuthans();
+                if (healthPercentage > 80) // only unequipped Guthan's armour if we have more than 80% hp
+                    unEquipGuthansArmour();
                 return;
+            }
+
+//            List<Rs2Item> foods = Microbot.getClientThread().runOnClientThread(Rs2Inventory::getInventoryFood);
+            Rs2Item idealFood = getIdealFood();
+            if (idealFood != null) {
+                Rs2Inventory.interact(idealFood, "eat");
+                Rs2Random.wait(1000, 1600);
             } else {
-                if (treshHold > 51) //return as long as we have more than 51% health and not guthan equipped
-                    return;
-            }
-            List<Rs2Item> foods = Microbot.getClientThread().runOnClientThread(Rs2Inventory::getInventoryFood);
-            if (foods == null || foods.isEmpty()) {
-                if (!equipFullGuthans()) {
-                    Microbot.showMessage("No more food left & no guthans available. Please teleport");
-                    sleep(5000);
+                if (!equipFullGuthansArmour()) {
+                    Microbot.showMessage("No more food left & no Guthan's armour available. Please teleport");
                 }
-                return;
-            }
-            for (Rs2Item food : foods) {
-                Rs2Inventory.interact(food, "eat");
-                sleep(1200, 2000);
-                break;
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
 
-    private void unEquipGuthans() {
+    public Rs2Item getIdealFood() {
+        // get food that heal value is less than lost health
+        Optional<Rs2Item> foodToEat = Rs2Inventory.getInventoryFood().stream().filter(food -> {
+            Rs2Food foodValue = Rs2Food.getFoodById(food.id);
+            if (foodValue == null) return false;
+
+            return foodValue.getHeal() <= (Rs2Player.getMaxHealth() - Rs2Player.checkCurrentHealth());
+        }).findFirst();
+
+        return foodToEat.orElse(null);
+    }
+
+    private void unEquipGuthansArmour() {
         if (Rs2Equipment.hasGuthanWeaponEquiped() && !weaponname.isEmpty()) {
             Rs2Inventory.equip(weaponname);
             if (shieldName != null)
@@ -82,7 +89,7 @@ public class FoodScript extends Script {
         }
     }
 
-    private boolean equipFullGuthans() {
+    private boolean equipFullGuthansArmour() {
         Rs2Item shield = get(EquipmentInventorySlot.SHIELD);
         if (shield != null)
             shieldName = shield.name;

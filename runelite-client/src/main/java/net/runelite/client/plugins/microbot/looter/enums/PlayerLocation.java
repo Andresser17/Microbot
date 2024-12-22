@@ -1,10 +1,9 @@
-package net.runelite.client.plugins.microbot.pvmfighter.enums;
+package net.runelite.client.plugins.microbot.looter.enums;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 
 import java.util.Optional;
@@ -13,7 +12,7 @@ import java.util.stream.Stream;
 @Getter
 @Slf4j
 public enum PlayerLocation {
-    COMBAT_FIELD(null, null),
+    LOOT_FIELD(null, null),
     SAFE_SPOT(null, null),
     NEAREST_BANK(null, null),
     OUTSIDE_POINT(new WorldArea(0, 0, 0, 0, 0), new WorldPoint(0, 0, 0));
@@ -33,8 +32,7 @@ public enum PlayerLocation {
     public static PlayerLocation checkCurrentPlayerLocation() {
         Optional<PlayerLocation> currentLoc = stream().filter((location) -> {
             WorldArea area = location.getArea();
-            if (area != null) return area.contains(Rs2Player.getWorldLocation());
-            return false;
+            return area.contains(Rs2Player.getWorldLocation());
         }).findFirst();
         return currentLoc.orElse(PlayerLocation.OUTSIDE_POINT);
     }

@@ -10,6 +10,7 @@ import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.Rs2InventorySetup;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
+import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.misc.Rs2Food;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
@@ -58,25 +59,19 @@ enum ItemToKeep {
 
 @Slf4j
 public class BankerScript extends Script {
-
     public void run(PvmFighterConfig config) {
         try {
             if (PvmFighterScript.playerState != PlayerState.BANKING) return;
             if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
 
-            if (needsBanking(config)) {
-                if (Rs2Bank.openBank()) {
-                    depositAllExcept(config);
-                    withdrawUpkeepItems(config);
-                }
-            }
+            Rs2Bank.openBank();
+            depositAllExcept(config);
+            withdrawUpkeepItems(config);
+            Rs2Random.wait(800, 1600);
+            Rs2Bank.closeBank();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
-    }
-
-    public boolean needsBanking(PvmFighterConfig config) {
-        return isUpkeepItemDepleted(config) || Rs2Inventory.getEmptySlots() <= config.minFreeSlots();
     }
 
     public boolean withdrawUpkeepItems(PvmFighterConfig config) {

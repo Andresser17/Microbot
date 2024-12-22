@@ -8,9 +8,8 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.grounditems.GroundItem;
 import net.runelite.client.plugins.grounditems.GroundItemsPlugin;
 import net.runelite.client.plugins.microbot.Microbot;
-import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.math.Random;
+import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.menu.NewMenuEntry;
 import net.runelite.client.plugins.microbot.util.models.RS2Item;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
@@ -264,16 +263,17 @@ public class Rs2GroundItem {
     public static boolean waitForGroundItemDespawn(Runnable actionWhileWaiting,GroundItem groundItem){
         sleepUntil(() ->  {
             actionWhileWaiting.run();
-            sleepUntil(() -> groundItem != GroundItemsPlugin.getCollectedGroundItems().get(groundItem.getLocation(), groundItem.getId()), Random.random(600, 2100));
+            sleepUntil(() -> groundItem != GroundItemsPlugin.getCollectedGroundItems().get(groundItem.getLocation(), groundItem.getId()), Rs2Random.between(600, 2100));
             return groundItem != GroundItemsPlugin.getCollectedGroundItems().get(groundItem.getLocation(), groundItem.getId());
         });
         return groundItem != GroundItemsPlugin.getCollectedGroundItems().get(groundItem.getLocation(), groundItem.getId());
     }
 
     private static boolean coreLoot(GroundItem groundItem) {
-        final int quantity = groundItem.isStackable() ? 1 : groundItem.getQuantity();
-        for (int i = 0; i < quantity; i++) {
+        final int quantity = !groundItem.isStackable() ? 1 : groundItem.getQuantity();
 
+        log.info("quantity: {}", quantity);
+        for (int i = 0; i < quantity; i++) {
             /**
              *  if the number of empty slots is less than the item quantity,
              *  return true only if the item is stackable and is already present in the inventory.
@@ -291,7 +291,6 @@ public class Rs2GroundItem {
              *  even after it has been successfully looted by the player or another player.
              *  Or if the player has an Open Herb Sack, Gem Bag or Seed Box etc. it won't trigger an inventory change.
              */
-
             waitForGroundItemDespawn(() -> interact(groundItem), groundItem);
 //            Rs2Inventory.waitForInventoryChanges(() -> interact(groundItem));
         }
@@ -370,7 +369,7 @@ public class Rs2GroundItem {
          return GroundItemsPlugin.getCollectedGroundItems().values().stream().filter(filter).collect(Collectors.toList());
     }
 
-    public static boolean lootItems(LootingParameters params, List<GroundItem> groundItems) {
+    public static boolean lootItem(LootingParameters params, List<GroundItem> groundItems) {
         if (groundItems.size() < params.getMinItems()) return false;
         if (params.isDelayedLooting()) {
             // Get the ground item with the lowest despawn time
@@ -384,11 +383,13 @@ public class Rs2GroundItem {
             int distance2 = Rs2Player.getWorldLocation().distanceTo(currentItem.getLocation());
 
             if (distance1 < distance2) return anteriorItem;
+            else if (anteriorItem.getGePrice() > currentItem.getGePrice()) return anteriorItem;
             return currentItem;
         });
+
         if (optional.isPresent()) {
             GroundItem closestItem = optional.get();
-            if (closestItem.getQuantity() < params.getMinQuantity()) return true;
+            if (closestItem.getQuantity() < params.getMinQuantity()) return false;
             if (Rs2Inventory.getEmptySlots() <= params.getMinInvSlots()) return true;
             coreLoot(closestItem);
         }

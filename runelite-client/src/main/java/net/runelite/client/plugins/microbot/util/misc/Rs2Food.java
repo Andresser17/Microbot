@@ -2,6 +2,10 @@ package net.runelite.client.plugins.microbot.util.misc;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
+
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @Getter
 @RequiredArgsConstructor
@@ -74,16 +78,13 @@ public enum Rs2Food {
         return name + " (+" + getHeal() + ")";
     }
 
-    public int getId() {
-        return id;
+    public static Stream<Rs2Food> stream() {
+        return Stream.of(Rs2Food.values());
     }
 
-    public int getHeal() {
-        return heal;
-    }
+    public static Rs2Food getFoodById(int id) {
+        Optional<Rs2Food> optional = stream().filter((food) -> food.id == id).findFirst();
 
-    public String getName() {
-        return name;
+        return optional.orElse(null);
     }
-
 }

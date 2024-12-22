@@ -788,6 +788,15 @@ public class Rs2Player {
     }
 
     /**
+     * Get layer max health
+     *
+     * @return Player max skill health
+     */
+    public static int getMaxHealth() {
+        return Microbot.getClient().getRealSkillLevel(Skill.HITPOINTS);
+    }
+
+    /**
      * Checks player current health
      *
      * @return
