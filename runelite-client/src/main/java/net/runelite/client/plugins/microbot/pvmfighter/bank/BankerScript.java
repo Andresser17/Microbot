@@ -151,13 +151,6 @@ public class BankerScript extends Script {
                 .map(String::trim)
                 .sorted(Comparator.comparingInt((name) -> currentHealth / Rs2Food.getFoodByName(name).getHeal()))
                 .filter(Rs2Bank::hasBankItem).collect(Collectors.toList());
-//        (anteriorFoodName, currentFoodName) -> {
-//            int currentHealth = Rs2Player.getMaxHealth() - Rs2Player.getBoostedSkillLevel(Skill.HITPOINTS);
-////            int anteriorFoodNecessary = currentHealth / Rs2Food.getFoodByName(anteriorFoodName.trim()).getHeal();
-////            int currentFoodNecessary = currentHealth / Rs2Food.getFoodByName(currentFoodName.trim()).getHeal();
-////            if (currentFoodNecessary < anteriorFoodNecessary) return 0;
-////            return 1;
-//        }
 
         if (!foodToWithdraw.isEmpty()) {
             int toWithdraw = currentHealth / Rs2Food.getFoodByName(foodToWithdraw.get(0)).getHeal();

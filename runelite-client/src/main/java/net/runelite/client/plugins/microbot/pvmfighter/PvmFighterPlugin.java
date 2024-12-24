@@ -68,13 +68,7 @@ public class PvmFighterPlugin extends Plugin {
     @Getter
     @Setter
     private final PvmFighterScript pvmFighterScript = new PvmFighterScript();
-    private final CannonScript cannonScript = new CannonScript();
-    private final AttackNpcScript attackNpcScript = new AttackNpcScript();
-    private final CombatPotionScript combatPotion = new CombatPotionScript();
-    private final FoodScript foodScript = new FoodScript();
-    private final PrayerPotionScript prayerPotionScript = new PrayerPotionScript();
-    private final LootScript lootScript = new LootScript();
-    private final SafeSpot safeSpotScript = new SafeSpot();
+    private final HelperScript helperScript = new HelperScript();
     private final FlickerScript flickerScript = new FlickerScript();
     private final UseSpecialAttackScript useSpecialAttackScript = new UseSpecialAttackScript();
     private final AntiPoisonScript antiPoisonScript = new AntiPoisonScript();
@@ -124,6 +118,7 @@ public class PvmFighterPlugin extends Plugin {
         PlayerLocation.NEAREST_BANK.setWorldPoint(Rs2Bank.getNearestBank().getWorldPoint(), 10);
 
         pvmFighterScript.run(config);
+        helperScript.run(config);
 
         Microbot.getSpecialAttackConfigs()
                 .setSpecialAttack(true);

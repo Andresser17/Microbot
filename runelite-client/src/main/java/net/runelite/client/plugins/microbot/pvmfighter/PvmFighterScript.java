@@ -20,7 +20,6 @@ import net.runelite.client.plugins.microbot.util.misc.Rs2Food;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -53,9 +52,6 @@ public class PvmFighterScript extends Script {
 
                 Microbot.log(String.format("PlayerState: %s, PlayerLocation: %s", playerState, currentLocation));
                 switch (playerState) {
-                    case EATING:
-                        foodScript.run(config);
-                        break;
                     case ATTACKING:
                         attackNpcScript.run(config);
                         break;
@@ -127,8 +123,11 @@ public class PvmFighterScript extends Script {
 
     private void getPlayerState(PvmFighterConfig config) {
 
-        if (needToEat(config)) {
-            playerState = PlayerState.EATING;
+        if (checkIfPlayerIsBeingAttack()) {
+            // if auto attack is true set attacking state, else safekeeping
+            if (config.toggleCombat()) {
+                playerState = PlayerState.ATTACKING;
+            } else if (config.safeSpot() != null) playerState = PlayerState.SAFEKEEPING;
             return;
         }
 
@@ -152,21 +151,11 @@ public class PvmFighterScript extends Script {
             return;
         }
 
-        playerState = PlayerState.STALE;
+        playerState = PlayerState.IDLE;
     }
 
-    private boolean needToEat(PvmFighterConfig config) {
-        if (!config.toggleFood()) return false;
-
-        // get food that heal value is less than lost health
-        Optional<Rs2Item> foodToEat = Rs2Inventory.getInventoryFood().stream().filter(food -> {
-            Rs2Food foodValue = Rs2Food.getFoodById(food.id);
-            if (foodValue == null) return false;
-
-            return foodValue.getHeal() <= (Rs2Player.getMaxHealth() - Rs2Player.checkCurrentHealth());
-        }).findFirst();
-
-        return foodToEat.isPresent() && !Rs2Player.isFullHealth();
+    private boolean checkIfPlayerIsBeingAttack() {
+        return Rs2Player.isInCombat() && !Rs2Player.isFullHealth() && AttackNpcScript.currentNPC == null;
     }
 
     private boolean needToSafeKeep(PvmFighterConfig config) {
@@ -182,7 +171,7 @@ public class PvmFighterScript extends Script {
     private boolean areGroundItemsToLoot(PvmFighterConfig config) {
         if (!config.toggleLootItems()) return false;
         if (Rs2Inventory.getEmptySlots() <= config.minFreeSlots()) return false;
-        if (!Rs2Antiban.isIdle()) return false;
+        if (!Rs2Antiban.isIdle() && AttackNpcScript.currentNPC != null) return false;
 
         boolean result = false;
         if (config.toggleLootItemsByName()) {

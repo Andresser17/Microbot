@@ -9,7 +9,7 @@ public enum PlayerState {
     LOOTING(PlayerLocation.COMBAT_FIELD),
     SAFEKEEPING(PlayerLocation.SAFE_SPOT),
     BANKING(PlayerLocation.NEAREST_BANK),
-    STALE(PlayerLocation.OUTSIDE_POINT);
+    IDLE(PlayerLocation.OUTSIDE_POINT);
 
     private final PlayerLocation playerLocation;
 

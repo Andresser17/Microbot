@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AttackNpcScript extends Script {
 
+    public static NPC currentNPC;
     public static List<NPC> attackableNpcs = new ArrayList<>();
     private boolean init = true;
 
@@ -87,22 +88,25 @@ public class AttackNpcScript extends Script {
                             .collect(Collectors.toList());
 
             if (attackableNpcs.isEmpty()) return;
-            NPC currentNpc = attackableNpcs.get(0);
+            currentNPC = attackableNpcs.get(0);
 
-            if (!Rs2Camera.isTileOnScreen(currentNpc.getLocalLocation()))
-                Rs2Camera.turnTo(currentNpc);
+            if (!Rs2Camera.isTileOnScreen(currentNPC.getLocalLocation()))
+                Rs2Camera.turnTo(currentNPC);
 
-            Rs2Npc.interact(currentNpc, "attack");
+            Rs2Npc.interact(currentNPC, "attack");
             PvmFighterPlugin.setCooldown(config.playStyle().getRandomTickInterval());
-            Microbot.status = "Attacking " + currentNpc.getName();
+            Microbot.status = "Attacking " + currentNPC.getName();
 
             sleepUntilFulfillCondition(() -> {
                 log.info("Player is attacking");
                 boolean isIdle = !Rs2Antiban.isIdle();
                 log.info("isIdle {}", isIdle);
-                return isIdle && !currentNpc.isDead();
+                log.info("AttackNPC CurrentNPC: {}", currentNPC);
+                log.info("AttackNPC CurrentNPC is Dead: {}", currentNPC.isDead());
+                return isIdle && currentNPC.isDead();
             }, () -> Rs2Random.wait(1500, 1600));
-            Microbot.log("Combat finished");
+            currentNPC = null;
+            log.info("Combat finished");
 
             // wait until loot appears
             if (config.toggleLootItems()) Rs2Random.wait(1200, 1600);

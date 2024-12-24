@@ -1,8 +1,10 @@
 package net.runelite.client.plugins.microbot.pvmfighter.combat;
 
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
+import net.runelite.client.plugins.microbot.pvmfighter.HelperScript;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
@@ -13,14 +15,14 @@ import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.misc.Rs2Food;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 
-import java.util.List;
 import java.util.Optional;
 
 import static net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment.get;
 
+@Slf4j
 public class FoodScript extends Script {
 
-    String weaponname = "";
+    String weaponName = "";
     String bodyName = "";
     String legsName = "";
     String helmName = "";
@@ -28,14 +30,13 @@ public class FoodScript extends Script {
     String shieldName = "";
 
     public void run(PvmFighterConfig config) {
-        weaponname = "";
+        weaponName = "";
         bodyName = "";
         legsName = "";
         helmName = "";
         shieldName = "";
         try {
-            if (PvmFighterScript.playerState != PlayerState.EATING) return;
-            if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
+            if (HelperScript.helperState != PlayerState.EATING) return;
 
             double healthPercentage = Rs2Player.getHealthPercentage();
             if (Rs2Inventory.hasItem("empty vial")) Rs2Inventory.drop("empty vial");
@@ -48,7 +49,7 @@ public class FoodScript extends Script {
 //            List<Rs2Item> foods = Microbot.getClientThread().runOnClientThread(Rs2Inventory::getInventoryFood);
             Rs2Item idealFood = getIdealFood();
             if (idealFood != null) {
-                Rs2Inventory.interact(idealFood, "eat");
+                Rs2Inventory.interact(idealFood, "Eat");
                 Rs2Random.wait(1000, 1600);
             } else {
                 if (!equipFullGuthansArmour()) {
@@ -73,8 +74,8 @@ public class FoodScript extends Script {
     }
 
     private void unEquipGuthansArmour() {
-        if (Rs2Equipment.hasGuthanWeaponEquiped() && !weaponname.isEmpty()) {
-            Rs2Inventory.equip(weaponname);
+        if (Rs2Equipment.hasGuthanWeaponEquiped() && !weaponName.isEmpty()) {
+            Rs2Inventory.equip(weaponName);
             if (shieldName != null)
                 Rs2Inventory.equip(shieldName);
         }
@@ -98,7 +99,7 @@ public class FoodScript extends Script {
             Rs2Item spearWidget = Microbot.getClientThread().runOnClientThread(() -> Rs2Inventory.get("guthan's warspear"));
             if (spearWidget == null) return false;
             Rs2Item weapon = Rs2Equipment.get(EquipmentInventorySlot.WEAPON);
-            weaponname = weapon != null ? weapon.name : "";
+            weaponName = weapon != null ? weapon.name : "";
             Rs2Inventory.equip(spearWidget.name);
         }
         if (!Rs2Equipment.hasGuthanBodyEquiped()) {
