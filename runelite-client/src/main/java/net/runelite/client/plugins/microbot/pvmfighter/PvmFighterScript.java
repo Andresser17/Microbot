@@ -126,6 +126,7 @@ public class PvmFighterScript extends Script {
     }
 
     private void getPlayerState(PvmFighterConfig config) {
+
         if (needToEat(config)) {
             playerState = PlayerState.EATING;
             return;

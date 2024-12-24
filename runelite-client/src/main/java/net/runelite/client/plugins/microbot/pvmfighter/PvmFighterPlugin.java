@@ -95,6 +95,7 @@ public class PvmFighterPlugin extends Plugin {
     private MenuEntry lastClick;
     private Point lastMenuOpenedPoint;
     private WorldPoint trueTile;
+    private boolean isRunning = false;
 
     @Provides
     PvmFighterConfig provideConfig(ConfigManager configManager) {
@@ -103,6 +104,11 @@ public class PvmFighterPlugin extends Plugin {
 
     @Override
     protected void startUp() throws AWTException {
+        if (isRunning) {
+            Microbot.showMessage("Plugin is already running");
+            return;
+        }
+
         Microbot.pauseAllScripts = false;
         cooldown = 0;
         shutdownFlag = false;
@@ -121,6 +127,8 @@ public class PvmFighterPlugin extends Plugin {
 
         Microbot.getSpecialAttackConfigs()
                 .setSpecialAttack(true);
+
+        isRunning = true;
     }
 
     protected void shutDown() {
@@ -129,6 +137,7 @@ public class PvmFighterPlugin extends Plugin {
         resetLocation();
         overlayManager.remove(playerAssistOverlay);
         overlayManager.remove(playerAssistInfoOverlay);
+        isRunning = false;
     }
 
     private void resetLocation() {

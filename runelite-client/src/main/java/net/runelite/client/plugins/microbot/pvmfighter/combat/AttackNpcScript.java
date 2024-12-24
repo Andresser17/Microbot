@@ -95,8 +95,17 @@ public class AttackNpcScript extends Script {
             Rs2Npc.interact(currentNpc, "attack");
             PvmFighterPlugin.setCooldown(config.playStyle().getRandomTickInterval());
             Microbot.status = "Attacking " + currentNpc.getName();
-            sleepUntil(() -> !Rs2Antiban.isIdle());
-            log.info("Combat finished");
+
+            sleepUntilFulfillCondition(() -> {
+                log.info("Player is attacking");
+                boolean isIdle = !Rs2Antiban.isIdle();
+                log.info("isIdle {}", isIdle);
+                return isIdle && !currentNpc.isDead();
+            }, () -> Rs2Random.wait(1500, 1600));
+            Microbot.log("Combat finished");
+
+            // wait until loot appears
+            if (config.toggleLootItems()) Rs2Random.wait(1200, 1600);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

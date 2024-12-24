@@ -87,4 +87,10 @@ public enum Rs2Food {
 
         return optional.orElse(null);
     }
+
+    public static Rs2Food getFoodByName(String name) {
+        Optional<Rs2Food> optional = stream().filter((food) -> food.name.equalsIgnoreCase(name)).findFirst();
+
+        return optional.orElse(null);
+    }
 }

@@ -25,6 +25,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 
 import static java.awt.event.KeyEvent.CHAR_UNDEFINED;
 
@@ -85,6 +86,15 @@ public abstract class Script implements IScript {
         return done;
     }
 
+    public boolean sleepUntilFulfillCondition(BooleanSupplier awaitedCondition, Runnable iterationWait) {
+        boolean done;
+        do {
+            done = awaitedCondition.getAsBoolean();
+            iterationWait.run();
+            if (!isRunning()) break;
+        } while (!done);
+        return done;
+    }
 
     /**
      * Sleeps until a specified condition is met, running an action periodically, or until a timeout is reached.
