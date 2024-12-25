@@ -128,6 +128,7 @@ public class PvmFighterPlugin extends Plugin {
 
     protected void shutDown() {
         pvmFighterScript.shutdown();
+        helperScript.shutdown();
 
         resetLocation();
         overlayManager.remove(playerAssistOverlay);

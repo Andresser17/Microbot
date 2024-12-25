@@ -5,7 +5,6 @@ import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.pvmfighter.HelperScript;
-import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
