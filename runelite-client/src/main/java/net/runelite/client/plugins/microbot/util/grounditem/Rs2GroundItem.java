@@ -351,9 +351,9 @@ public class Rs2GroundItem {
 
     public static List<GroundItem> getItemsToLootByValue(LootingParameters params) {
         final Predicate<GroundItem> filter = (groundItem) -> {
+            boolean isInRange = params.getArea().contains(groundItem.getLocation());
             boolean valueIsInPriceRange = groundItem.getGePrice() > params.getMinValue() && (groundItem.getGePrice() / groundItem.getQuantity()) < params.getMaxValue();
-            boolean nameMatch = Arrays.stream(params.getNames()).anyMatch(name -> groundItem.getName().toLowerCase().contains(name.toLowerCase()));
-            return valueIsInPriceRange && (!params.isAntiLureProtection() || (params.isAntiLureProtection() && groundItem.getOwnership() == OWNERSHIP_SELF)) && nameMatch;
+            return valueIsInPriceRange && isInRange && (!params.isAntiLureProtection() || (params.isAntiLureProtection() && groundItem.getOwnership() == OWNERSHIP_SELF));
         };
 
         return GroundItemsPlugin.getCollectedGroundItems().values().stream().filter(filter).collect(Collectors.toList());

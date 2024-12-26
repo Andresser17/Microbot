@@ -22,7 +22,7 @@ public class LootScript extends Script {
             if (PvmFighterScript.playerState != PlayerState.LOOTING) return;
             if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
 
-            if (config.toggleLootItemsByValue()) {
+            if (config.toggleLootItemsByPriceRange()) {
                 lootItemsByValue(config);
             }
 
@@ -162,20 +162,19 @@ public class LootScript extends Script {
                 config.toggleDelayedLooting(),
                 config.toggleOnlyLootMyItems()
         );
-        List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
+        List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByValue(params);
         Rs2GroundItem.lootItem(params, groundItems);
     }
 
     public static boolean hasItemsToLootByValue(PvmFighterConfig config) {
         LootingParameters params = new LootingParameters(
+                config.minPriceOfItemsToLoot(),
+                config.maxPriceOfItemsToLoot(),
                 PlayerLocation.COMBAT_FIELD.getArea(),
-                1,
                 1,
                 config.minFreeSlots(),
                 config.toggleDelayedLooting(),
-                config.toggleOnlyLootMyItems(),
-                Arrays.stream(config.lootItemsByName().split(","))
-                        .map(String::trim).toArray(String[]::new)
+                config.toggleOnlyLootMyItems()
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByValue(params);
         return groundItems.size() >= config.minimumQuantityToLoot();

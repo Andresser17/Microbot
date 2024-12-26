@@ -292,13 +292,13 @@ public interface PvmFighterConfig extends Config {
     }
 
     @ConfigItem(
-            keyName = "Loot items by price value",
+            keyName = "LootItemsByPriceRange",
             name = "Loot by price range",
             description = "Enable/Disabled loot items between provided min and max price range",
             position = 0,
             section = lootSection
     )
-    default boolean toggleLootItemsByValue() {
+    default boolean toggleLootItemsByPriceRange() {
         return false;
     }
 

@@ -173,7 +173,7 @@ public class PvmFighterScript extends Script {
         boolean result = false;
         if (config.toggleLootItemsByName()) {
             result = LootScript.hasItemsToLootByName(config);
-        } else if (config.toggleLootItemsByValue()) {
+        } else if (config.toggleLootItemsByPriceRange()) {
             result = LootScript.hasItemsToLootByValue(config);
         } else if (config.toggleLootCoins()) {
             result = LootScript.hasCoinsToLoot(config);
