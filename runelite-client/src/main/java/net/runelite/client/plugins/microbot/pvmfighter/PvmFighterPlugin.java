@@ -209,10 +209,10 @@ public class PvmFighterPlugin extends Plugin {
         }
 
         if(event.getKey().equals("Combat")) {
-            if (!config.toggleCombat() && config.toggleCenterTile()) {
-                setCenter(new WorldPoint(0, 0, 0));
-            }
-            if (config.toggleCombat() && !config.toggleCenterTile()) {
+//            if (!config.toggleCombat() && config.toggleCenterTile()) {
+//                setCenter(new WorldPoint(0, 0, 0));
+//            }
+            if (config.toggleCombat() && PlayerLocation.COMBAT_FIELD.getArea() == null) {
                 setCenter(Rs2Player.getWorldLocation());
             }
             if (!Objects.equals(config.playStyle().getName(), Rs2Antiban.getPlayStyle().getName())) {
