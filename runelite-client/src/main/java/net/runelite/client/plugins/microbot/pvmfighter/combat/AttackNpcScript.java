@@ -76,14 +76,19 @@ public class AttackNpcScript extends Script {
 
             attackableNpcs = Rs2Npc.getNpcs().filter(npc -> {
                 boolean isInArea = PlayerLocation.COMBAT_FIELD.getArea().contains(npc.getWorldLocation());
-                boolean isInteracting = (npc.getInteracting() == null || npc.getInteracting() == Microbot.getClient().getLocalPlayer());
-                return npcsToAttack.contains(npc.getName()) && !npc.isDead() && isInArea && isInteracting && Rs2Npc.hasLineOfSight(npc);
-            }).sorted(Comparator.comparing((NPC npc) -> npc.getInteracting() == Microbot.getClient().getLocalPlayer() ? 0 : 1)
-                            .thenComparingInt(npc -> npc.getLocalLocation()
-                            .distanceTo(Rs2Player.getLocalLocation())))
-                            .collect(Collectors.toList());
+                boolean isNotInteracting = (npc.getInteracting() == null || npc.getInteracting() == Microbot.getClient().getLocalPlayer());
+                boolean isInList = npcsToAttack.contains(npc.getName());
+                return isInList && !npc.isDead() && isInArea && isNotInteracting && Rs2Npc.hasLineOfSight(npc);
+            }).collect(Collectors.toList());
+//                    .sorted(Comparator.comparing((NPC npc) -> npc.getInteracting() == Microbot.getClient().getLocalPlayer() ? 0 : 1)
+//                            .thenComparingInt(npc -> npc.getLocalLocation()
+//                            .distanceTo(Rs2Player.getLocalLocation())))
+//                            .collect(Collectors.toList());
 
-            if (attackableNpcs.isEmpty()) return;
+            if (attackableNpcs.isEmpty()) {
+                Microbot.log("Not attackable npc found");
+                return;
+            };
             currentNPC = attackableNpcs.get(0);
 
             if (!Rs2Camera.isTileOnScreen(currentNPC.getLocalLocation()))

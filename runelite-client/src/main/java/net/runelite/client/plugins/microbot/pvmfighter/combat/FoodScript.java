@@ -45,7 +45,6 @@ public class FoodScript extends Script {
                 return;
             }
 
-//            List<Rs2Item> foods = Microbot.getClientThread().runOnClientThread(Rs2Inventory::getInventoryFood);
             Rs2Item idealFood = getIdealFood();
             if (idealFood != null) {
                 Rs2Inventory.interact(idealFood, "Eat");

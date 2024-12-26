@@ -23,13 +23,12 @@ import net.runelite.client.plugins.microbot.pvmfighter.combat.*;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
+import net.runelite.client.plugins.microbot.util.bank.enums.BankLocation;
 import net.runelite.client.plugins.microbot.util.combat.Rs2Combat;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.prayer.Rs2Prayer;
 import net.runelite.client.plugins.microbot.pvmfighter.bank.BankerScript;
-import net.runelite.client.plugins.microbot.pvmfighter.cannon.CannonScript;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PrayerStyle;
-import net.runelite.client.plugins.microbot.pvmfighter.loot.LootScript;
 import net.runelite.client.plugins.microbot.pvmfighter.skill.AttackStyleScript;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -115,7 +114,7 @@ public class PvmFighterPlugin extends Plugin {
             setCenter(Rs2Player.getWorldLocation());
 
         PlayerLocation.COMBAT_FIELD.setWorldPoint(config.centerLocation(), config.attackRadius());
-        PlayerLocation.NEAREST_BANK.setWorldPoint(Rs2Bank.getNearestBank().getWorldPoint(), 10);
+        PlayerLocation.BANK_LOCATION.setWorldPoint(Rs2Bank.getNearestBank().getWorldPoint(), 10);
 
         pvmFighterScript.run(config);
         helperScript.run(config);
@@ -196,6 +195,15 @@ public class PvmFighterPlugin extends Plugin {
                 setSafeSpot(new WorldPoint(0, 0, 0));
             }
         }
+
+        if (event.getKey().equals("NearestBankLocation") || event.getKey().equals("BankLocation")) {
+            if (config.useNearestBank()) {
+                PlayerLocation.BANK_LOCATION.setWorldPoint(Rs2Bank.getNearestBank().getWorldPoint(), 10);
+            } else {
+                PlayerLocation.BANK_LOCATION.setWorldPoint(config.bankLocation().getWorldPoint(), 10);
+            }
+        }
+
         if (event.getKey().equals("SafeSpotLocation")) {
             PlayerLocation.SAFE_SPOT.setWorldPoint(config.safeSpot(), 0);
         }

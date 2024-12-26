@@ -9,7 +9,10 @@ import net.runelite.api.Varbits;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
+import net.runelite.client.plugins.microbot.util.misc.Rs2Food;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
+
+import java.util.stream.Stream;
 
 @Getter
 @RequiredArgsConstructor
@@ -170,5 +173,9 @@ public enum BankLocation {
             default:
                 return true;
         }
+    }
+
+    public static Stream<BankLocation> stream() {
+        return Stream.of(BankLocation.values());
     }
 }

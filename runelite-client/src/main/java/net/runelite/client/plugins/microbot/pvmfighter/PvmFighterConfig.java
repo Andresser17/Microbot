@@ -8,6 +8,7 @@ import net.runelite.client.plugins.microbot.pvmfighter.enums.PrayerStyle;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.RangedAmmo;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.Spell;
 import net.runelite.client.plugins.microbot.util.antiban.enums.PlayStyle;
+import net.runelite.client.plugins.microbot.util.bank.enums.BankLocation;
 
 @ConfigGroup(PvmFighterConfig.GROUP)
 @ConfigInformation("1. Make sure to place the cannon first before starting the plugin. <br />" +
@@ -644,13 +645,35 @@ public interface PvmFighterConfig extends Config {
         return false;
     }
 
+    @ConfigItem(
+            keyName = "BankLocation",
+            name = "Bank Location",
+            description = "Select the bank to use",
+            position = 1,
+            section = banking
+    )
+    default BankLocation bankLocation() {
+        return BankLocation.AL_KHARID;
+    }
+
+    @ConfigItem(
+            keyName = "NearestBankLocation",
+            name = "Go to nearest bank",
+            description = "Use nearest bank location available",
+            position = 2,
+            section = banking
+    )
+    default boolean useNearestBank() {
+        return true;
+    }
+
     //Minimum free inventory slots to bank
     @Range(max = 28)
     @ConfigItem(
             keyName = "minFreeSlots",
             name = "Min. free slots",
             description = "Minimum free inventory slots to bank, if less than this, will bank items",
-            position = 1,
+            position = 3,
             section = banking
     )
     default int minFreeSlots() {
@@ -662,7 +685,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "useStamina",
             name = "Use stamina potions",
             description = "Use stamina potions when banking",
-            position = 2,
+            position = 4,
             section = banking
     )
     default boolean useStamina() {
@@ -673,7 +696,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "staminaValue",
             name = "Stamina Potions",
             description = "Amount of stamina potions to withdraw",
-            position = 3,
+            position = 5,
             section = banking
     )
     default int staminaValue() {
@@ -685,7 +708,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "useFood",
             name = "Use food",
             description = "Use food when banking",
-            position = 4,
+            position = 6,
             section = banking
     )
     default boolean useFood() {
@@ -693,10 +716,10 @@ public interface PvmFighterConfig extends Config {
     }
 
     @ConfigItem(
-            keyName = "foodValue",
+            keyName = "AmountOfFood",
             name = "Food",
             description = "Amount of food to withdraw",
-            position = 5,
+            position = 7,
             section = banking
     )
     default int amountOfFood() {
@@ -704,25 +727,25 @@ public interface PvmFighterConfig extends Config {
     }
 
     @ConfigItem(
-            keyName = "WithdrawNecessaryToRestoreHealth",
-            name = "Withdraw food to restore health",
-            description = "When banking withdraw and eat only the necessary food to restore full health.",
-            position = 5,
-            section = banking
-    )
-    default boolean withdrawNecessaryToRestoreHealth() {
-        return false;
-    }
-
-    @ConfigItem(
             keyName = "FoodToWithdraw",
             name = "Food to withdraw",
-            description = "Food to withdraw by name",
-            position = 5,
+            description = "Food to withdraw by name, will withdraw prioritizing position from first to last",
+            position = 8,
             section = banking
     )
     default String foodToWithdraw() {
         return "";
+    }
+
+    @ConfigItem(
+            keyName = "WithdrawNecessaryToRestoreHealth",
+            name = "Withdraw food to restore health",
+            description = "When banking withdraw and eat only the necessary food to restore full health.",
+            position = 9,
+            section = banking
+    )
+    default boolean withdrawNecessaryFoodToRestoreHealth() {
+        return false;
     }
 
     // checkbox to use restore potions when banking
@@ -730,7 +753,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "useRestore",
             name = "Use restore potions",
             description = "Use restore potions when banking",
-            position = 6,
+            position = 10,
             section = banking
     )
     default boolean useRestore() {
@@ -741,7 +764,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "restoreValue",
             name = "Restore Potions",
             description = "Amount of restore potions to withdraw",
-            position = 7,
+            position = 11,
             section = banking
     )
     default int restoreValue() {
@@ -753,7 +776,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "usePrayer",
             name = "Use prayer potions",
             description = "Use prayer potions when banking",
-            position = 8,
+            position = 12,
             section = banking
     )
     default boolean usePrayer() {
@@ -764,7 +787,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "prayerValue",
             name = "Prayer Potions",
             description = "Amount of prayer potions to withdraw",
-            position = 9,
+            position = 13,
             section = banking
     )
     default int prayerValue() {
@@ -776,7 +799,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "useAntipoison",
             name = "Use antipoison potions",
             description = "Use antipoison potions when banking",
-            position = 10,
+            position = 14,
             section = banking
     )
     default boolean useAntipoison() {
@@ -787,7 +810,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "antipoisonValue",
             name = "Antipoison Potions",
             description = "Amount of antipoison potions to withdraw",
-            position = 11,
+            position = 15,
             section = banking
     )
     default int antipoisonValue() {
@@ -799,7 +822,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "useAntifire",
             name = "Use antifire potions",
             description = "Use antifire potions when banking",
-            position = 12,
+            position = 16,
             section = banking
     )
     default boolean useAntifire() {
@@ -810,7 +833,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "antifireValue",
             name = "Antifire Potions",
             description = "Amount of antifire potions to withdraw",
-            position = 13,
+            position = 17,
             section = banking
     )
     default int antifireValue() {
@@ -822,7 +845,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "useCombat",
             name = "Use combat potions",
             description = "Use combat potions when banking",
-            position = 14,
+            position = 18,
             section = banking
     )
     default boolean useCombat() {
@@ -833,7 +856,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "combatValue",
             name = "Combat Potions",
             description = "Amount of combat potions to withdraw",
-            position = 15,
+            position = 19,
             section = banking
     )
     default int combatValue() {
@@ -846,7 +869,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "ignoreTeleport",
             name = "Ignore Teleport Items",
             description = "ignore teleport items when banking",
-            position = 16,
+            position = 20,
             section = banking
     )
     default boolean ignoreTeleport() {
@@ -857,7 +880,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "itemsToKeep",
             name = "Items to keep",
             description = "Items to keep by item name",
-            position = 17,
+            position = 21,
             section = banking
     )
     default String itemsToKeep() {

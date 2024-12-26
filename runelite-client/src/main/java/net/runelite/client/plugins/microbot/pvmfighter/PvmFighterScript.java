@@ -95,13 +95,13 @@ public class PvmFighterScript extends Script {
                 walkToSafeSpot();
                 break;
             case BANKING:
-                walkToNearestBank();
+                walkToSelectedBank();
                 break;
         }
     }
 
-    private void walkToNearestBank() {
-        WorldPoint point = PlayerLocation.NEAREST_BANK.getPoint();
+    private void walkToSelectedBank() {
+        WorldPoint point = PlayerLocation.BANK_LOCATION.getPoint();
         Rs2Walker.walkTo(point, 8);
         sleepUntil(() -> point.equals(Rs2Player.getWorldLocation()));
     }
@@ -119,7 +119,6 @@ public class PvmFighterScript extends Script {
     }
 
     private void getPlayerState(PvmFighterConfig config) {
-
         if (checkIfPlayerIsBeingAttack()) {
             // if auto attack is true set attacking state, else safekeeping
             if (config.toggleCombat()) {
@@ -173,15 +172,24 @@ public class PvmFighterScript extends Script {
         boolean result = false;
         if (config.toggleLootItemsByName()) {
             result = LootScript.hasItemsToLootByName(config);
-        } else if (config.toggleLootItemsByPriceRange()) {
+        }
+
+        if (config.toggleLootItemsByPriceRange() && !result) {
             result = LootScript.hasItemsToLootByValue(config);
-        } else if (config.toggleLootCoins()) {
+        }
+
+        if (config.toggleLootCoins() && !result) {
             result = LootScript.hasCoinsToLoot(config);
-        } else if (config.toggleLootRunes()) {
+        }
+
+        if (config.toggleLootRunes() && !result) {
             result = LootScript.hasRunesToLoot(config);
-        } else if (config.toggleLootBones()) {
+        }
+        if (config.toggleLootBones() && !result) {
             result = LootScript.hasBonesToLoot(config);
-        } else if (config.toggleLootArrows()) {
+        }
+
+        if (config.toggleLootArrows() && !result) {
             result = LootScript.hasArrowsToLoot(config);
         }
 

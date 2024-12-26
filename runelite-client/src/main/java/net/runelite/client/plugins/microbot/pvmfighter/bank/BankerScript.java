@@ -1,7 +1,7 @@
 package net.runelite.client.plugins.microbot.pvmfighter.bank;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Player;
 import net.runelite.api.Skill;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
@@ -23,32 +23,43 @@ enum ItemToKeep {
     TELEPORT(Constants.TELEPORT_IDS, PvmFighterConfig::ignoreTeleport, PvmFighterConfig::staminaValue),
     STAMINA(Constants.STAMINA_POTION_IDS, PvmFighterConfig::useStamina, PvmFighterConfig::staminaValue),
     PRAYER(Constants.PRAYER_RESTORE_POTION_IDS, PvmFighterConfig::usePrayer, PvmFighterConfig::prayerValue),
-    FOOD(Constants.FOOD_ITEM_IDS, PvmFighterConfig::useFood, PvmFighterConfig::amountOfFood),
+    FOOD(Constants.FOOD_ITEM_IDS, PvmFighterConfig::useFood, PvmFighterConfig::foodToWithdraw, PvmFighterConfig::amountOfFood),
     ANTIPOISON(Constants.ANTI_POISON_POTION_IDS, PvmFighterConfig::useAntipoison, PvmFighterConfig::antipoisonValue),
     ANTIFIRE(Constants.ANTI_FIRE_POTION_IDS, PvmFighterConfig::useAntifire, PvmFighterConfig::antifireValue),
     COMBAT(Constants.STRENGTH_POTION_IDS, PvmFighterConfig::useCombat, PvmFighterConfig::combatValue),
     RESTORE(Constants.RESTORE_POTION_IDS, PvmFighterConfig::useRestore, PvmFighterConfig::restoreValue);
 
+    @Getter
     private final List<Integer> ids;
-    private final Function<PvmFighterConfig, Boolean> useConfig;
-    private final Function<PvmFighterConfig, Integer> valueConfig;
+    private final Function<PvmFighterConfig, Boolean> withdrawItem;
+    private final Function<PvmFighterConfig, String> itemsToWithdraw;
+    private final Function<PvmFighterConfig, Integer> quantityToWithdraw;
 
-    ItemToKeep(Set<Integer> ids, Function<PvmFighterConfig, Boolean> useConfig, Function<PvmFighterConfig, Integer> valueConfig) {
-        this.ids = ids.stream().collect(Collectors.toList());
-        this.useConfig = useConfig;
-        this.valueConfig = valueConfig;
+    ItemToKeep(Set<Integer> ids, Function<PvmFighterConfig, Boolean> withdrawItem, Function<PvmFighterConfig, Integer> quantityToWithdraw) {
+        this.ids = new ArrayList<>(ids);
+        this.withdrawItem = withdrawItem;
+        this.itemsToWithdraw = null;
+        this.quantityToWithdraw = quantityToWithdraw;
     }
 
-    public List<Integer> getIds() {
-        return ids;
+    ItemToKeep(Set<Integer> ids, Function<PvmFighterConfig, Boolean> withdrawItem, Function<PvmFighterConfig, String> itemsToWithdraw, Function<PvmFighterConfig, Integer> quantityToWithdraw) {
+        this.ids = new ArrayList<>(ids);
+        this.withdrawItem = withdrawItem;
+        this.itemsToWithdraw = itemsToWithdraw;
+        this.quantityToWithdraw = quantityToWithdraw;
     }
 
     public boolean isEnabled(PvmFighterConfig config) {
-        return useConfig.apply(config);
+        return withdrawItem.apply(config);
     }
 
-    public int getValue(PvmFighterConfig config) {
-        return valueConfig.apply(config);
+    public String[] getItemsToWithdraw(PvmFighterConfig config) {
+        assert itemsToWithdraw != null;
+        return Arrays.stream(itemsToWithdraw.apply(config).split(",")).map(String::trim).toArray(String[]::new);
+    }
+
+    public int getQuantityToWithdraw(PvmFighterConfig config) {
+        return quantityToWithdraw.apply(config);
     }
 }
 
@@ -64,7 +75,7 @@ public class BankerScript extends Script {
                 depositAllExcept(config.itemsToKeep());
             } else depositAllExcept(config);
 
-            if (config.withdrawNecessaryToRestoreHealth()) {
+            if (config.withdrawNecessaryFoodToRestoreHealth()) {
                 withdrawNecessaryFoodToRestoreHealth(config);
             }
 
@@ -90,13 +101,20 @@ public class BankerScript extends Script {
             if (item.isEnabled(config)) {
                 int count = item.getIds().stream().mapToInt(Rs2Inventory::count).sum();
                 log.info("Item: {} Count: {}", item.name(), count);
-                if (count < item.getValue(config)) {
-                    log.info("Withdrawing {} {}(s)", item.getValue(config) - count, item.name());
+                if (count < item.getQuantityToWithdraw(config)) {
+                    log.info("Withdrawing {} {}(s)", item.getQuantityToWithdraw(config) - count, item.name());
                     if (item.name().equals("FOOD")) {
+                        String[] itemsToWithdraw = item.getItemsToWithdraw(config);
                         for (Rs2Food food : Arrays.stream(Rs2Food.values()).sorted(Comparator.comparingInt(Rs2Food::getHeal).reversed()).collect(Collectors.toList())) {
                             log.info("Checking bank for food: {}", food.getName());
-                            if (Rs2Bank.hasBankItem(food.getId(), item.getValue(config) - count)) {
-                                Rs2Bank.withdrawX(true, food.getId(), item.getValue(config) - count);
+                            if (itemsToWithdraw.length > 0) {
+                                Optional<String> match = Arrays.stream(itemsToWithdraw).filter((foodName) -> food.getName().equals(foodName)).findFirst();
+                                match.ifPresent(name -> Rs2Bank.withdrawX(true, name, item.getQuantityToWithdraw(config) - count));
+                                break;
+                            }
+
+                            if (Rs2Bank.hasBankItem(food.getId(), item.getQuantityToWithdraw(config) - count)) {
+                                Rs2Bank.withdrawX(true, food.getId(), item.getQuantityToWithdraw(config) - count);
                                 break;
                             }
                         }
@@ -105,8 +123,8 @@ public class BankerScript extends Script {
                         Collections.reverse(ids);
                         for (int id : ids) {
                             log.info("Checking bank for item: {}", id);
-                            if (Rs2Bank.hasBankItem(id, item.getValue(config) - count)) {
-                                Rs2Bank.withdrawX(true, id, item.getValue(config) - count);
+                            if (Rs2Bank.hasBankItem(id, item.getQuantityToWithdraw(config) - count)) {
+                                Rs2Bank.withdrawX(true, id, item.getQuantityToWithdraw(config) - count);
                                 break;
                             }
                         }
@@ -125,7 +143,6 @@ public class BankerScript extends Script {
         Rs2Bank.depositAllExcept(ids.toArray(new Integer[0]));
         return Rs2Bank.isOpen();
     }
-
 
     /**
      * @param itemsToKeep a string array of item's name

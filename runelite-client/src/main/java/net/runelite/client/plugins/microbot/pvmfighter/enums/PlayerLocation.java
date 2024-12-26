@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 
 import java.util.Optional;
@@ -15,7 +14,7 @@ import java.util.stream.Stream;
 public enum PlayerLocation {
     COMBAT_FIELD(null, null),
     SAFE_SPOT(null, null),
-    NEAREST_BANK(null, null),
+    BANK_LOCATION(null, null),
     OUTSIDE_POINT(new WorldArea(0, 0, 0, 0, 0), new WorldPoint(0, 0, 0));
 
     private WorldArea area;
