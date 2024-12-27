@@ -34,7 +34,6 @@ public class SafeSpot extends Script {
                 if (!super.run() || PlayerAssistPlugin.fulfillConditionsToRun()) return;
                 if (!config.toggleSafeSpot()) return;
 
-                minimumHealth = config.minimumHealthSafeSpot();
                 currentSafeSpot = config.safeSpot();
                 if (isDefaultSafeSpot(currentSafeSpot)) {
                     if (!messageShown) {

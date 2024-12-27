@@ -4,8 +4,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Getter
 @RequiredArgsConstructor
@@ -93,6 +95,23 @@ public enum Rs2Food {
     // get all ids as a set
     public static Set<Integer> getIds() {
         return Arrays.stream(values()).map(Rs2Food::getId).collect(Collectors.toSet());
+    }
+
+    public static Stream<Rs2Food> stream() {
+        return Stream.of(Rs2Food.values());
+    }
+
+
+    public static Rs2Food getFoodById(int id) {
+        Optional<Rs2Food> optional = stream().filter((food) -> food.id == id).findFirst();
+
+        return optional.orElse(null);
+    }
+
+    public static Rs2Food getFoodByName(String name) {
+        Optional<Rs2Food> optional = stream().filter((food) -> food.name.equalsIgnoreCase(name)).findFirst();
+
+        return optional.orElse(null);
     }
 
 }
