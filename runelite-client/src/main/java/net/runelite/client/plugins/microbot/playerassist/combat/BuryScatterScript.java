@@ -1,6 +1,5 @@
 package net.runelite.client.plugins.microbot.playerassist.combat;
 
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.playerassist.PlayerAssistConfig;

@@ -10,7 +10,6 @@ import net.runelite.client.plugins.microbot.cooking.enums.CookingAreaType;
 import net.runelite.client.plugins.microbot.cooking.enums.CookingItem;
 import net.runelite.client.plugins.microbot.cooking.enums.CookingLocation;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
-import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.camera.Rs2Camera;
@@ -18,7 +17,6 @@ import net.runelite.client.plugins.microbot.util.dialogues.Rs2Dialogue;
 import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
-import net.runelite.client.plugins.microbot.util.math.Random;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
@@ -31,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 import static net.runelite.client.plugins.microbot.util.Global.sleepUntilTrue;
 
 enum CookingState {
-    COMBINE,
+    COMBINING,
     COOKING,
     WALKING,
     BANKING,
@@ -53,15 +51,9 @@ public class AutoCookingScript extends Script {
         init = true;
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                if (!Microbot.isLoggedIn()) return;
-                if (!super.run()) return;
-                if (Rs2AntibanSettings.actionCooldownActive) return;
+                if (!fulfillConditionsToRun()) return;
 
                 if (init) {
-                    if (initialPlayerLocation == null) {
-                        initialPlayerLocation = Rs2Player.getWorldLocation();
-                    }
-
                     if (config.useNearestCookingLocation()) {
                         location = CookingLocation.findNearestCookingLocation(cookingItem);
                     } else {
@@ -77,8 +69,6 @@ public class AutoCookingScript extends Script {
 
                     getState(config, location);
                 }
-
-                if (Rs2Player.isMoving() || Rs2Player.isAnimating() || Microbot.pauseAllScripts) return;
 
                 switch (state) {
                     case COOKING:
@@ -169,6 +159,10 @@ public class AutoCookingScript extends Script {
             }
         }, 0, 1000, TimeUnit.MILLISECONDS);
         return true;
+    }
+
+    public boolean fulfillConditionsToRun() {
+        return Microbot.isLoggedIn() && !Microbot.pauseAllScripts && super.isRunning();
     }
     
     @Override

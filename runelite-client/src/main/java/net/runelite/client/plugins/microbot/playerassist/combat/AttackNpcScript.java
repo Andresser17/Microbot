@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class AttackNpcScript extends Script {
-
     public static Actor currentNpc = null;
     public static List<NPC> attackableNpcs = new ArrayList<>();
     private boolean messageShown = false;

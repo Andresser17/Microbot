@@ -4,12 +4,11 @@ import net.runelite.api.GameObject;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.looter.AutoLooterConfig;
-import net.runelite.client.plugins.microbot.looter.enums.LooterState;
+import net.runelite.client.plugins.microbot.looter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
 import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
-import net.runelite.client.plugins.microbot.util.math.Random;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
@@ -17,13 +16,12 @@ import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static net.runelite.client.plugins.microbot.util.Global.sleepUntilTrue;
 
 public class NatureRuneChestScript extends Script {
 
-    LooterState state;
+    PlayerState state;
     boolean init = true;
 
     public boolean run(AutoLooterConfig config) {
@@ -70,7 +68,7 @@ public class NatureRuneChestScript extends Script {
                         Rs2Walker.walkTo(config.natureRuneChestLocation().getWorldPoint());
                         sleepUntilTrue(() -> isNearNatureRuneChest(config, 6) && !Rs2Player.isMoving(), 600, 300000);
                         if (!isNearNatureRuneChest(config, 6)) return;
-                        state = LooterState.LOOTING;
+                        state = PlayerState.LOOTING;
                         break;
                 }
 
@@ -93,11 +91,11 @@ public class NatureRuneChestScript extends Script {
 
     private void getState(AutoLooterConfig config) {
         if (!isNearNatureRuneChest(config, 6)) {
-            state = LooterState.WALKING;
+            state = PlayerState.WALKING;
             init = false;
             return;
         }
-        state = LooterState.LOOTING;
+        state = PlayerState.LOOTING;
         init = false;
     }
 

@@ -25,6 +25,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
+
+import static java.awt.event.KeyEvent.CHAR_UNDEFINED;
 
 @Slf4j
 public abstract class Script implements IScript {
@@ -83,6 +86,16 @@ public abstract class Script implements IScript {
         return done;
     }
 
+    public boolean sleepUntilFulfillCondition(BooleanSupplier awaitedCondition, Runnable iterationWait) {
+        boolean done;
+        do {
+            done = awaitedCondition.getAsBoolean();
+            iterationWait.run();
+            if (!isRunning())
+                break;
+        } while (!done);
+        return done;
+    }
 
     /**
      * Sleeps until a specified condition is met, running an action periodically, or until a timeout is reached.
@@ -195,6 +208,10 @@ public abstract class Script implements IScript {
         }
 
         return true;
+    }
+
+    public boolean fulfillConditionsToRun() {
+        return Microbot.isLoggedIn() && !Microbot.pauseAllScripts && isRunning() && Microbot.getClient() != null;
     }
 
     public void keyPress(char c) {

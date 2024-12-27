@@ -1,6 +1,5 @@
 package net.runelite.client.plugins.microbot.playerassist.combat;
 
-import net.runelite.api.widgets.Widget;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.playerassist.PlayerAssistConfig;
