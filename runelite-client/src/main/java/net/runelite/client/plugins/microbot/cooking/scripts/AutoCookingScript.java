@@ -1,14 +1,17 @@
 package net.runelite.client.plugins.microbot.cooking.scripts;
 
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.AnimationID;
 import net.runelite.api.NPC;
 import net.runelite.api.TileObject;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.cooking.AutoCookingConfig;
-import net.runelite.client.plugins.microbot.cooking.enums.CookingAreaType;
 import net.runelite.client.plugins.microbot.cooking.enums.CookingItem;
 import net.runelite.client.plugins.microbot.cooking.enums.CookingLocation;
+import net.runelite.client.plugins.microbot.cooking.enums.PlayerState;
+import net.runelite.client.plugins.microbot.cooking.enums.PlayerLocation;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
@@ -28,19 +31,11 @@ import java.util.concurrent.TimeUnit;
 
 import static net.runelite.client.plugins.microbot.util.Global.sleepUntilTrue;
 
-enum CookingState {
-    COMBINING,
-    COOKING,
-    WALKING,
-    BANKING,
-    DROPPING,
-}
-
+@Slf4j
 public class AutoCookingScript extends Script {
 
-    private CookingState state;
-    private boolean init;
-    private CookingLocation location;
+    private PlayerState playerState;
+    private PlayerLocation currentLocation;
 
     public boolean run(AutoCookingConfig config) {
         Microbot.enableAutoRunOn = false;
@@ -48,37 +43,43 @@ public class AutoCookingScript extends Script {
         Rs2Antiban.resetAntibanSettings();
         Rs2Antiban.antibanSetupTemplates.applyCookingSetup();
         Rs2Antiban.setActivity(Activity.GENERAL_COOKING);
-        init = true;
+
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                if (!fulfillConditionsToRun()) return;
+                if (!super.fulfillConditionsToRun()) return;
 
-                if (init) {
-                    if (config.useNearestCookingLocation()) {
-                        location = CookingLocation.findNearestCookingLocation(cookingItem);
-                    } else {
-                        location = config.cookingLocation();
-                        if (cookingItem.getCookingAreaType() != CookingAreaType.BOTH) {
-                            if (location.getCookingAreaType() != cookingItem.getCookingAreaType()) {
-                                Microbot.showMessage("Cooking Area does not match item's cooking area");
-                                shutdown();
-                                return;
-                            }
-                        }
-                    }
+//                if (init) {
+//                    if (config.useNearestCookingLocation()) {
+//                        currentLocation = CookingLocation.findNearestCookingLocation(cookingItem);
+//                    } else {
+//                        currentLocation = config.cookingLocation();
+//                        if (cookingItem.getCookingAreaType() != CookingAreaType.BOTH) {
+//                            if (currentLocation.getCookingAreaType() != cookingItem.getCookingAreaType()) {
+//                                Microbot.showMessage("Cooking Area does not match item's cooking area");
+//                                shutdown();
+//                                return;
+//                            }
+//                        }
+//                    }
+//
+//                    getPlayerState(config, currentLocation);
+//                }
 
-                    getState(config, location);
-                }
+                getPlayerState(config);
+                currentLocation = PlayerLocation.checkCurrentPlayerLocation();
+                if (!checkIfInDesiredLocation()) walkToDesiredLocation();
 
-                switch (state) {
+                Microbot.status = String.format("PlayerState: %s - %s", playerState, currentLocation);
+                switch (playerState) {
                     case COOKING:
+                        if (currentLocation != PlayerLocation.COOKING_AREA) return;
                         if (!cookingItem.hasRequirements()) {
                             Microbot.showMessage("You do not meet the requirements to cook this item");
                             shutdown();
                             return;
                         }
 
-                        TileObject cookingObject = Rs2GameObject.findObjectById(location.getCookingObjectID());
+                        TileObject cookingObject = Rs2GameObject.findObjectById(currentLocation.getCookingLocation().getCookingObjectID());
 
                         if (cookingObject != null) {
                             if (!Rs2Camera.isTileOnScreen(cookingObject.getLocalLocation())) {
@@ -89,33 +90,30 @@ public class AutoCookingScript extends Script {
                             sleepUntil(() -> !Rs2Player.isMoving() && Rs2Widget.findWidget("How many would you like to cook?", null, false) != null);
 
                             Rs2Keyboard.keyPress(KeyEvent.VK_SPACE);
-                            Microbot.status = "Cooking " + cookingItem.getRawItemName();
                             
                             Rs2Antiban.actionCooldown();
                             Rs2Antiban.takeMicroBreakByChance();
 
                             sleepUntil(() -> (Rs2Player.getAnimation() != AnimationID.IDLE));
-                            sleepUntilTrue(() -> (!hasRawItem(cookingItem) && !Rs2Player.isAnimating(3500))
+                            sleepUntilTrue(() -> (!hasRawFoodInInventory(cookingItem) && !Rs2Player.isAnimating(3500))
                                     || Rs2Dialogue.isInDialogue() || Rs2Player.isWalking(), 500, 150000);
-                            if (hasRawItem(cookingItem)) {
+                            if (hasRawFoodInInventory(cookingItem)) {
                                 break;
                             }
                             if (hasBurntItem(cookingItem) && !cookingItem.getBurntItemName().isEmpty()) {
-                                state = CookingState.DROPPING;
                                 return;
                             }
-
-                            state = CookingState.BANKING;
                             break;
                         }
                     case DROPPING:
-                        Microbot.status = "Dropping " + cookingItem.getBurntItemName();
+//                        Microbot.status = "Dropping " + cookingItem.getBurntItemName();
                         Rs2Inventory.dropAll(item -> item.name.equalsIgnoreCase(cookingItem.getBurntItemName()), config.getDropOrder());
                         sleepUntilTrue(() -> !hasBurntItem(cookingItem), 500, 150000);
-                        state = CookingState.BANKING;
                         break;
                     case BANKING:
-                        if (location == CookingLocation.ROUGES_DEN) {
+                        if (currentLocation != PlayerLocation.BANK_LOCATION) return;
+
+                        if (PlayerLocation.COOKING_AREA.getCookingLocation()  == CookingLocation.ROUGES_DEN) {
                             NPC npc = Rs2Npc.getBankerNPC();
                             boolean isNPCBankOpen = Rs2Bank.openBank(npc);
                             if (!isNPCBankOpen) return;
@@ -124,34 +122,22 @@ public class AutoCookingScript extends Script {
                             if (!isBankOpen || !Rs2Bank.isOpen()) return;
                         }
 
-                        if (hasCookedItem(cookingItem)) {
-                            Rs2Bank.depositAll(cookingItem.getCookedItemName(), true);
-                            Rs2Random.wait(800, 1600);
+                        Rs2Bank.depositAll(cookingItem.getCookedItemName(), true);
+                        Rs2Random.wait(800, 1600);
+
+                        // deposit burnt food
+                        if (config.bankBurntFood() && hasBurntItem(config.cookingItem())) {
+                            Rs2Bank.depositAll(config.cookingItem().getBurntItemID());
                         }
                         
-                        if (!hasRawItem(cookingItem)) {
+                        if (!hasRawFoodInBank(cookingItem)) {
                             Microbot.showMessage("No Raw Food Item found in Bank");
                             shutdown();
                             return;
                         }
                         Rs2Bank.withdrawAll(cookingItem.getRawItemName(), true);
                         Rs2Random.wait(800, 1600);
-                        state = CookingState.WALKING;
                         Rs2Bank.closeBank();
-                        break;
-                    case WALKING:
-                        if (!isNearCookingLocation(location, 10)) {
-                            boolean walkTo = Rs2Walker.walkTo(location.getCookingObjectWorldPoint(), 2);
-                            if (!walkTo) return;
-                        } else if (!isNearCookingLocation(location, 2)) {
-                            Rs2Walker.walkFastCanvas(location.getCookingObjectWorldPoint());
-                        }
-
-                        if (hasRawItem(cookingItem)) {
-                            state = CookingState.COOKING;
-                        } else {
-                            state = CookingState.BANKING;
-                        }
                         break;
                 }
             } catch (Exception ex) {
@@ -161,51 +147,89 @@ public class AutoCookingScript extends Script {
         return true;
     }
 
-    public boolean fulfillConditionsToRun() {
-        return Microbot.isLoggedIn() && !Microbot.pauseAllScripts && super.isRunning();
-    }
-    
     @Override
     public void shutdown(){
         super.shutdown();
         Rs2Antiban.resetAntibanSettings();
     }
 
-    private void getState(AutoCookingConfig config, CookingLocation location) {
-        if (!hasRawItem(config.cookingItem())) {
-            if (hasBurntItem(config.cookingItem())) {
-                state = CookingState.DROPPING;
-                init = false;
-                return;
-            }
-            state = CookingState.BANKING;
-            init = false;
+    private boolean checkIfInDesiredLocation() {
+        return playerState.getPlayerLocation()  == currentLocation;
+    }
+
+    private void walkToDesiredLocation() {
+        if (!Rs2Antiban.isIdle() || Rs2Player.isWalking()) return;
+
+        switch (playerState) {
+            case COOKING:
+                walkToCookingArea();
+                break;
+            case BANKING:
+                walkToSelectedBank();
+                break;
+        }
+    }
+
+    private void walkToCookingArea() {
+        WorldPoint point = PlayerLocation.COOKING_AREA.getPoint();
+        Rs2Walker.walkTo(point, 3);
+        sleepUntil(() -> PlayerLocation.COOKING_AREA.getArea().contains(Rs2Player.getWorldLocation()));
+    }
+
+    private void walkToSelectedBank() {
+        WorldPoint point = PlayerLocation.BANK_LOCATION.getPoint();
+        Rs2Walker.walkTo(point, 8);
+        sleepUntil(() -> point.equals(Rs2Player.getWorldLocation()));
+    }
+
+    private void getPlayerState(AutoCookingConfig config) {
+        if (hasRawFoodInInventory(config.cookingItem())) {
+//            if (hasBurntItem(config.cookingItem())) {
+//                playerState = CookingState.DROPPING;
+//                return;
+//            }
+
+            playerState = PlayerState.COOKING;
             return;
         }
 
-        if (!isNearCookingLocation(location, 4)) {
-            state = CookingState.WALKING;
-            init = false;
+        if (hasBurntItem(config.cookingItem()) && !config.bankBurntFood()) {
+            playerState = PlayerState.DROPPING;
             return;
         }
 
-        state = CookingState.COOKING;
-        init = false;
+        if (needsBanking(config.cookingItem())) {
+            playerState = PlayerState.BANKING;
+            return;
+        }
+
+//        if (!isNearCookingLocation(location, 4)) {
+//            playerState = CookingState.WALKING;
+//            return;
+//        }
+
+        playerState = PlayerState.IDLE;
+    }
+
+    private boolean needsBanking(CookingItem cookingItem) {
+//        if (Rs2Bank.isOpen()) {
+//            return Rs2Bank.hasBankItem(cookingItem.getRawItemName(), true);
+//        }
+        // check if has cooked food to deposit or not raw food
+        return Rs2Inventory.hasItem(cookingItem.getCookedItemName(), true)
+                || !hasRawFoodInInventory(cookingItem);
     }
 
     private boolean isNearCookingLocation(CookingLocation location, int distance) {
         return Rs2Player.getWorldLocation().distanceTo(location.getCookingObjectWorldPoint()) <= distance && !Rs2Player.isMoving();
     }
 
-    private boolean hasRawItem(CookingItem cookingItem) {
-        if (Rs2Bank.isOpen()) {
-            return Rs2Bank.hasBankItem(cookingItem.getRawItemName(), true);
-        }
-        return Rs2Inventory.hasItem(cookingItem.getRawItemName(), true);
+    private boolean hasRawFoodInBank(CookingItem cookingItem) {
+        return Rs2Bank.hasItem(cookingItem.getRawItemID());
     }
 
-    private boolean hasCookedItem(CookingItem cookingItem) {
-        return Rs2Inventory.hasItem(cookingItem.getCookedItemName(), true);
+    private boolean hasRawFoodInInventory(CookingItem cookingItem) {
+        return Rs2Inventory.hasItem(cookingItem.getRawItemID());
     }
 
     private boolean hasBurntItem(CookingItem cookingItem) {

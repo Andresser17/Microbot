@@ -16,6 +16,7 @@ import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
 
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -30,18 +31,16 @@ public class AutoCombiningScript extends Script {
         Rs2Antiban.antibanSetupTemplates.applyCookingSetup();
         Rs2Antiban.setActivity(Activity.MAKING_PINEAPPLE_PIZZAS);
 
-
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                if (!fulfillConditionsToRun()) return;
+                if (!super.fulfillConditionsToRun()) return;
 
                 getPlayerState(config);
 
-                log.info("PlayerState: {}", playerState);
+                Microbot.log(String.format("PlayerState: %s", playerState));
                 switch (playerState) {
                     case COMBINING:
                         // combine items
-//                        List<Rs2Item> foundItems = Arrays.stream(combiningItem.getCombiningOrder()).map((ingredient) -> Rs2Inventory.get(ingredient.getId())).collect(Collectors.toList());
                         Ingredients[][] combiningOrder = combiningItem.getCombiningOrder();
                         for (Ingredients[] ingredients : combiningOrder) {
                             Rs2Item ingredient1 = Rs2Inventory.get(ingredients[0].getId());
@@ -68,7 +67,7 @@ public class AutoCombiningScript extends Script {
                         if (!isBankOpen || !Rs2Bank.isOpen()) return;
 
                         if (hasCombinedItem(combiningItem)) {
-                            Rs2Bank.depositAll(combiningItem.getCombinedItemId());
+                            Rs2Bank.depositAll();
                             Rs2Random.wait(800, 1600);
                         }
 
@@ -80,7 +79,6 @@ public class AutoCombiningScript extends Script {
                             shutdown();
                             return;
                         }
-
                         Rs2Bank.closeBank();
                         break;
                 }
@@ -91,14 +89,15 @@ public class AutoCombiningScript extends Script {
         return true;
     }
 
-    public boolean fulfillConditionsToRun() {
-        return Microbot.isLoggedIn() && !Microbot.pauseAllScripts && super.isRunning();
-    }
-    
     @Override
-    public void shutdown(){
+    public void shutdown() {
         super.shutdown();
         Rs2Antiban.resetAntibanSettings();
+    }
+
+    private void validateInventory() {
+        List<Rs2Item> items = Rs2Inventory.all();
+
     }
 
     private void getPlayerState(AutoCookingConfig config) {

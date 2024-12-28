@@ -5,6 +5,7 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 import net.runelite.client.plugins.microbot.cooking.enums.*;
+import net.runelite.client.plugins.microbot.util.bank.enums.BankLocation;
 import net.runelite.client.plugins.microbot.util.inventory.InteractOrder;
 
 @ConfigGroup("autocooking")
@@ -68,8 +69,8 @@ public interface AutoCookingConfig extends Config {
     }
 
     @ConfigItem(
-            name = "Item to Cook",
             keyName = "itemToCook",
+            name = "Item to Cook",
             position = 0,
             description = "Item to cook",
             section = cookingSection
@@ -112,13 +113,46 @@ public interface AutoCookingConfig extends Config {
     }
 
     @ConfigItem(
-            name = "DropOrder",
-            keyName = "dropOrder",
+            keyName = "BankLocation",
+            name = "Bank location",
             position = 4,
+            description = "Selected bank location",
+            section = cookingSection
+    )
+    default BankLocation bankLocation() {
+        return BankLocation.AL_KHARID;
+    }
+
+    @ConfigItem(
+            keyName = "useNearestBankLocation",
+            name = "Use Nearest Bank Location",
+            position = 5,
+            description = "Use nearest bank location (this overrides the specified bank location)",
+            section = cookingSection
+    )
+    default boolean useNearestBankLocation() {
+        return false;
+    }
+
+    @ConfigItem(
+            keyName = "DropOrder",
+            name = "Drop order",
+            position = 6,
             description = "The order in which to drop items",
             section = cookingSection
     )
     default InteractOrder getDropOrder() {
         return InteractOrder.STANDARD;
+    }
+
+    @ConfigItem(
+            name = "Bank burnt food?",
+            keyName = "BankBurntFood",
+            position = 7,
+            description = "Bank burnt food in inventory",
+            section = cookingSection
+    )
+    default boolean bankBurntFood() {
+        return false;
     }
 }

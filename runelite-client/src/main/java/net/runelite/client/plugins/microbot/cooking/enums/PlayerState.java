@@ -1,9 +1,18 @@
 package net.runelite.client.plugins.microbot.cooking.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum PlayerState {
-    COMBINING,
-    COOKING,
-    WALKING,
-    BANKING,
-    DROPPING,
+    COMBINING(PlayerLocation.BANK_LOCATION),
+    COOKING(PlayerLocation.COOKING_AREA),
+    BANKING(PlayerLocation.BANK_LOCATION),
+    DROPPING(PlayerLocation.OUTSIDE_POINT),
+    IDLE(PlayerLocation.OUTSIDE_POINT);
+
+    private final PlayerLocation playerLocation;
+
+    PlayerState(PlayerLocation playerLocation) {
+        this.playerLocation = playerLocation;
+    }
 }

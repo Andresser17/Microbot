@@ -12,9 +12,14 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.microbot.Microbot;
+import net.runelite.client.plugins.microbot.cooking.enums.CookingLocation;
+import net.runelite.client.plugins.microbot.cooking.enums.PlayerLocation;
 import net.runelite.client.plugins.microbot.cooking.scripts.AutoCombiningScript;
 import net.runelite.client.plugins.microbot.cooking.scripts.AutoCookingScript;
+import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
+import net.runelite.client.plugins.microbot.util.bank.enums.BankLocation;
 import net.runelite.client.plugins.microbot.util.mouse.VirtualMouse;
+import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 import javax.inject.Inject;
@@ -43,6 +48,7 @@ public class AutoCookingPlugin extends Plugin {
     private OverlayManager overlayManager;
     @Inject
     private AutoCookingOverlay overlay;
+    private boolean isRunning;
 
     @Provides
     AutoCookingConfig provideConfig(ConfigManager configManager) {
@@ -51,6 +57,11 @@ public class AutoCookingPlugin extends Plugin {
 
     @Override
     protected void startUp() throws AWTException {
+        if (isRunning) {
+            Microbot.showMessage("Plugin is already running");
+            return;
+        }
+
         Microbot.pauseAllScripts = false;
         Microbot.setClient(client);
         Microbot.setClientThread(clientThread);
@@ -58,8 +69,26 @@ public class AutoCookingPlugin extends Plugin {
         if (overlayManager != null) {
             overlayManager.add(overlay);
         }
+
+        if (config.useNearestBankLocation()) {
+            BankLocation location = Rs2Bank.getNearestBank();
+            PlayerLocation.BANK_LOCATION.setWorldPoint(location.getWorldPoint(), 10);
+        } else {
+            BankLocation location = config.bankLocation();
+            PlayerLocation.COOKING_AREA.setWorldPoint(location.getWorldPoint(), 10);
+        }
+
         switch (config.cookingActivity()) {
             case COOKING:
+                if (config.useNearestCookingLocation()) {
+                    CookingLocation location = CookingLocation.findNearestCookingLocation(config.cookingItem());
+                    PlayerLocation.COOKING_AREA.setWorldPoint(location.getCookingObjectWorldPoint(), 10);
+                    PlayerLocation.COOKING_AREA.setCookingLocation(location);
+                } else {
+                    CookingLocation location = config.cookingLocation();
+                    PlayerLocation.COOKING_AREA.setWorldPoint(location.getCookingObjectWorldPoint(), 10);
+                    PlayerLocation.COOKING_AREA.setCookingLocation(location);
+                }
                 autoCookingScript.run(config);
                 break;
             case COMBINING:
@@ -69,11 +98,14 @@ public class AutoCookingPlugin extends Plugin {
             default:
                 Microbot.log("Invalid Cooking Activity");
         }
+
+        isRunning = true;
     }
 
     protected void shutDown() {
         autoCookingScript.shutdown();
         autoCombiningScript.shutdown();
         overlayManager.remove(overlay);
+        isRunning = false;
     }
 }
