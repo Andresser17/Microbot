@@ -198,6 +198,8 @@ public class PvmFighterScript extends Script {
 
     private boolean isReadyToBank(PvmFighterConfig config) {
         if (!config.toggleBanking()) return false;
-        return Rs2Inventory.getEmptySlots() <= config.minFreeSlots();
+        if (config.useFood() && !Rs2Inventory.getInventoryFood().isEmpty()) return false;
+        return Rs2Inventory.getEmptySlots() <= config.minFreeSlots()
+                || (Rs2Inventory.getInventoryFood().isEmpty() && Rs2Player.getHealthPercentage() <= config.minimumHealthSafeSpot());
     }
 }

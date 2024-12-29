@@ -2,6 +2,9 @@ package net.runelite.client.plugins.microbot.pvmfighter;
 
 
 import net.runelite.client.plugins.microbot.Microbot;
+import net.runelite.client.plugins.microbot.cooking.enums.PlayerLocation;
+import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
+import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.components.LineComponent;
@@ -26,16 +29,19 @@ public class PvmFighterInfoOverlay extends OverlayPanel {
         try {
             panelComponent.setPreferredSize(new Dimension(250, 400));
             panelComponent.getChildren().add(TitleComponent.builder()
-                    .text("\uD83E\uDD86 AIO Fighter \uD83E\uDD86")
-                    .color(Color.ORANGE)
+                    .text("PVM Fighter")
+                    .color(Color.GREEN)
                     .build());
 
 
             panelComponent.getChildren().add(LineComponent.builder()
-                    .left("Play Style: " + config.playStyle() + "(" + config.playStyle().getPrimaryTickInterval() + "," + config.playStyle().getSecondaryTickInterval() + ")")
+                    .left(String.format("Play Style: %s", Rs2Antiban.getPlayStyle()))
                     .right("Attack cooldown: " + PvmFighterPlugin.getCooldown())
                     .build());
-            panelComponent.getChildren().add(LineComponent.builder().build());
+            panelComponent.getChildren().add(LineComponent.builder()
+                    .left(String.format("Health percentage: %s", Rs2Player.getHealthPercentage()))
+                    .right("Bank Location: " + PlayerLocation.BANK_LOCATION)
+                    .build());
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(Microbot.status)
                     .right("Version:" + PvmFighterPlugin.version)
