@@ -4,6 +4,7 @@ package net.runelite.client.plugins.microbot.pvmfighter;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.cooking.enums.PlayerLocation;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
+import net.runelite.client.plugins.microbot.util.bank.enums.BankLocation;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -40,7 +41,6 @@ public class PvmFighterInfoOverlay extends OverlayPanel {
                     .build());
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(String.format("Health percentage: %s", Rs2Player.getHealthPercentage()))
-                    .right("Bank Location: " + PlayerLocation.BANK_LOCATION)
                     .build());
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(Microbot.status)

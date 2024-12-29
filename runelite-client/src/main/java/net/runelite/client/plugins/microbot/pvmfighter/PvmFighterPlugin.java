@@ -23,6 +23,7 @@ import net.runelite.client.plugins.microbot.pvmfighter.combat.*;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
+import net.runelite.client.plugins.microbot.util.bank.enums.BankLocation;
 import net.runelite.client.plugins.microbot.util.combat.Rs2Combat;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.prayer.Rs2Prayer;
@@ -113,7 +114,11 @@ public class PvmFighterPlugin extends Plugin {
             setCenter(Rs2Player.getWorldLocation());
 
         PlayerLocation.COMBAT_FIELD.setWorldPoint(config.centerLocation(), config.attackRadius());
-        PlayerLocation.BANK_LOCATION.setWorldPoint(Rs2Bank.getNearestBank().getWorldPoint(), 10);
+        if (config.useNearestBank()) {
+            PlayerLocation.BANK_LOCATION.setWorldPoint(Rs2Bank.getNearestBank().getWorldPoint(), 10);
+        } else {
+            PlayerLocation.BANK_LOCATION.setWorldPoint(config.bankLocation().getWorldPoint(), 10);
+        }
 
         pvmFighterScript.run(config);
         helperScript.run(config);

@@ -31,7 +31,8 @@ public enum CookingItem {
     RAW_SHRIMP("raw shrimps", ItemID.RAW_SHRIMPS, 1, "shrimps", ItemID.SHRIMPS, "burnt shrimp", ItemID.BURNT_SHRIMP, CookingAreaType.BOTH),
     RAW_CHICKEN("raw chicken", ItemID.RAW_CHICKEN, 1, "chicken", ItemID.CHICKEN, "burnt chicken", ItemID.BURNT_CHICKEN, CookingAreaType.BOTH),
     RAW_ANCHOVIES("raw anchovies", ItemID.RAW_ANCHOVIES, 1, "anchovies", ItemID.ANCHOVIES, "burnt fish", ItemID.BURNT_FISH, CookingAreaType.BOTH),
-    RAW_SARDINE("raw sardine", ItemID.RAW_SARDINE, 1, "sardine", ItemID.SARDINE, "burnt fish", ItemID.BURNT_FISH_369, CookingAreaType.BOTH);
+    RAW_SARDINE("raw sardine", ItemID.RAW_SARDINE, 1, "sardine", ItemID.SARDINE, "burnt fish", ItemID.BURNT_FISH_369, CookingAreaType.BOTH),
+    RAW_BEEF("raw beef", ItemID.RAW_BEEF, 1, "Cooked meat", ItemID.COOKED_MEAT, "burnt meat", ItemID.BURNT_MEAT, CookingAreaType.BOTH);
 
     private final String rawItemName;
     private final int rawItemID;
