@@ -77,6 +77,7 @@ public class PlayerAssistPlugin extends Plugin {
     private final AttackStyleScript attackStyleScript = new AttackStyleScript();
     private final BankerScript bankerScript = new BankerScript();
     private final PrayerScript prayerScript = new PrayerScript();
+    private final HighAlchScript highAlchScript = new HighAlchScript();
     @Inject
     private PlayerAssistConfig config;
     @Inject
@@ -121,6 +122,7 @@ public class PlayerAssistPlugin extends Plugin {
         attackStyleScript.run(config);
         bankerScript.run(config);
         prayerScript.run(config);
+        highAlchScript.run(config);
         Microbot.getSpecialAttackConfigs()
                 .setSpecialAttack(true);
     }
@@ -140,6 +142,7 @@ public class PlayerAssistPlugin extends Plugin {
         attackStyleScript.shutdown();
         bankerScript.shutdown();
         prayerScript.shutdown();
+        highAlchScript.shutdown();
         resetLocation();
         overlayManager.remove(playerAssistOverlay);
         overlayManager.remove(playerAssistInfoOverlay);
