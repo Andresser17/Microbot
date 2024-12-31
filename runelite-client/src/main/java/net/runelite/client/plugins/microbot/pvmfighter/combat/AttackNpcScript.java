@@ -23,10 +23,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class AttackNpcScript extends Script {
+public class AttackNpcScript {
 
     public static NPC currentNPC;
     public static List<NPC> attackableNpcs = new ArrayList<>();
@@ -99,20 +100,23 @@ public class AttackNpcScript extends Script {
             Rs2Npc.interact(currentNPC, "attack");
             PvmFighterPlugin.setCooldown(config.playStyle().getRandomTickInterval());
             Microbot.status = "Attacking " + currentNPC.getName();
-
+            Rs2Random.wait(1500, 2000);
             sleepUntilFulfillCondition(() -> {
                 log.info("Player is attacking");
-                boolean isIdle = !Rs2Antiban.isIdle();
+                boolean isIdle = Rs2Antiban.isIdle();
                 log.info("isIdle {}", isIdle);
                 log.info("AttackNPC CurrentNPC: {}", currentNPC);
                 log.info("AttackNPC CurrentNPC is Dead: {}", currentNPC.isDead());
                 return isIdle && currentNPC.isDead();
             }, () -> Rs2Random.wait(1500, 1600));
-            currentNPC = null;
-            log.info("Combat finished");
+            if (currentNPC.isDead()) currentNPC = null;
+            Microbot.log("Combat finished");
 
             // wait until loot appears
-            if (config.toggleLootItems()) Rs2Random.wait(2000, 1600);
+            if (config.toggleLootItems()) {
+                Microbot.log("Waiting for loot");
+                Rs2Random.wait(1500, 2000);
+            }
             isRunning = false;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
@@ -120,8 +124,17 @@ public class AttackNpcScript extends Script {
     }
 
     public void shutdown() {
-        super.shutdown();
         init = true;
         isRunning = false;
+    }
+
+    public boolean sleepUntilFulfillCondition(BooleanSupplier awaitedCondition, Runnable iterationWait) {
+        boolean done;
+        do {
+            done = awaitedCondition.getAsBoolean();
+            iterationWait.run();
+            if (!isRunning) break;
+        } while (!done);
+        return done;
     }
 }

@@ -37,6 +37,8 @@ public class PvmFighterScript extends Script {
         Microbot.enableAutoRunOn = false;
         Rs2Antiban.resetAntibanSettings();
         Rs2Antiban.antibanSetupTemplates.applyCombatSetup();
+        Rs2AntibanSettings.simulateMistakes = true;
+        Rs2AntibanSettings.moveMouseOffScreen = true;
         Rs2Antiban.setActivity(Activity.GENERAL_COMBAT);
         Rs2Antiban.setActivityIntensity(ActivityIntensity.MODERATE);
         Rs2Antiban.setPlayStyle(PlayStyle.MODERATE);
@@ -170,6 +172,7 @@ public class PvmFighterScript extends Script {
     private boolean areGroundItemsToLoot(PvmFighterConfig config) {
         if (!config.toggleLootItems()) return false;
         if (Rs2Inventory.getEmptySlots() <= config.minFreeSlots()) return false;
+        if (!Rs2Antiban.isIdle() && AttackNpcScript.currentNPC != null) return false;
 
         boolean result = false;
         if (config.toggleLootItemsByName()) {

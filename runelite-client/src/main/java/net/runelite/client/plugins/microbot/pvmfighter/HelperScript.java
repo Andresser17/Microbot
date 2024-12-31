@@ -40,7 +40,7 @@ public class HelperScript extends Script {
                 // check if player is in desired location
                 getPlayerState(config);
 
-                Microbot.log(String.format("HelperState: %s", helperState));
+//                Microbot.log(String.format("HelperState: %s", helperState));
                 switch (helperState) {
                     case EATING:
                         foodScript.run(config);

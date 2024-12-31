@@ -91,8 +91,7 @@ public abstract class Script implements IScript {
         do {
             done = awaitedCondition.getAsBoolean();
             iterationWait.run();
-            if (!isRunning())
-                break;
+            if (!isRunning()) break;
         } while (!done);
         return done;
     }
