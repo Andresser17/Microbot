@@ -170,7 +170,6 @@ public class PvmFighterScript extends Script {
     private boolean areGroundItemsToLoot(PvmFighterConfig config) {
         if (!config.toggleLootItems()) return false;
         if (Rs2Inventory.getEmptySlots() <= config.minFreeSlots()) return false;
-        if (!Rs2Antiban.isIdle() && AttackNpcScript.currentNPC != null) return false;
 
         boolean result = false;
         if (config.toggleLootItemsByName()) {
