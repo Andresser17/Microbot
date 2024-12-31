@@ -50,10 +50,10 @@ public class PvmFighterScript extends Script {
                 boolean desiredLocation = checkIfInDesiredLocation();
                 if (!desiredLocation && Rs2Antiban.isIdle()) walkToDesiredLocation();
 
-                Microbot.log(String.format("PlayerState: %s, PlayerLocation: %s", playerState, currentLocation));
+//                Microbot.log(String.format("PlayerState: %s, PlayerLocation: %s", playerState, currentLocation));
                 switch (playerState) {
                     case ATTACKING:
-                        attackNpcScript.run(config);
+                        if (!AttackNpcScript.isRunning) attackNpcScript.run(config);
                         break;
                     case LOOTING:
                         lootScript.run(config);

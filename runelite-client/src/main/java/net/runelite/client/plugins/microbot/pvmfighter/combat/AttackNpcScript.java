@@ -31,6 +31,7 @@ public class AttackNpcScript extends Script {
     public static NPC currentNPC;
     public static List<NPC> attackableNpcs = new ArrayList<>();
     private boolean init = true;
+    public static boolean isRunning = false;
 
     public void run(PvmFighterConfig config) {
         if (init) {
@@ -40,6 +41,7 @@ public class AttackNpcScript extends Script {
                 throw new RuntimeException(e);
             }
             init = false;
+            isRunning = true;
         }
 
         try {
@@ -110,7 +112,8 @@ public class AttackNpcScript extends Script {
             log.info("Combat finished");
 
             // wait until loot appears
-            if (config.toggleLootItems()) Rs2Random.wait(1200, 1600);
+            if (config.toggleLootItems()) Rs2Random.wait(2000, 1600);
+            isRunning = false;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -119,5 +122,6 @@ public class AttackNpcScript extends Script {
     public void shutdown() {
         super.shutdown();
         init = true;
+        isRunning = false;
     }
 }

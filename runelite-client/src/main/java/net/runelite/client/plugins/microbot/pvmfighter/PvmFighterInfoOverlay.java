@@ -36,11 +36,15 @@ public class PvmFighterInfoOverlay extends OverlayPanel {
 
 
             panelComponent.getChildren().add(LineComponent.builder()
-                    .left(String.format("Play Style: %s", Rs2Antiban.getPlayStyle()))
-                    .right("Attack cooldown: " + PvmFighterPlugin.getCooldown())
+                    .left(String.format("Play style: %s", Rs2Antiban.getPlayStyle()))
+                    .right(String.format("Player state: %s, Location: %s", PvmFighterScript.playerState, PvmFighterScript.currentLocation))
+                    .build());
+            panelComponent.getChildren().add(LineComponent.builder()
+                    .left(String.format("Helper state: %s", HelperScript.helperState))
                     .build());
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(String.format("Health percentage: %s", Rs2Player.getHealthPercentage()))
+                    .right("Attack cooldown: " + PvmFighterPlugin.getCooldown())
                     .build());
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(Microbot.status)

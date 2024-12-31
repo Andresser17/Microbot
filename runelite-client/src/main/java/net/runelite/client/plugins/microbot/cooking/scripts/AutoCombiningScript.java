@@ -66,10 +66,8 @@ public class AutoCombiningScript extends Script {
                         boolean isBankOpen = Rs2Bank.walkToBankAndUseBank();
                         if (!isBankOpen || !Rs2Bank.isOpen()) return;
 
-                        if (hasCombinedItem(combiningItem)) {
-                            Rs2Bank.depositAll();
-                            Rs2Random.wait(800, 1600);
-                        }
+                        Rs2Bank.depositAll();
+                        Rs2Random.wait(800, 1600);
 
                         if (hasNecessaryIngredientsInBank(combiningItem)) {
                             Arrays.stream(combiningItem.getIngredients()).forEach((ingredient) -> Rs2Bank.withdrawX(ingredient.getId(), ingredient.getQuantityToWithdraw()));
