@@ -99,7 +99,7 @@ public class AttackNpcScript extends Script {
             Rs2Npc.interact(currentNPC, "attack");
             PvmFighterPlugin.setCooldown(config.playStyle().getRandomTickInterval());
             Microbot.status = "Attacking " + currentNPC.getName();
-
+            Rs2Random.wait(1500, 2000);
             sleepUntilFulfillCondition(() -> {
                 log.info("Player is attacking");
                 boolean isIdle = !Rs2Antiban.isIdle();
