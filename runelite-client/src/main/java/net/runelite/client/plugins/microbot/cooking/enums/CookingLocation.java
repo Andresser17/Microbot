@@ -34,7 +34,7 @@ public enum CookingLocation {
     BARBARBIAN_VILLAGE(new WorldPoint(3106, 3433, 0), CookingAreaType.FIRE, ObjectID.FIRE_43475),
     EDGEVILLE(new WorldPoint(3078, 3496, 0), CookingAreaType.RANGE, ObjectID.STOVE_12269),
     COOKS_GUILD(new WorldPoint(3146, 3452, 0), CookingAreaType.RANGE, ObjectID.RANGE_7183),
-    VARROCK_WEST(new WorldPoint(3160, 3428, 0), CookingAreaType.RANGE, ObjectID.RANGE_7183),
+    VARROCK_WEST(new WorldPoint(3160, 3429, 0), CookingAreaType.RANGE, ObjectID.RANGE_7183),
     VARROCK_EAST(new WorldPoint(3247, 3397, 0), CookingAreaType.RANGE, ObjectID.RANGE_7183),
     AL_KHARID(new WorldPoint(3272, 3180, 0), CookingAreaType.RANGE, ObjectID.RANGE_26181),
     TAI_BWO_WANNAI(new WorldPoint(2788, 3048, 0), CookingAreaType.FIRE, ObjectID.FIRE_26185),
