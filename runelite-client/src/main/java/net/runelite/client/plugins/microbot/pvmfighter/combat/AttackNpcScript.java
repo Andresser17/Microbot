@@ -42,7 +42,6 @@ public class AttackNpcScript {
                 throw new RuntimeException(e);
             }
             init = false;
-            isRunning = true;
         }
 
         try {
@@ -53,7 +52,7 @@ public class AttackNpcScript {
                 Microbot.showMessage("Please set a center location");
                 PvmFighterPlugin.shutdownFlag = true;
             }
-
+            isRunning = true;
             switch (config.combatStyle()) {
                 case RANGED:
                     if (!Rs2Equipment.hasEquipped(config.ammoToUse().getId())) {
@@ -90,6 +89,7 @@ public class AttackNpcScript {
 
             if (attackableNpcs.isEmpty()) {
                 Microbot.log("Not attackable npc found");
+                isRunning = false;
                 return;
             };
             currentNPC = attackableNpcs.get(0);
@@ -107,7 +107,7 @@ public class AttackNpcScript {
                 log.info("isIdle {}", isIdle);
                 log.info("AttackNPC CurrentNPC: {}", currentNPC);
                 log.info("AttackNPC CurrentNPC is Dead: {}", currentNPC.isDead());
-                return isIdle && currentNPC.isDead();
+                return isIdle && (currentNPC.isDead() || !Rs2Player.isInCombat());
             }, () -> Rs2Random.wait(1500, 1600));
             if (currentNPC.isDead()) currentNPC = null;
             Microbot.log("Combat finished");
