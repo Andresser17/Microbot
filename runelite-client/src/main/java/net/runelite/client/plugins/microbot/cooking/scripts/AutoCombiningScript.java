@@ -41,10 +41,10 @@ public class AutoCombiningScript extends Script {
                 switch (playerState) {
                     case COMBINING:
                         // combine items
-                        Ingredients[][] combiningOrder = combiningItem.getCombiningOrder();
-                        for (Ingredients[] ingredients : combiningOrder) {
-                            Rs2Item ingredient1 = Rs2Inventory.get(ingredients[0].getId());
-                            Rs2Item ingredient2 = Rs2Inventory.get(ingredients[1].getId());
+                        int[][] combiningOrder = combiningItem.getCombiningOrder();
+                        for (int[] ingredients : combiningOrder) {
+                            Rs2Item ingredient1 = Rs2Inventory.get(ingredients[0]);
+                            Rs2Item ingredient2 = Rs2Inventory.get(ingredients[1]);
                             if (ingredient1 != null && ingredient2 != null) {
                                 Rs2Inventory.combine(ingredient1, ingredient2);
                                 Rs2Random.wait(800, 1200);
@@ -70,7 +70,7 @@ public class AutoCombiningScript extends Script {
                         Rs2Random.wait(800, 1600);
 
                         if (hasNecessaryIngredientsInBank(combiningItem)) {
-                            Arrays.stream(combiningItem.getIngredients()).forEach((ingredient) -> Rs2Bank.withdrawX(ingredient.getId(), ingredient.getQuantityToWithdraw()));
+                            Arrays.stream(combiningItem.getIngredients()).forEach((ingredient) -> Rs2Bank.withdrawX(ingredient[0], ingredient[1]));
                             Rs2Random.wait(800, 1600);
                         } else {
                             Microbot.showMessage("No ingredients found in Bank");
@@ -108,15 +108,15 @@ public class AutoCombiningScript extends Script {
     }
 
     private boolean hasNecessaryIngredientsInInventory(CombiningItem combiningItem) {
-        Ingredients[] ingredients = combiningItem.getIngredients();
-        return Arrays.stream(ingredients).allMatch((ingredient) -> Rs2Inventory.hasItem(ingredient.getName(), true));
+        int[][] ingredients = combiningItem.getIngredients();
+        return Arrays.stream(ingredients).allMatch((ingredient) -> Rs2Inventory.hasItem(ingredient[0]));
     }
 
     private boolean hasNecessaryIngredientsInBank(CombiningItem combiningItem) {
         if (!Rs2Bank.isOpen()) return false;
 
-        Ingredients[] ingredients = combiningItem.getIngredients();
-        return Arrays.stream(ingredients).allMatch((ingredient) -> Rs2Bank.hasItem(ingredient.getName(), true));
+        int[][] ingredients = combiningItem.getIngredients();
+        return Arrays.stream(ingredients).allMatch((ingredient) -> Rs2Bank.hasItem(ingredient[0]));
     }
 
     private boolean hasCombinedItem(CombiningItem combiningItem) {
