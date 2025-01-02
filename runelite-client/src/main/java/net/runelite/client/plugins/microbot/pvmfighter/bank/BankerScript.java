@@ -77,9 +77,10 @@ public class BankerScript extends Script {
 
             if (config.withdrawNecessaryFoodToRestoreHealth()) {
                 withdrawNecessaryFoodToRestoreHealth(config);
+            } else {
+                withdrawUpkeepItems(config);
             }
 
-            withdrawUpkeepItems(config);
             Rs2Random.wait(800, 1600);
             Rs2Bank.closeBank();
         } catch (Exception ex) {
@@ -105,19 +106,32 @@ public class BankerScript extends Script {
                     log.info("Withdrawing {} {}(s)", item.getQuantityToWithdraw(config) - count, item.name());
                     if (item.name().equals("FOOD")) {
                         String[] itemsToWithdraw = item.getItemsToWithdraw(config);
-                        for (Rs2Food food : Arrays.stream(Rs2Food.values()).sorted(Comparator.comparingInt(Rs2Food::getHeal).reversed()).collect(Collectors.toList())) {
-                            log.info("Checking bank for food: {}", food.getName());
-                            if (itemsToWithdraw.length > 0) {
-                                Optional<String> match = Arrays.stream(itemsToWithdraw).filter((foodName) -> food.getName().equals(foodName)).findFirst();
-                                match.ifPresent(name -> Rs2Bank.withdrawX(true, name, item.getQuantityToWithdraw(config) - count));
-                                break;
-                            }
-
-                            if (Rs2Bank.hasBankItem(food.getId(), item.getQuantityToWithdraw(config) - count)) {
-                                Rs2Bank.withdrawX(true, food.getId(), item.getQuantityToWithdraw(config) - count);
-                                break;
+                        int quantityToWithdraw = item.getQuantityToWithdraw(config);
+                        for (String foodName : itemsToWithdraw) {
+                            if (Rs2Bank.hasBankItem(foodName)) {
+                                int foodCount = Rs2Bank.count(foodName);
+                                if (foodCount >= quantityToWithdraw) {
+                                    Rs2Bank.withdrawX(foodName, quantityToWithdraw);
+                                    break;
+                                } else {
+                                    Rs2Bank.withdrawAll(foodName);
+                                    quantityToWithdraw = quantityToWithdraw - foodCount;
+                                }
                             }
                         }
+//                        for (Rs2Food food : Arrays.stream(Rs2Food.values()).sorted(Comparator.comparingInt(Rs2Food::getHeal).reversed()).collect(Collectors.toList())) {
+//                            log.info("Checking bank for food: {}", food.getName());
+//                            if (itemsToWithdraw.length > 0) {
+//                                Optional<String> match = Arrays.stream(itemsToWithdraw).filter((foodName) -> food.getName().equals(foodName)).findFirst();
+//                                match.ifPresent(name -> Rs2Bank.withdrawX(true, name, item.getQuantityToWithdraw(config) - count));
+//                                break;
+//                            }
+//
+//                            if (Rs2Bank.hasBankItem(food.getId(), item.getQuantityToWithdraw(config) - count)) {
+//                                Rs2Bank.withdrawX(true, food.getId(), item.getQuantityToWithdraw(config) - count);
+//                                break;
+//                            }
+//                        }
                     } else {
                         ArrayList<Integer> ids = new ArrayList<>(item.getIds());
                         Collections.reverse(ids);
