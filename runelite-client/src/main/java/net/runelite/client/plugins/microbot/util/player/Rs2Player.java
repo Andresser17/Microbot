@@ -541,6 +541,13 @@ public class Rs2Player {
     }
 
     /**
+     * Calculates the player's current health as a percentage of their real (base) health.
+     */
+    public static int getHealthPercentageInt() {
+        return (Microbot.getClient().getBoostedSkillLevel(Skill.HITPOINTS) * 100) / Microbot.getClient().getRealSkillLevel(Skill.HITPOINTS);
+    }
+
+    /**
      * Get a list of players around you
      *
      * @return

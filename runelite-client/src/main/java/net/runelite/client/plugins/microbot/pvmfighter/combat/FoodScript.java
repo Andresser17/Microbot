@@ -6,6 +6,7 @@ import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.pvmfighter.HelperScript;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
+import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
@@ -36,6 +37,7 @@ public class FoodScript extends Script {
         shieldName = "";
         try {
             if (HelperScript.helperState != PlayerState.EATING) return;
+            if (Rs2Bank.isOpen()) return;
 
             double healthPercentage = Rs2Player.getHealthPercentage();
             if (Rs2Inventory.hasItem("empty vial")) Rs2Inventory.drop("empty vial");

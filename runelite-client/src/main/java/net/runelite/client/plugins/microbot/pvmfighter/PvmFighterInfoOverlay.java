@@ -43,7 +43,7 @@ public class PvmFighterInfoOverlay extends OverlayPanel {
                     .left(String.format("Helper state: %s", HelperScript.helperState))
                     .build());
             panelComponent.getChildren().add(LineComponent.builder()
-                    .left(String.format("Health percentage: %s", Rs2Player.getHealthPercentage()))
+                    .left(String.format("Health percentage: %s", Rs2Player.getHealthPercentageInt()))
                     .right("Attack cooldown: " + PvmFighterPlugin.getCooldown())
                     .build());
             panelComponent.getChildren().add(LineComponent.builder()

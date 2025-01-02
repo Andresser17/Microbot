@@ -124,12 +124,18 @@ public class PvmFighterScript extends Script {
     }
 
     private void getPlayerState(PvmFighterConfig config) {
+        if (isReadyToBank(config)) {
+            playerState = PlayerState.BANKING;
+            return;
+        }
+
         if (checkIfPlayerIsBeingAttack()) {
+            Microbot.log("Player is being attacked");
             // if auto attack is true set attacking state, else safekeeping
             if (config.toggleCombat()) {
                 playerState = PlayerState.ATTACKING;
-            } else if (config.safeSpot() != null) playerState = PlayerState.SAFEKEEPING;
-            return;
+                return;
+            }
         }
 
         if (needToSafeKeep(config)) {
@@ -142,11 +148,6 @@ public class PvmFighterScript extends Script {
             return;
         }
 
-        if (isReadyToBank(config)) {
-            playerState = PlayerState.BANKING;
-            return;
-        }
-
         if (config.toggleCombat()) {
             playerState = PlayerState.ATTACKING;
             return;
@@ -156,7 +157,7 @@ public class PvmFighterScript extends Script {
     }
 
     private boolean checkIfPlayerIsBeingAttack() {
-        return Rs2Player.isInCombat() && !Rs2Player.isFullHealth() && AttackNpcScript.currentNPC == null;
+        return Rs2Player.isInCombat() && Rs2Antiban.isIdle() && AttackNpcScript.currentNPC == null;
     }
 
     private boolean needToSafeKeep(PvmFighterConfig config) {
@@ -173,7 +174,7 @@ public class PvmFighterScript extends Script {
         if (!config.toggleLootItems()) return false;
         if (Rs2Inventory.getEmptySlots() <= config.minFreeSlots()) return false;
         if (!Rs2Antiban.isIdle() && AttackNpcScript.currentNPC != null) return false;
-        log.info("are ground items");
+
         boolean result = false;
         if (config.toggleLootItemsByName()) {
             result = LootScript.hasItemsToLootByName(config);
@@ -203,8 +204,18 @@ public class PvmFighterScript extends Script {
 
     private boolean isReadyToBank(PvmFighterConfig config) {
         if (!config.toggleBanking()) return false;
+        // while still have food don't bank
         if (config.useFood() && !Rs2Inventory.getInventoryFood().isEmpty()) return false;
-        return Rs2Inventory.getEmptySlots() <= config.minFreeSlots()
-                || (Rs2Inventory.getInventoryFood().isEmpty() && Rs2Player.getHealthPercentage() <= config.minimumHealthSafeSpot());
+
+        log.info("minimum health: {}", config.minimumHealthSafeSpot());
+        log.info("player needs to retrieve: {}", Rs2Player.getHealthPercentageInt() <= config.minimumHealthSafeSpot());
+        return Rs2Inventory.getEmptySlots() <= config.minFreeSlots() || needsToRetreat(config);
+    }
+
+    public static boolean needsToRetreat(PvmFighterConfig config) {
+        boolean healthIsLessThanMinimum = Rs2Player.getHealthPercentageInt() <= config.minimumHealthSafeSpot();
+        if (config.useFood() && Rs2Inventory.getInventoryFood().isEmpty() && healthIsLessThanMinimum) return true;
+
+        return healthIsLessThanMinimum;
     }
 }

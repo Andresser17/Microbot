@@ -107,6 +107,7 @@ public class AttackNpcScript {
                 log.info("isIdle {}", isIdle);
                 log.info("AttackNPC CurrentNPC: {}", currentNPC);
                 log.info("AttackNPC CurrentNPC is Dead: {}", currentNPC.isDead());
+                if (PvmFighterScript.needsToRetreat(config)) return true;
                 return isIdle && (currentNPC.isDead() || !Rs2Player.isInCombat());
             }, () -> Rs2Random.wait(1500, 1600));
             if (currentNPC.isDead()) currentNPC = null;
