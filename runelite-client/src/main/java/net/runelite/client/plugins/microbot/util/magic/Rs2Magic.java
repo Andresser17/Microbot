@@ -7,6 +7,7 @@ import net.runelite.api.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.globval.enums.InterfaceTab;
+import net.runelite.client.plugins.microbot.magic.aiomagic.enums.EnchantSpell;
 import net.runelite.client.plugins.microbot.util.Global;
 import net.runelite.client.plugins.microbot.util.camera.Rs2Camera;
 import net.runelite.client.plugins.microbot.util.dialogues.Rs2Dialogue;
@@ -202,6 +203,53 @@ public class Rs2Magic {
         } else {
             lowAlch(item, sleepMin, sleepMax);
         }
+    }
+
+    /**
+     * alch item with minsleep of 300 and maxsleep of 600
+     *
+     * @param item
+     */
+    public static void enchant(EnchantSpell enchantSpell, Rs2Item item) {
+        enchant(enchantSpell, item, 300, 600);
+    }
+
+    private static void enchant(EnchantSpell enchantSpell, Rs2Item item, int sleepMin, int sleepMax) {
+        sleepUntil(() -> {
+            Rs2Tab.switchToMagicTab();
+            sleep(50, 150);
+            return Rs2Tab.getCurrentTab() == InterfaceTab.MAGIC;
+        });
+
+        // click view enchantments widget
+        if (Rs2Widget.clickWidget(14286860)) {
+            sleep(50, 150);
+            // check if back button is visible
+            if (Rs2Widget.isWidgetVisible(218, 4)) {
+                Widget enchantment = Rs2Widget.findWidget(enchantSpell.getMagicAction().getName());
+                alch(enchantment, item, sleepMin, sleepMax);
+            }
+        }
+
+//        if (Rs2Widget.isWidgetVisible(218, 4) && Arrays.stream(Rs2Widget.getWidget(218, 4).getActions()).anyMatch(x -> x.equalsIgnoreCase("back"))){
+//            Rs2Widget.clickWidget(218, 4);
+//            sleep(150, 300);
+//        }
+//        Widget highAlch = Rs2Widget.findWidget(MagicAction.HIGH_LEVEL_ALCHEMY.getName());
+//        if (highAlch.getSpriteId() != 41) return;
+//        alch(highAlch, item, sleepMin, sleepMax);
+
+//        if (Rs2Widget.clickWidget("Jewellery Enchantments", Optional.of(218), 3, true)) {
+//            if (Rs2Widget.isWidgetVisible(218, 4) && Arrays.stream(Rs2Widget.getWidget(218, 4).getActions()).anyMatch(x -> x.equalsIgnoreCase("back"))){
+//                Rs2Widget.clickWidget(218, 4);
+//                sleep(150, 300);
+//            }
+//        }
+//         if (!Rs2Widget.isHidden(14286852)) {
+//            // back button inside the enchant jewellery interface has no text, thats why we use hardcoded id
+//            Rs2Widget.clickWidget(14286852);
+//        }
+
     }
 
     public static void superHeat(String itemName) {

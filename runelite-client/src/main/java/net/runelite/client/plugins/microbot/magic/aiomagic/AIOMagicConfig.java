@@ -4,11 +4,8 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
-import net.runelite.client.plugins.microbot.magic.aiomagic.enums.MagicActivity;
-import net.runelite.client.plugins.microbot.magic.aiomagic.enums.SuperHeatItem;
-import net.runelite.client.plugins.microbot.magic.aiomagic.enums.TeleportSpell;
+import net.runelite.client.plugins.microbot.magic.aiomagic.enums.*;
 import net.runelite.client.plugins.microbot.util.magic.Rs2CombatSpells;
-import net.runelite.client.plugins.microbot.util.magic.Rs2Spells;
 import net.runelite.client.plugins.microbot.util.magic.Rs2Staff;
 
 @ConfigGroup(AIOMagicConfig.configGroup)
@@ -22,6 +19,8 @@ public interface AIOMagicConfig extends Config {
 	String staff = "staff";
 	String teleportSpell = "teleportSpell";
 	String castAmount = "castAmount";
+	String enchantSpell = "enchantSpell";
+	String jewelleryToEnchant = "jewelleryToEnchant";
 
 	@ConfigSection(
 			name = "General Settings",
@@ -57,6 +56,13 @@ public interface AIOMagicConfig extends Config {
 			position = 3
 	)
 	String teleportSection = "teleport";
+
+	@ConfigSection(
+			name = "Enchant Settings",
+			description = "Configure enchant settings",
+			position = 4
+	)
+	String enchantSection = "enchant";
 
 	@ConfigItem(
 			keyName = activity,
@@ -144,5 +150,27 @@ public interface AIOMagicConfig extends Config {
 	)
 	default int castAmount() {
 		return 1000;
+	}
+
+	@ConfigItem(
+			keyName = enchantSpell,
+			name = "Enchant Spell",
+			description = "Select enchanting to cast",
+			position = 0,
+			section = enchantSection
+	)
+	default EnchantSpell enchantSpell() {
+		return EnchantSpell.SAPPHIRE_OPAL_JEWELLERY;
+	}
+
+	@ConfigItem(
+			keyName = jewelleryToEnchant,
+			name = "Jewellery to enchant",
+			description = "Select jewellery to enchant",
+			position = 1,
+			section = enchantSection
+	)
+	default Jewellery jewelleryToEnchant() {
+		return Jewellery.SAPPHIRE_RING;
 	}
 }

@@ -12,9 +12,7 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.microbot.Microbot;
-import net.runelite.client.plugins.microbot.magic.aiomagic.enums.MagicActivity;
-import net.runelite.client.plugins.microbot.magic.aiomagic.enums.SuperHeatItem;
-import net.runelite.client.plugins.microbot.magic.aiomagic.enums.TeleportSpell;
+import net.runelite.client.plugins.microbot.magic.aiomagic.enums.*;
 import net.runelite.client.plugins.microbot.magic.aiomagic.scripts.*;
 import net.runelite.client.plugins.microbot.util.magic.Rs2CombatSpells;
 import net.runelite.client.plugins.microbot.util.magic.Rs2Staff;
@@ -57,6 +55,8 @@ public class AIOMagicPlugin extends Plugin {
 	private TeleportScript teleportScript;
 	@Inject
 	private TeleAlchScript teleAlchScript;
+	@Inject
+	private EnchantScript enchantScript;
 
 	public static String version = "1.0.0";
 	
@@ -74,6 +74,10 @@ public class AIOMagicPlugin extends Plugin {
 	private Rs2Staff staff;
 	@Getter
 	private int totalCasts;
+	@Getter
+	private EnchantSpell enchantSpell;
+	@Getter
+	private Jewellery jewelleryToEnchant;
 	
 	@Override
 	protected void startUp() throws AWTException {
@@ -84,6 +88,8 @@ public class AIOMagicPlugin extends Plugin {
 		teleportSpell = config.teleportSpell();
 		staff = config.staff();
 		totalCasts = config.castAmount();
+		enchantSpell = config.enchantSpell();
+		jewelleryToEnchant = config.jewelleryToEnchant();
 
 		if (overlayManager != null) {
 			overlayManager.add(aioMagicOverlay);
@@ -105,6 +111,9 @@ public class AIOMagicPlugin extends Plugin {
 			case TELEALCH:
 				teleAlchScript.run();
 				break;
+			case ENCHANT:
+				enchantScript.run();
+				break;
 		}
 	}
 
@@ -114,6 +123,7 @@ public class AIOMagicPlugin extends Plugin {
 		superHeatScript.shutdown();
 		teleportScript.shutdown();
 		teleAlchScript.shutdown();
+		enchantScript.shutdown();
 		overlayManager.remove(aioMagicOverlay);
 	}
 

@@ -10,6 +10,7 @@ import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.grounditem.LootingParameters;
 import net.runelite.client.plugins.microbot.util.grounditem.Rs2GroundItem;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
+import net.runelite.client.plugins.microbot.util.magic.Rs2Magic;
 
 import java.util.Arrays;
 import java.util.List;
