@@ -1,7 +1,3 @@
-
-
-
-
 package net.runelite.client.plugins.microbot.blastoisefurnace;
 
 import net.runelite.client.config.*;
@@ -10,45 +6,49 @@ import net.runelite.client.plugins.microbot.blastoisefurnace.enums.Bars;
 @ConfigGroup("blastoisefurnace")
 @ConfigInformation("must have Ice Gloves or smiths gloves (i) equiped<br />+<br />coalbag, stamina potions and energy potions in bank<br /><br />| if doing gold bars; must have Goldsmiths Gauntlet and bank your coalbag |<br /><br />(makes 1.5m an hour minimum with steel and should cover expenses)<br /><br />current version does not support foremen or coffer refill<br /><br />im working on that aswell as full native use of antiban<br />Enjoy! :)")
 public interface BlastoiseFurnaceConfig extends Config {
+    // Keys
+    String stamina = "stamina";
+    String bars = "bars";
+    String payFee = "payFee";
+
     @ConfigSection(
-            name = "Blast Furnace Settings",
+            name = "Settings",
             description = "Blast Furnace Settings",
             position = 0,
             closedByDefault = false
     )
-    String bFSettingsSection = "bFSettings";
-
-    default boolean useStamina() {
-        return true;
-    }
-
-
+    String settings = "settings";
 
     @ConfigItem(
-            keyName = "Bars",
+            keyName = bars,
             name = "Bars",
-            description = "Bars",
-            position = 1,
-            section = "bFSettings"
+            description = "Select Bars to smith",
+            position = 0,
+            section = settings
     )
     default Bars getBars() {
         return Bars.STEEL_BAR;
     }
-    @ConfigSection(
-            name = "Credits",
-            description = "Credits",
-            position = 2,
-            closedByDefault = false
-    )
-    String Credits = "Credits";
+
     @ConfigItem(
-            keyName = "Credits",
-            name = "Credits",
-            description = "Credits",
-            position = 3,
-            section = "Credits"
+            keyName = stamina,
+            name = "Use stamina potions",
+            description = "Use drink and stamina potions",
+            position = 1,
+            section = settings
     )
-    default String Credits() {
-        return "Special thanks to:\n\nExioStorm, MrPecan, george\n\nfor building the backbone of this plugin!\nand teaching me how to java while doing so\ni will forever be gratefull.\nFishy ^_^";
+    default boolean useStamina() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = payFee,
+            name = "Has to pay fee?",
+            description = "Player not have smithing level 60, so has to pay 2500 coins every 10 minutes to used Blast Furnace.",
+            position = 2,
+            section = settings
+    )
+    default boolean hasToPayFee() {
+        return false;
     }
 }

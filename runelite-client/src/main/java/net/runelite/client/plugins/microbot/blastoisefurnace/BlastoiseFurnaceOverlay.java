@@ -22,7 +22,7 @@ public class BlastoiseFurnaceOverlay extends OverlayPanel {
     public Dimension render(Graphics2D graphics) {
         try {
             this.panelComponent.setPreferredSize(new Dimension(200, 300));
-            this.panelComponent.getChildren().add(TitleComponent.builder().text("Blastoise" + BlastoiseFurnaceScript.version).color(Color.GREEN).build());
+            this.panelComponent.getChildren().add(TitleComponent.builder().text(String.format("Blast Furnace V%s", BlastoiseFurnaceScript.version)).color(Color.GREEN).build());
             this.panelComponent.getChildren().add(LineComponent.builder().build());
             this.panelComponent.getChildren().add(LineComponent.builder().left(Microbot.status).build());
         } catch (Exception var3) {
