@@ -1,5 +1,6 @@
 package net.runelite.client.plugins.microbot.magic.aiomagic.scripts;
 
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ItemID;
 import net.runelite.api.Skill;
 import net.runelite.client.plugins.microbot.Microbot;
@@ -25,9 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class AlchScript extends Script {
 
-    private MagicState state;
+    private MagicState playerState;
     private final AIOMagicPlugin plugin;
 
     @Inject
@@ -44,10 +46,10 @@ public class AlchScript extends Script {
         Rs2AntibanSettings.contextualVariability = true;
         Rs2AntibanSettings.usePlayStyle = true;
         Rs2Antiban.setActivity(Activity.ALCHING);
+
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                if (!Microbot.isLoggedIn()) return;
-                if (!super.run()) return;
+                if (!fulfillConditionsToRun()) return;
                 long startTime = System.currentTimeMillis();
 
                 if (plugin.getAlchItemNames().isEmpty()) {
@@ -56,17 +58,9 @@ public class AlchScript extends Script {
                     return;
                 }
 
-                if (hasStateChanged()) {
-                    state = updateState();
-                }
+                getPlayerState();
 
-                if (state == null) {
-                    Microbot.showMessage("Unable to evaluate state");
-                    shutdown();
-                    return;
-                }
-
-                switch (state) {
+                switch (playerState) {
                     case BANKING:
                         boolean isBankOpen = Rs2Bank.isNearBank(15) ? Rs2Bank.useBank() : Rs2Bank.walkToBankAndUseBank();
                         if (!isBankOpen || !Rs2Bank.isOpen()) return;
@@ -109,15 +103,25 @@ public class AlchScript extends Script {
                         }
 
                         Rs2Bank.setWithdrawAsNote();
-                        plugin.getAlchItemNames().forEach((itemName) -> {
+
+                        boolean itemFound = false;
+                        for (String itemName : plugin.getAlchItemNames())  {
                             if (!isRunning()) return;
-                            Rs2Bank.withdrawAll(itemName);
-                            Rs2Inventory.waitForInventoryChanges(1200);
-                        });
-                        Rs2Bank.setWithdrawAsItem();
+                            if (Rs2Bank.hasItem(itemName)) {
+                                Rs2Bank.withdrawAll(itemName);
+                                itemFound = true;
+                                Rs2Inventory.waitForInventoryChanges(1200);
+                            }
+                        }
+
+                        if (!itemFound) {
+                            Microbot.showMessage("No items found in bank, shutting down.");
+                            shutdown();
+                            return;
+                        }
 
                         Rs2Bank.closeBank();
-                        sleepUntil(() -> !Rs2Bank.isOpen());
+                        Rs2Random.wait(800, 1200);
                         break;
                     case CASTING:
                         if (!Rs2Inventory.hasItem(ItemID.NATURE_RUNE)) {
@@ -125,6 +129,7 @@ public class AlchScript extends Script {
                             shutdown();
                             return;
                         }
+
                         if (!Rs2Inventory.hasItem(plugin.getAlchItemNames().get(0))) {
                             plugin.getAlchItemNames().remove(0);
                             return;
@@ -160,31 +165,28 @@ public class AlchScript extends Script {
     }
 
     private boolean hasStateChanged() {
-        if (state == null) return true;
-        if (state == MagicState.BANKING && hasRequiredItems()) return true;
-        return state == MagicState.CASTING && !hasRequiredItems();
+        if (playerState == null) return true;
+        if (playerState == MagicState.BANKING && hasRequiredItems()) return true;
+        return playerState == MagicState.CASTING && !hasRequiredItems();
     }
 
-    private MagicState updateState() {
-        if (state == null) {
-            if (hasRequiredItems()) {
-                return MagicState.CASTING;
-            } else {
-                return MagicState.BANKING;
-            }
+    private void getPlayerState() {
+        if (hasRequiredItems()) {
+            playerState = MagicState.CASTING;
+            return;
         }
-        if (state == MagicState.BANKING && hasRequiredItems()) return MagicState.CASTING;
-        if (state == MagicState.CASTING && !hasRequiredItems()) return MagicState.BANKING;
-        return null;
+
+        playerState = MagicState.BANKING;
     }
 
     private boolean hasRequiredItems() {
-        return Rs2Inventory.hasItem(plugin.getAlchItemNames()) && getRequiredAlchRunes(getAlchCastAmount()).isEmpty();
+        return Rs2Inventory.hasItem(plugin.getAlchItemNames());
+//        return Rs2Inventory.hasItem(plugin.getAlchItemNames()) && getRequiredAlchRunes(getAlchCastAmount()).isEmpty();
     }
 
     private Map<Runes, Integer> getRequiredAlchRunes(int casts) {
         Rs2Spells alchSpell = Rs2Player.getRealSkillLevel(Skill.MAGIC) >= 55 ? Rs2Spells.HIGH_LEVEL_ALCHEMY : Rs2Spells.LOW_LEVEL_ALCHEMY;
-        return Rs2Magic.getRequiredRunes(alchSpell, plugin.getStaff(), casts, false);
+        return Rs2Magic.getRequiredRunes(alchSpell, Rs2Staff.STAFF_OF_FIRE, casts, false);
     }
 
     private int getAlchCastAmount() {

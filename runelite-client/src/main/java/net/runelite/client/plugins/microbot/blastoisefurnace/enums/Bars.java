@@ -23,7 +23,7 @@ public enum Bars {
     ),
     STEEL_BAR(
             ItemID.STEEL_BAR,
-            Set.of(new int[]{ItemID.IRON_ORE, 1}, new int[]{ItemID.COAL, 1}),
+            Set.of(new int[]{ItemID.COAL, 1}, new int[]{ItemID.IRON_ORE, 1}),
             Varbits.BLAST_FURNACE_STEEL_BAR,
             Varbits.BLAST_FURNACE_IRON_ORE,
             true,
@@ -39,7 +39,7 @@ public enum Bars {
     ),
     MITHRIL_BAR(
             ItemID.MITHRIL_BAR,
-            Set.of(new int[]{ItemID.MITHRIL_ORE, 1}, new int[]{ItemID.COAL, 2}),
+            Set.of(new int[]{ItemID.COAL, 2}, new int[]{ItemID.MITHRIL_ORE, 1}),
             Varbits.BLAST_FURNACE_MITHRIL_BAR,
             Varbits.BLAST_FURNACE_MITHRIL_ORE,
             true,
@@ -47,7 +47,7 @@ public enum Bars {
     ),
     ADAMANTITE_BAR(
             ItemID.ADAMANTITE_BAR,
-            Set.of(new int[]{ItemID.ADAMANTITE_ORE, 1}, new int[]{ItemID.COAL, 6}),
+            Set.of(new int[]{ItemID.COAL, 6}, new int[]{ItemID.ADAMANTITE_ORE, 1}),
             Varbits.BLAST_FURNACE_ADAMANTITE_BAR,
             Varbits.BLAST_FURNACE_ADAMANTITE_ORE,
             true,
@@ -55,7 +55,7 @@ public enum Bars {
     ),
     RUNITE_BAR(
             ItemID.RUNITE_BAR,
-            Set.of(new int[]{ItemID.RUNITE_ORE, 1}, new int[]{ItemID.COAL, 8}),
+            Set.of(new int[]{ItemID.COAL, 8}, new int[]{ItemID.RUNITE_ORE, 1}),
             Varbits.BLAST_FURNACE_RUNITE_BAR,
             Varbits.BLAST_FURNACE_RUNITE_ORE,
             true,

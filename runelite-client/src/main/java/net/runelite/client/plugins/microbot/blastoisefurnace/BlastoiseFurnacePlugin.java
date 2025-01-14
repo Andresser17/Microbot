@@ -3,6 +3,7 @@ package net.runelite.client.plugins.microbot.blastoisefurnace;
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
+import net.runelite.api.Skill;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.*;
 import net.runelite.client.config.ConfigManager;
@@ -47,6 +48,19 @@ public class BlastoiseFurnacePlugin extends Plugin {
         }
 
         BlastoiseFurnaceScript.run(config);
+    }
+
+    @Subscribe
+    public void onStatChanged(StatChanged event) {
+        log.info("Stat changed: {}", event.getSkill());
+        if (event.getSkill() == Skill.SMITHING) {
+            net.runelite.client.plugins.microbot.blastoisefurnace.BlastoiseFurnaceScript.waitingXpDrop = false;
+        }
+//        if(event.getXp()> BlastoiseFurnaceScript.previousXP){
+//            if(BlastoiseFurnaceScript.waitingXpDrop) {
+//                //BlastoiseFurnaceScript.waitingXpDrop = false;
+//            }
+//        }
     }
 
     @Subscribe

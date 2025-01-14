@@ -87,12 +87,18 @@ public abstract class Script implements IScript {
     }
 
     public boolean sleepUntilFulfillCondition(BooleanSupplier awaitedCondition, Runnable iterationWait) {
+        return sleepUntilFulfillCondition(awaitedCondition, iterationWait, 1000);
+    }
+
+    public boolean sleepUntilFulfillCondition(BooleanSupplier awaitedCondition, Runnable iterationWait, int maxIterations) {
         boolean done;
+        int currentIteration = 0;
         do {
             done = awaitedCondition.getAsBoolean();
+            currentIteration++;
             iterationWait.run();
             if (!isRunning()) break;
-        } while (!done);
+        } while (!done && currentIteration < maxIterations);
         return done;
     }
 
