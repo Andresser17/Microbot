@@ -138,6 +138,9 @@ public class PlankMakerScript extends Script {
                         // withdraw logs
                         if (Rs2Bank.hasItem(plankToMake.getRequiredLogs())) {
                             Rs2Bank.withdrawAll(plankToMake.getRequiredLogs());
+                        } else {
+                            Microbot.showMessage("No more logs left");
+                            shutdown();
                         }
 
                         Rs2Random.wait(800, 1200);
