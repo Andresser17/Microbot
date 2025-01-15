@@ -102,6 +102,13 @@ public class AlchScript extends Script {
                             Rs2Inventory.waitForInventoryChanges(1200);
                         }
 
+                        if (plugin.getAlchItemNames().stream()
+                                .noneMatch(itemName -> Rs2Bank.hasItem(itemName) || Rs2Inventory.hasItem(itemName))) {
+                            Microbot.showMessage("No Alch Items Found");
+                            shutdown();
+                            return;
+                        }
+
                         Rs2Bank.setWithdrawAsNote();
 
                         boolean itemFound = false;
