@@ -39,6 +39,14 @@ public enum CombiningItem {
             new int[]{ItemID.PIE_SHELL, ItemID.SALMON},
             new int[]{ItemID.PART_ADMIRAL_PIE, ItemID.TUNA},
             new int[]{ItemID.PART_ADMIRAL_PIE_7194, ItemID.POTATO},
+    }),
+    GUTHIX_REST("Guthix rest", ItemID.GUTHIX_REST3, 18, new int[][]{
+            new int[]{ItemID.CUP_OF_HOT_WATER, 5},
+            new int[]{ItemID.HARRALANDER, 5},
+                new int[]{ItemID.MARRENTILL, 5},
+                new int[]{ItemID.GUAM_LEAF, 10},
+    }, new int[][] {
+        new int[]{ItemID.CUP_OF_HOT_WATER, ItemID.HARRALANDER},
     });
 
     private final String combinedItemName;

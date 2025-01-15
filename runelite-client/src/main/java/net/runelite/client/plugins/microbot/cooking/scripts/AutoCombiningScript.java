@@ -6,6 +6,7 @@ import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.cooking.AutoCookingConfig;
 import net.runelite.client.plugins.microbot.cooking.enums.*;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
+import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
@@ -28,6 +29,7 @@ public class AutoCombiningScript extends Script {
         Microbot.enableAutoRunOn = false;
         CombiningItem combiningItem = config.itemToCombine();
         Rs2Antiban.resetAntibanSettings();
+        Rs2AntibanSettings.simulateMistakes = true;
         Rs2Antiban.antibanSetupTemplates.applyCookingSetup();
         Rs2Antiban.setActivity(Activity.MAKING_PINEAPPLE_PIZZAS);
 
