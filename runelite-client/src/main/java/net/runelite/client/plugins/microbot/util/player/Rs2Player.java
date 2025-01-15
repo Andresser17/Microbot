@@ -1266,6 +1266,9 @@ public class Rs2Player {
      * @param player the player to follow
      * @return true if the action was invoked successfully, false otherwise
      */
+
+    public static boolean cast(Player player) { return invokeMenu(player, "cast"); }
+
     public static boolean follow(Player player) {
         return invokeMenu(player, "follow");
     }
@@ -1277,6 +1280,7 @@ public class Rs2Player {
      * @param action the action to invoke (e.g., "attack", "walk here", "trade with", "follow")
      * @return true if the action was invoked successfully, false otherwise
      */
+
     private static boolean invokeMenu(Player player, String action) {
         if (player == null) return false;
 
@@ -1294,6 +1298,9 @@ public class Rs2Player {
             menuAction = MenuAction.PLAYER_THIRD_OPTION;
         } else if (action.equalsIgnoreCase("trade with")) {
             menuAction = MenuAction.PLAYER_FOURTH_OPTION;
+        }
+        else if (action.equalsIgnoreCase("cast")) {
+            menuAction = MenuAction.WIDGET_TARGET_ON_PLAYER;
         }
 
         // Invoke the menu entry using the selected action
