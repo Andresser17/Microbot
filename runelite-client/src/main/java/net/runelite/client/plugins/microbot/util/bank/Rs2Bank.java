@@ -1306,30 +1306,16 @@ public class Rs2Bank {
         Microbot.log("Calculating nearest bank path...");
         BankLocation nearest = null;
         double dist = Double.MAX_VALUE;
-        int y = worldPoint.getY();
-        boolean worldpointIsInCave = y > 6400;
         WorldPoint location;
         double currDist;
-        final int penalty = 10; // penalty if the bank is outside the cave and player is inside cave. This is to avoid being closer than banks in a cave
         for (BankLocation bankLocation : BankLocation.values()) {
             if (!bankLocation.hasRequirements()) continue;
 
-            boolean bankisInCave = bankLocation.getWorldPoint().getY() > 6400;
-
-            if (!bankisInCave && worldpointIsInCave) {
-                location = new WorldPoint(worldPoint.getX(),  worldPoint.getY() - 6400, Microbot.getClient().getPlane());
-                currDist = location.distanceTo2D(bankLocation.getWorldPoint()) + penalty;
-            } else {
-                location = worldPoint;
-                currDist = location.distanceTo2D(bankLocation.getWorldPoint());
-            }
-
+            currDist = Rs2Walker.getTotalTiles(bankLocation.getWorldPoint());
 
             if (nearest == null || currDist < dist) {
-                if (Rs2Walker.canReach(bankLocation.getWorldPoint())) {
-                    dist = currDist;
-                    nearest = bankLocation;
-                }
+                dist = currDist;
+                nearest = bankLocation;
             }
         }
         if (nearest != null) {
@@ -1707,6 +1693,45 @@ public class Rs2Bank {
         Widget bank = getBankSizeWidget();
         if (bank == null) return 0;
         return Integer.parseInt(bank.getText());
+    }
+
+    /**
+     * Retrieves an Rs2Item from the bank based on the specified item ID.
+     *
+     * @param itemId the ID of the item to search for.
+     * @return the Rs2Item matching the item ID, or null if not found.
+     */
+    public static Rs2Item getBankItem(int itemId) {
+        return bankItems().stream()
+                .filter(item -> item.getId() == itemId)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Retrieves an Rs2Item from the bank based on the specified item name.
+     *
+     * @param itemName the name of the item to search for.
+     * @param exact whether to search for an exact match (true) or a partial match (false).
+     * @return the Rs2Item matching the item name, or null if not found.
+     */
+    public static Rs2Item getBankItem(String itemName, boolean exact) {
+        return bankItems.stream()
+                .filter(item -> exact
+                        ? item.getName().equalsIgnoreCase(itemName)
+                        : item.getName().toLowerCase().contains(itemName.toLowerCase()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Retrieves an Rs2Item from the bank based on a partial match of the specified item name.
+     *
+     * @param itemName the name of the item to search for.
+     * @return the Rs2Item matching the item name (partial match), or null if not found.
+     */
+    public static Rs2Item getBankItem(String itemName) {
+        return getBankItem(itemName, false);
     }
 
     /**

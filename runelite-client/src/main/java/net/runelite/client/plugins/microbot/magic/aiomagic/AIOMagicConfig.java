@@ -4,6 +4,10 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
+import net.runelite.client.plugins.microbot.magic.aiomagic.enums.MagicActivity;
+import net.runelite.client.plugins.microbot.magic.aiomagic.enums.StunSpell;
+import net.runelite.client.plugins.microbot.magic.aiomagic.enums.SuperHeatItem;
+import net.runelite.client.plugins.microbot.magic.aiomagic.enums.TeleportSpell;
 import net.runelite.client.plugins.microbot.magic.aiomagic.enums.*;
 import net.runelite.client.plugins.microbot.util.magic.Rs2CombatSpells;
 import net.runelite.client.plugins.microbot.util.magic.Rs2Staff;
@@ -21,6 +25,8 @@ public interface AIOMagicConfig extends Config {
 	String castAmount = "castAmount";
 	String enchantSpell = "enchantSpell";
 	String jewelleryToEnchant = "jewelleryToEnchant";
+	String stunSpell = "stunSpell";
+	String stunNpcName = "stunNpcName";
 
 	@ConfigSection(
 			name = "General Settings",
@@ -35,6 +41,13 @@ public interface AIOMagicConfig extends Config {
 			position = 1
 	)
 	String splashSection = "splash";
+
+	@ConfigSection(
+			name = "Stun Settings",
+			description = "Configure splashing settings",
+			position = 1
+	)
+	String stunSection = "stun";
 
 	@ConfigSection(
 			name = "Alch Settings",
@@ -73,6 +86,27 @@ public interface AIOMagicConfig extends Config {
 	)
 	default MagicActivity magicActivity() {
 		return MagicActivity.SPLASHING;
+	}
+
+	@ConfigItem(
+			keyName = stunNpcName,
+			name = "Stun npc name",
+			description = "Name of the npc to stun",
+			position = 0,
+			section = stunSection
+	)
+	default String stunNpcName() {
+		return "";
+	}
+	@ConfigItem(
+			keyName = stunSpell,
+			name = "Stun spell",
+			description = "Name of the stun spell",
+			position = 1,
+			section = stunSection
+	)
+	default StunSpell stunSpell() {
+		return StunSpell.STUN;
 	}
 
 	@ConfigItem(

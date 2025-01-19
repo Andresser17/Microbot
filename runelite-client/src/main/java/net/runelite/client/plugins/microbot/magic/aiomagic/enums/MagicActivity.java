@@ -7,4 +7,6 @@ public enum MagicActivity {
     TELEPORT,
     TELEALCH,
     ENCHANT,
+    STUNALCH,
+
 }

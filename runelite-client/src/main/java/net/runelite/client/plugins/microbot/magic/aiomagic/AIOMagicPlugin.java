@@ -13,17 +13,19 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.magic.aiomagic.enums.*;
+import net.runelite.client.plugins.microbot.magic.aiomagic.enums.StunSpell;
+import net.runelite.client.plugins.microbot.magic.aiomagic.enums.SuperHeatItem;
+import net.runelite.client.plugins.microbot.magic.aiomagic.enums.TeleportSpell;
 import net.runelite.client.plugins.microbot.magic.aiomagic.scripts.*;
 import net.runelite.client.plugins.microbot.util.magic.Rs2CombatSpells;
-import net.runelite.client.plugins.microbot.util.magic.Rs2Staff;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 import javax.inject.Inject;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.stream.Collectors;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @PluginDescriptor(
 		name = PluginDescriptor.GMason + "AIO Magic",
@@ -56,9 +58,11 @@ public class AIOMagicPlugin extends Plugin {
 	@Inject
 	private TeleAlchScript teleAlchScript;
 	@Inject
+	private StunAlchScript stunAlchScript;
+	@Inject
 	private EnchantScript enchantScript;
 
-	public static String version = "1.0.0";
+	public static String version = "1.1.0";
 	
 	@Getter
 	private Rs2CombatSpells combatSpell;
@@ -71,14 +75,16 @@ public class AIOMagicPlugin extends Plugin {
 	@Getter
 	private TeleportSpell teleportSpell;
 	@Getter
-	private Rs2Staff staff;
+	private StunSpell stunSpell;
 	@Getter
 	private int totalCasts;
 	@Getter
 	private EnchantSpell enchantSpell;
 	@Getter
 	private Jewellery jewelleryToEnchant;
-	
+
+	private String stunNpcName;
+
 	@Override
 	protected void startUp() throws AWTException {
 		combatSpell = config.combatSpell();
@@ -90,6 +96,8 @@ public class AIOMagicPlugin extends Plugin {
 		totalCasts = config.castAmount();
 		enchantSpell = config.enchantSpell();
 		jewelleryToEnchant = config.jewelleryToEnchant();
+		stunSpell = config.stunSpell();
+		stunNpcName = config.stunNpcName();
 
 		if (overlayManager != null) {
 			overlayManager.add(aioMagicOverlay);
@@ -114,6 +122,9 @@ public class AIOMagicPlugin extends Plugin {
 			case ENCHANT:
 				enchantScript.run();
 				break;
+			case STUNALCH:
+				stunAlchScript.run();
+				break;
 		}
 	}
 
@@ -124,9 +135,11 @@ public class AIOMagicPlugin extends Plugin {
 		teleportScript.shutdown();
 		teleAlchScript.shutdown();
 		enchantScript.shutdown();
+		stunAlchScript.shutdown();
 		overlayManager.remove(aioMagicOverlay);
 	}
 
+	@Subscribe
 	public void onConfigChanged(ConfigChanged event) {
 		if (!event.getGroup().equals(AIOMagicConfig.configGroup)) return;
 		
@@ -150,12 +163,12 @@ public class AIOMagicPlugin extends Plugin {
 			teleportSpell = config.teleportSpell();
 		}
 
-		if (event.getKey().equals(AIOMagicConfig.staff)) {
-			staff = config.staff();
+		if (event.getKey().equals(AIOMagicConfig.stunSpell)) {
+			stunSpell = config.stunSpell();
 		}
 
-		if (event.getKey().equals(AIOMagicConfig.castAmount)) {
-			totalCasts = config.castAmount();
+		if (event.getKey().equals(AIOMagicConfig.stunNpcName)) {
+			stunNpcName = config.stunNpcName();
 		}
 	}
 	
