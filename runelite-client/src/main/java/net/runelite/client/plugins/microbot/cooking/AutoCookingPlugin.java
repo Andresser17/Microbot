@@ -75,7 +75,7 @@ public class AutoCookingPlugin extends Plugin {
             PlayerLocation.BANK_LOCATION.setWorldPoint(location.getWorldPoint(), 10);
         } else {
             BankLocation location = config.bankLocation();
-            PlayerLocation.COOKING_AREA.setWorldPoint(location.getWorldPoint(), 10);
+            PlayerLocation.BANK_LOCATION.setWorldPoint(location.getWorldPoint(), 10);
         }
 
         switch (config.cookingActivity()) {

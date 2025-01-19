@@ -58,7 +58,6 @@ public class AutoCookingScript extends Script {
                 currentLocation = PlayerLocation.checkCurrentPlayerLocation();
                 if (!checkIfInDesiredLocation()) walkToDesiredLocation();
 
-//                Microbot.log(String.format("PlayerState: %s - %s", playerState, currentLocation));
                 switch (playerState) {
                     case COOKING:
                         if (currentLocation != PlayerLocation.COOKING_AREA) return;
@@ -67,8 +66,6 @@ public class AutoCookingScript extends Script {
                             shutdown();
                             return;
                         }
-
-
 
                         TileObject cookingTileObject = Rs2GameObject.findObjectById(PlayerLocation.COOKING_AREA.getCookingLocation().getCookingObjectID());
                         if (cookingTileObject != null) {

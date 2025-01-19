@@ -18,6 +18,7 @@ import net.runelite.client.plugins.microbot.magic.aiomagic.enums.SuperHeatItem;
 import net.runelite.client.plugins.microbot.magic.aiomagic.enums.TeleportSpell;
 import net.runelite.client.plugins.microbot.magic.aiomagic.scripts.*;
 import net.runelite.client.plugins.microbot.util.magic.Rs2CombatSpells;
+import net.runelite.client.plugins.microbot.util.magic.Rs2Staff;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 import javax.inject.Inject;
@@ -82,7 +83,9 @@ public class AIOMagicPlugin extends Plugin {
 	private EnchantSpell enchantSpell;
 	@Getter
 	private Jewellery jewelleryToEnchant;
-
+	@Getter
+	private Rs2Staff staff;
+	@Getter
 	private String stunNpcName;
 
 	@Override

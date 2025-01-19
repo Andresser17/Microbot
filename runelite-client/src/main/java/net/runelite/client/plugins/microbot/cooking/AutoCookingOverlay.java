@@ -25,9 +25,7 @@ public class AutoCookingOverlay extends OverlayPanel {
                     .text("Micro Cooking V" + AutoCookingPlugin.version)
                     .color(Color.GREEN)
                     .build());
-
             panelComponent.getChildren().add(LineComponent.builder().build());
-
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(Microbot.status)
                     .build());

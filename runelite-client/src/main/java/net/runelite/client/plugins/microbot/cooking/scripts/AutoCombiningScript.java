@@ -39,7 +39,6 @@ public class AutoCombiningScript extends Script {
 
                 getPlayerState(config);
 
-                Microbot.log(String.format("PlayerState: %s", playerState));
                 switch (playerState) {
                     case COMBINING:
                         // combine items
@@ -65,15 +64,14 @@ public class AutoCombiningScript extends Script {
                         }
                         break;
                     case BANKING:
-                        boolean isBankOpen = Rs2Bank.walkToBankAndUseBank();
-                        if (!isBankOpen || !Rs2Bank.isOpen()) return;
+                        if (!Rs2Bank.isOpen()) Rs2Bank.openBank();
 
                         Rs2Bank.depositAll();
-                        Rs2Random.wait(800, 1600);
+                        Rs2Random.wait(800, 1200);
 
                         if (hasNecessaryIngredientsInBank(combiningItem)) {
                             Arrays.stream(combiningItem.getIngredients()).forEach((ingredient) -> Rs2Bank.withdrawX(ingredient[0], ingredient[1]));
-                            Rs2Random.wait(800, 1600);
+                            Rs2Random.wait(800, 1200);
                         } else {
                             Microbot.showMessage("No ingredients found in Bank");
                             shutdown();
@@ -93,11 +91,6 @@ public class AutoCombiningScript extends Script {
     public void shutdown() {
         super.shutdown();
         Rs2Antiban.resetAntibanSettings();
-    }
-
-    private void validateInventory() {
-        List<Rs2Item> items = Rs2Inventory.all();
-
     }
 
     private void getPlayerState(AutoCookingConfig config) {
