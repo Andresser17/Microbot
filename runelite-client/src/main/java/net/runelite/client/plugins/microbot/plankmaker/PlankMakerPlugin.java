@@ -54,8 +54,8 @@ public class PlankMakerPlugin extends Plugin {
         }
 
         // set sawmill and bank locations to use
-        Location sawmillLocation = config.sawmillLocation().getLocation();
-        Location bankLocation = config.sawmillLocation().getBankLocation();
+        Location sawmillLocation = config.sawmillLocation().getTeleport().getLocation();
+        Location bankLocation = config.sawmillLocation().getBankTeleport().getLocation();
 
         PlayerState.PROCESSING.setLocation(sawmillLocation);
         PlayerState.BANKING.setLocation(bankLocation);

@@ -6,9 +6,7 @@ import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
-import net.runelite.client.plugins.microbot.plankmaker.enums.Location;
-import net.runelite.client.plugins.microbot.plankmaker.enums.Plank;
-import net.runelite.client.plugins.microbot.plankmaker.enums.PlayerState;
+import net.runelite.client.plugins.microbot.plankmaker.enums.*;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
@@ -25,6 +23,7 @@ import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -79,42 +78,6 @@ public class PlankMakerScript extends Script {
                             break;
                         }
 
-                        String bankTeleportItemName = config.sawmillLocation().getBankTeleport()[0];
-                        // check if bank teleport is exhausted
-                        Rs2Item bankTeleportItem = Rs2Equipment.get(bankTeleportItemName);
-                        if (bankTeleportItem != null) {
-                            // check if item has available the necessary teleport
-                            if (!bankTeleportItem.getEquipmentActions().contains(config.sawmillLocation().getBankTeleport()[1])) {
-                                Rs2Equipment.unEquip(bankTeleportItemName);
-
-                                if (!Rs2Bank.isOpen()) Rs2Bank.openBank();
-                                Rs2Bank.depositOne(bankTeleportItemName);
-                                Rs2Random.wait(1200, 1600);
-                                // check if is left another charged teleport item in bank
-                                if (Rs2Bank.hasItem(String.format("%s(", bankTeleportItemName))) {
-                                    Rs2Bank.withdrawOne(bankTeleportItemName);
-                                    Rs2Bank.closeBank();
-                                    Rs2Inventory.interact(bankTeleportItemName, "Wear");
-                                } else {
-                                    // No more necessary teleport amulets found, shutdown.
-                                    Microbot.showMessage("No more bank teleport left");
-                                    shutdown();
-                                }
-                            }
-                        } else {
-                            if (!Rs2Bank.isOpen()) Rs2Bank.openBank();
-                            // check if is left another charged teleport item in bank
-                            if (Rs2Bank.hasItem(String.format("%s(", bankTeleportItemName))) {
-                                Rs2Bank.withdrawOne(bankTeleportItemName);
-                                Rs2Bank.closeBank();
-                                Rs2Inventory.interact(bankTeleportItemName, "Wear");
-                            } else {
-                                // No more necessary teleport amulets found, shutdown.
-                                Microbot.showMessage("No more bank teleport left");
-                                shutdown();
-                            }
-                        }
-
                         // deposit all planks and withdraw more logs
                         if (!Rs2Bank.isOpen()) Rs2Bank.openBank();
 
@@ -134,6 +97,59 @@ public class PlankMakerScript extends Script {
                                 shutdown();
                             }
                         }
+
+                        JewelleryTeleport jewelleryTeleport = config.sawmillLocation().getBankTeleport().getJewelleryTeleport();
+                        // check if equipped jewellery is uncharged
+                        boolean isUncharged = Rs2Equipment.hasEquipped(jewelleryTeleport.getUnchargedId());
+                        if (isUncharged) {
+                            if (!Rs2Bank.isOpen()) Rs2Bank.openBank();
+                            Rs2Random.wait(1000, 1200);
+                            // check if is left another charged teleport item in bank
+                            boolean found = false;
+                            for (int id : jewelleryTeleport.getChargedIds()) {
+                                if (Rs2Bank.hasItem(id)) {
+                                    found = true;
+                                    Rs2Bank.withdrawOne(id);
+                                    Rs2Bank.closeBank();
+                                    Rs2Random.wait(1200, 1500);
+                                    Rs2Inventory.wear(id);
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                // No more necessary teleport amulets found, shutdown.
+                                Microbot.showMessage("No more bank teleport left");
+                                shutdown();
+                            }
+                        }
+
+//                        else {
+//                            // check if player has no jewellery equipped
+//                            boolean hasNotEquipped = Arrays.stream(jewelleryTeleport.getChargedIds()).noneMatch(Rs2Equipment::hasEquipped);
+//                            if (hasNotEquipped) {
+//                                if (!Rs2Bank.isOpen()) Rs2Bank.openBank();
+//                                // check if is left another charged teleport item in bank
+//                                boolean found = false;
+//                                for (int id : jewelleryTeleport.getChargedIds()) {
+//                                    if (Rs2Bank.hasItem(id)) {
+//                                        found = true;
+//                                        Rs2Bank.withdrawOne(id);
+//                                        Rs2Bank.closeBank();
+//                                        Rs2Inventory.wear(id);
+//                                        break;
+//                                    }
+//                                }
+//                                if (!found) {
+//                                    // No more necessary teleport amulets found, shutdown.
+//                                    Microbot.showMessage("No more bank teleport left");
+//                                    shutdown();
+//                                }
+//                            }
+//                        }
+
+                        if (!Rs2Bank.isOpen()) Rs2Bank.openBank();
+                        Rs2Random.wait(800, 1200);
+                        Rs2Bank.depositAllExcept(ItemID.COINS_995);
 
                         // withdraw logs
                         if (Rs2Bank.hasItem(plankToMake.getRequiredLogs())) {
@@ -176,13 +192,13 @@ public class PlankMakerScript extends Script {
         switch (playerState) {
             case PROCESSING:
                 // Go to sawmill
-                WorldPoint sawmillPoint = config.sawmillLocation().getLocation().getPoint();
+                WorldPoint sawmillPoint = config.sawmillLocation().getTeleport().getLocation().getPoint();
                 Rs2Walker.walkTo(sawmillPoint, 8);
                 sleepUntilFulfillCondition(() -> playerState.getLocation().getArea().contains(Rs2Player.getWorldLocation()), () -> Rs2Random.wait(800, 1200));
                 break;
             case BANKING:
                 // Go to nearest bank
-                WorldPoint nearestBank = config.sawmillLocation().getBankLocation().getPoint();
+                WorldPoint nearestBank = config.sawmillLocation().getBankTeleport().getLocation().getPoint();
                 Rs2Walker.walkTo(nearestBank, 8);
                 sleepUntilFulfillCondition(() -> playerState.getLocation().getArea().contains(Rs2Player.getWorldLocation()), () -> Rs2Random.wait(800, 1200));
                 break;
