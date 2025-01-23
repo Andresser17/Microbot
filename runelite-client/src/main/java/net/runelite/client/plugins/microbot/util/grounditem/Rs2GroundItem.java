@@ -270,9 +270,10 @@ public class Rs2GroundItem {
     }
 
     private static boolean coreLoot(GroundItem groundItem) {
-        final int quantity = !groundItem.isStackable() ? 1 : groundItem.getQuantity();
-
-        log.info("quantity: {}", quantity);
+        int quantity = groundItem.isStackable() ? 1 : groundItem.getQuantity();
+        if (Rs2Inventory.getEmptySlots() < quantity) {
+            quantity = Rs2Inventory.getEmptySlots();
+        }
         for (int i = 0; i < quantity; i++) {
             /**
              *  if the number of empty slots is less than the item quantity,
