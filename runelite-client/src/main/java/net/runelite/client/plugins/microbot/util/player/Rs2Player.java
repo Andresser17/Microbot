@@ -54,7 +54,6 @@ public class Rs2Player {
     public static Instant lastAnimationTime = null;
     private static final long COMBAT_TIMEOUT_MS = 10000;
     private static long lastCombatTime = 0;
-    public static boolean lastInteractWasPlayer = false;
     @Getter
     public static int lastAnimationID = AnimationID.IDLE;
 
@@ -719,14 +718,19 @@ public class Rs2Player {
     }
 
     /**
+     * Get the local player
+     * @return player
+     */
+    public static Player getLocalPlayer() {
+        return Microbot.getClient().getLocalPlayer();
+    }
+
+    /**
      * Checks if the player is in combat based on recent activity.
      *
      * @return True if the player is in combat, false otherwise.
      */
     public static boolean isInCombat() {
-        if (lastInteractWasPlayer) {
-            return (System.currentTimeMillis() - lastCombatTime < COMBAT_TIMEOUT_MS) && Microbot.getVarbitPlayerValue(1075) != -1;
-        }
         return System.currentTimeMillis() - lastCombatTime < COMBAT_TIMEOUT_MS;
     }
 
@@ -955,7 +959,7 @@ public class Rs2Player {
      */
 
     public static boolean drinkAntiPoisonPotion() {
-        if(hasAntiPoisonActive() || hasAntiVenomActive()) {
+        if(!hasAntiPoisonActive() || hasAntiVenomActive()) {
             return true;
         }
         return usePotion(Rs2Potion.getAntiPoisonVariants().toArray(new String[0]));
@@ -1006,7 +1010,7 @@ public class Rs2Player {
      * @return true if an item was found and interacted with; false otherwise.
      */
     private static boolean usePotion(String... itemNames) {
-        if (Rs2Inventory.contains(x -> Arrays.stream(itemNames).anyMatch(name -> x.name.contains(name)))) {
+        if (Rs2Inventory.contains(x -> Arrays.stream(itemNames).anyMatch(name -> x.name.contains(name) && !x.isNoted()))) {
             Rs2Item potion = Rs2Inventory.get(Arrays.stream(itemNames).collect(Collectors.toList()),false);
             if (potion != null) {
                 return Rs2Inventory.interact(potion, "drink");
