@@ -47,6 +47,18 @@ public enum CombiningItem {
                 new int[]{ItemID.GUAM_LEAF, 10},
     }, new int[][] {
         new int[]{ItemID.CUP_OF_HOT_WATER, ItemID.HARRALANDER},
+    }),
+    HARRALANDER_POTION_UNF("Harralander potion (unf)", ItemID.HARRALANDER_POTION_UNF, 22, new int[][]{
+            new int[]{ItemID.HARRALANDER, 14},
+            new int[]{ItemID.VIAL_OF_WATER, 14}
+    }, new int[][]{
+            new int[]{ItemID.HARRALANDER, ItemID.VIAL_OF_WATER}
+    }),
+    COMBAT_POTION("Combat potion", ItemID.COMBAT_POTION3, 36, new int[][]{
+            new int[]{ItemID.HARRALANDER_POTION_UNF, 14},
+            new int[]{ItemID.GOAT_HORN_DUST, 14}
+    }, new int[][]{
+            new int[]{ItemID.HARRALANDER_POTION_UNF, ItemID.GOAT_HORN_DUST}
     });
 
     private final String combinedItemName;

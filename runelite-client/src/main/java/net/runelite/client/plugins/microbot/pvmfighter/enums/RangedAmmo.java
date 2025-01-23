@@ -7,6 +7,7 @@ import net.runelite.api.ItemID;
 public enum RangedAmmo {
     // Bolts
     BRONZE_BOLTS("Bronze Bolts", ItemID.BRONZE_BOLTS, "Crossbow"),
+    BONE_BOLTS("Bone Bolts", ItemID.BONE_BOLTS, "Crossbow"),
     BLURITE_BOLTS("Blurite Bolts", ItemID.BLURITE_BOLTS, "Crossbow"),
     IRON_BOLTS("Iron Bolts", ItemID.IRON_BOLTS, "Crossbow"),
     STEEL_BOLTS("Steel Bolts", ItemID.STEEL_BOLTS, "Crossbow"),
