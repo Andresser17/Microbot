@@ -13,10 +13,10 @@ public class BuryScatterScript extends Script {
 public boolean run(PvmFighterConfig config) {
     mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
         try {
-            if (!Microbot.isLoggedIn() || !super.run() || (!config.toggleLootBones() && !config.toggleScatter())) return;
+            if (!Microbot.isLoggedIn() || !super.run() || (!config.lootBones() && !config.lootAshes())) return;
 
-            processItems(config.toggleLootBones(), Rs2Inventory.getBones(), "bury");
-            processItems(config.toggleScatter(), Rs2Inventory.getAshes(), "scatter");
+            processItems(config.lootBones(), Rs2Inventory.getBones(), "bury");
+            processItems(config.lootAshes(), Rs2Inventory.getAshes(), "scatter");
 
         } catch(Exception ex) {
             System.out.println(ex.getMessage());

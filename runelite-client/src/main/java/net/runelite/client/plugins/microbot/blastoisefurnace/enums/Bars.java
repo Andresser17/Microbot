@@ -15,7 +15,9 @@ import java.util.stream.Stream;
 public enum Bars {
     IRON_BAR(
             ItemID.IRON_BAR,
-            Set.of(new int[]{ItemID.IRON_ORE, 1}),
+            ItemID.IRON_ORE,
+            1,
+            0,
             Varbits.BLAST_FURNACE_IRON_BAR,
             Varbits.BLAST_FURNACE_IRON_ORE,
             false,
@@ -23,7 +25,9 @@ public enum Bars {
     ),
     STEEL_BAR(
             ItemID.STEEL_BAR,
-            Set.of(new int[]{ItemID.COAL, 1}, new int[]{ItemID.IRON_ORE, 1}),
+            ItemID.IRON_ORE,
+            1,
+            1,
             Varbits.BLAST_FURNACE_STEEL_BAR,
             Varbits.BLAST_FURNACE_IRON_ORE,
             true,
@@ -31,7 +35,9 @@ public enum Bars {
     ),
     GOLD_BAR(
             ItemID.GOLD_BAR,
-            Set.of(new int[]{ItemID.GOLD_ORE, 1}),
+            ItemID.GOLD_ORE,
+            1,
+            0,
             Varbits.BLAST_FURNACE_GOLD_BAR,
             Varbits.BLAST_FURNACE_GOLD_ORE,
             false,
@@ -39,7 +45,9 @@ public enum Bars {
     ),
     MITHRIL_BAR(
             ItemID.MITHRIL_BAR,
-            Set.of(new int[]{ItemID.COAL, 2}, new int[]{ItemID.MITHRIL_ORE, 1}),
+            ItemID.MITHRIL_ORE,
+            1,
+            2,
             Varbits.BLAST_FURNACE_MITHRIL_BAR,
             Varbits.BLAST_FURNACE_MITHRIL_ORE,
             true,
@@ -47,7 +55,9 @@ public enum Bars {
     ),
     ADAMANTITE_BAR(
             ItemID.ADAMANTITE_BAR,
-            Set.of(new int[]{ItemID.COAL, 6}, new int[]{ItemID.ADAMANTITE_ORE, 1}),
+            ItemID.ADAMANTITE_ORE,
+            1,
+            6,
             Varbits.BLAST_FURNACE_ADAMANTITE_BAR,
             Varbits.BLAST_FURNACE_ADAMANTITE_ORE,
             true,
@@ -55,7 +65,9 @@ public enum Bars {
     ),
     RUNITE_BAR(
             ItemID.RUNITE_BAR,
-            Set.of(new int[]{ItemID.COAL, 8}, new int[]{ItemID.RUNITE_ORE, 1}),
+            ItemID.RUNITE_ORE,
+            1,
+            8,
             Varbits.BLAST_FURNACE_RUNITE_BAR,
             Varbits.BLAST_FURNACE_RUNITE_ORE,
             true,
@@ -63,7 +75,9 @@ public enum Bars {
     );
 
     private final int id;
-    private final Set<int[]> necessaryOres;
+    private final int oreId;
+    private final int oreQuantity;
+    private final int coalQuantity;
     private final int barVarbit;
     private final int oreVarbit;
     private final boolean requiresCoalBag;

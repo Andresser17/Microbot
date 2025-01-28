@@ -17,7 +17,7 @@ public class CombatPotionScript extends Script {
             try {
                 if (!Microbot.isLoggedIn()) return;
                 if (!super.run()) return;
-                if (!config.toggleCombatPotion() && !config.toggleRangingPotion()) return;
+                if (!config.useCombatPotion() && !config.useRangingPotion()) return;
                 if (Microbot.getClient().getBoostedSkillLevel(Skill.ATTACK) - Microbot.getClient().getRealSkillLevel(Skill.ATTACK) > 5) return;
                 if (Microbot.getClient().getBoostedSkillLevel(Skill.RANGED) - Microbot.getClient().getRealSkillLevel(Skill.RANGED) > 5) return;
                 List<Rs2Item> rs2Items = Rs2Inventory.getPotions();

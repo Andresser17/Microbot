@@ -23,7 +23,9 @@ public class BlastoiseFurnaceOverlay extends OverlayPanel {
         try {
             this.panelComponent.setPreferredSize(new Dimension(200, 300));
             this.panelComponent.getChildren().add(TitleComponent.builder().text(String.format("Blast Furnace V%s", BlastoiseFurnaceScript.version)).color(Color.GREEN).build());
-            this.panelComponent.getChildren().add(LineComponent.builder().build());
+            panelComponent.getChildren().add(LineComponent.builder()
+                    .right(String.format("Player state: %s", BlastoiseFurnaceScript.playerState))
+                    .build());
             this.panelComponent.getChildren().add(LineComponent.builder().left(Microbot.status).build());
         } catch (Exception var3) {
             Exception ex = var3;

@@ -18,7 +18,7 @@ public class PrayerPotionScript extends Script {
             try {
                 if (!Microbot.isLoggedIn()) return;
                 if (!super.run()) return;
-                if (!config.togglePrayerPotions()) return;
+                if (!config.usePrayerPotions()) return;
                 if ((Microbot.getClient().getBoostedSkillLevel(Skill.PRAYER) * 100) /  Microbot.getClient().getRealSkillLevel(Skill.PRAYER) > Random.random(25, 30)) return;
                 List<Rs2Item> potions = Microbot.getClientThread().runOnClientThread(Rs2Inventory::getPotions);
                 if (potions == null || potions.isEmpty()) {

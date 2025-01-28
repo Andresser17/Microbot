@@ -12,14 +12,9 @@ import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterPlugin;
-import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterState;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class SafeSpot extends Script {
@@ -31,7 +26,7 @@ public class SafeSpot extends Script {
         try {
             if (!super.fulfillConditionsToRun() || PvmFighterScript.playerState != PlayerState.SAFEKEEPING) return;
 
-            minimumHealth = config.minimumHealthSafeSpot();
+            minimumHealth = config.minimumHealthToRetrieve();
             currentSafeSpot = config.safeSpot();
             if (isDefaultSafeSpot(currentSafeSpot)) {
                 Microbot.showMessage("Please set a safe spot location");
@@ -66,7 +61,7 @@ public class SafeSpot extends Script {
                 if (Microbot.getClient().getLocalPlayer().getInteracting() == null) {
                     if (npcsToAttack.get(0).contains(Objects.requireNonNull(npc.getName()))) {
                         Rs2Npc.attack(npc);
-                        PvmFighterPlugin.setCooldown(config.playStyle().getRandomTickInterval());
+                        PvmFighterPlugin.setCooldown(config.selectPlayStyle().getRandomTickInterval());
                     }
                 }
             });

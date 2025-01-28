@@ -9,6 +9,8 @@ public enum PlayerState {
     LOOTING(PlayerLocation.COMBAT_FIELD),
     SAFEKEEPING(PlayerLocation.SAFE_SPOT),
     BANKING(PlayerLocation.BANK_LOCATION),
+    CANNON(PlayerLocation.COMBAT_FIELD),
+    SLAYER_MASTER(PlayerLocation.SLAYER_MASTER),
     IDLE(PlayerLocation.OUTSIDE_POINT);
 
     private final PlayerLocation playerLocation;

@@ -21,15 +21,13 @@ import net.runelite.client.plugins.microbot.inventorysetups.MInventorySetupsPlug
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.pvmfighter.combat.*;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.Setup;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
-import net.runelite.client.plugins.microbot.util.bank.enums.BankLocation;
 import net.runelite.client.plugins.microbot.util.combat.Rs2Combat;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.prayer.Rs2Prayer;
-import net.runelite.client.plugins.microbot.pvmfighter.bank.BankerScript;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PrayerStyle;
-import net.runelite.client.plugins.microbot.pvmfighter.skill.AttackStyleScript;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ColorUtil;
@@ -44,7 +42,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @PluginDescriptor(
-        name = PluginDescriptor.Mocrosoft + "PVM Fighter",
+        name = "PVM Fighter",
         description = "Microbot Fighter plugin",
         tags = {"fight", "microbot", "misc", "combat", "pvmfighter"},
         enabledByDefault = false
@@ -69,12 +67,6 @@ public class PvmFighterPlugin extends Plugin {
     private final PvmFighterScript pvmFighterScript = new PvmFighterScript();
     private final HelperScript helperScript = new HelperScript();
     private final FlickerScript flickerScript = new FlickerScript();
-    private final UseSpecialAttackScript useSpecialAttackScript = new UseSpecialAttackScript();
-    private final AntiPoisonScript antiPoisonScript = new AntiPoisonScript();
-    private final BuryScatterScript buryScatterScript = new BuryScatterScript();
-    private final AttackStyleScript attackStyleScript = new AttackStyleScript();
-    private final BankerScript bankerScript = new BankerScript();
-    private final PrayerScript prayerScript = new PrayerScript();
     @Inject
     private PvmFighterConfig config;
     @Inject
@@ -113,7 +105,15 @@ public class PvmFighterPlugin extends Plugin {
         if (!config.toggleCenterTile() && Microbot.isLoggedIn())
             setCenter(Rs2Player.getWorldLocation());
 
-        PlayerLocation.COMBAT_FIELD.setWorldPoint(config.centerLocation(), config.attackRadius());
+        if (config.toggleSlayer()) {
+            PlayerLocation.SLAYER_MASTER.setWorldPoint(config.slayerMaster().getWorldPoint());
+            PlayerLocation.SLAYER_MASTER.setWorldArea(config.slayerMaster().getWorldArea());
+        }
+
+        if (!config.toggleSlayer()) {
+            PlayerLocation.COMBAT_FIELD.setWorldPoint(config.centerLocation(), config.attackRadius());
+        }
+
         if (config.useNearestBank()) {
             PlayerLocation.BANK_LOCATION.setWorldPoint(Rs2Bank.getNearestBank().getWorldPoint(), 10);
         } else {
@@ -151,6 +151,7 @@ public class PvmFighterPlugin extends Plugin {
                 "centerLocation",
                 worldPoint
         );
+
     }
     // set safe spot
     private void setSafeSpot(WorldPoint worldPoint)
@@ -172,18 +173,27 @@ public class PvmFighterPlugin extends Plugin {
     private void addNpcToList(String npcName) {
         configManager.setConfiguration(
                 PvmFighterConfig.GROUP,
-                "monster",
-                config.attackableNpcs() + npcName + ","
+                PvmFighterConfig.npcTargets,
+                config.npcTargets() + npcName + ","
         );
     }
     private void removeNpcFromList(String npcName) {
         configManager.setConfiguration(
                 PvmFighterConfig.GROUP,
-                "monster",
-                Arrays.stream(config.attackableNpcs().split(","))
+                PvmFighterConfig.npcTargets,
+                Arrays.stream(config.npcTargets().split(","))
                         .filter(n -> !n.equalsIgnoreCase(npcName))
                         .collect(Collectors.joining(","))
         );
+    }
+
+    @Override
+    public void resetConfiguration() {
+
+//        configManager.setConfiguration(
+//                PvmFighterConfig.GROUP,
+//                PvmFighterConfig.npcTargets,
+//        );
     }
 
     private String getNpcNameFromMenuEntry(String menuTarget) {
@@ -194,7 +204,7 @@ public class PvmFighterPlugin extends Plugin {
     @Subscribe
     public void onConfigChanged(ConfigChanged event) {
         if (event.getKey().equals("SafeSpot")) {
-            if (!config.toggleSafeSpot()) {
+            if (!config.useSafeSpot()) {
                 // reset safe spot to default
                 setSafeSpot(new WorldPoint(0, 0, 0));
             }
@@ -219,16 +229,14 @@ public class PvmFighterPlugin extends Plugin {
             if (config.toggleCombat() && PlayerLocation.COMBAT_FIELD.getArea() == null) {
                 setCenter(Rs2Player.getWorldLocation());
             }
-            if (!Objects.equals(config.playStyle().getName(), Rs2Antiban.getPlayStyle().getName())) {
-                Rs2Antiban.setPlayStyle(config.playStyle());
+            if (!Objects.equals(config.selectPlayStyle().getName(), Rs2Antiban.getPlayStyle().getName())) {
+                Rs2Antiban.setPlayStyle(config.selectPlayStyle());
             }
         }
-        if (event.getKey().equals("InventorySetupName")) {
-            InventorySetup inventorySetup = MInventorySetupsPlugin.getInventorySetups().stream().filter(Objects::nonNull).filter(x -> x.getName().equalsIgnoreCase(config.inventorySetup())).findFirst().orElse(null);
+        if (event.getKey().equals(PvmFighterConfig.inventorySetup)) {
+            MInventorySetupsPlugin.getInventorySetups().stream().filter(Objects::nonNull)
+                    .filter(x -> x.getName().equalsIgnoreCase(config.inventorySetup().getInventorySetupName())).findFirst().ifPresent(this::setInventorySetup);
 
-            if (inventorySetup != null) {
-                setInventorySetup(inventorySetup);
-            }
         }
     }
 
@@ -238,7 +246,7 @@ public class PvmFighterPlugin extends Plugin {
         if (cooldown > 0 && !Rs2Combat.inCombat())
             cooldown--;
         //execute flicker script
-        if(config.togglePrayer())
+        if(config.withdrawPrayerPotions())
             flickerScript.onGameTick();
 
         if (shutdownFlag) {
@@ -249,7 +257,7 @@ public class PvmFighterPlugin extends Plugin {
 
     @Subscribe
     public void onNpcDespawned(NpcDespawned npcDespawned) {
-        if(config.togglePrayer())
+        if(config.withdrawPrayerPotions())
             flickerScript.onNpcDespawned(npcDespawned);
     }
 
@@ -258,11 +266,11 @@ public class PvmFighterPlugin extends Plugin {
         if (event.getActor() != Microbot.getClient().getLocalPlayer()) return;
         final Hitsplat hitsplat = event.getHitsplat();
 
-        if ((hitsplat.isMine()) && event.getActor().getInteracting() instanceof NPC && config.togglePrayer() && (config.prayerStyle() == PrayerStyle.LAZY_FLICK) || (config.prayerStyle() == PrayerStyle.PERFECT_LAZY_FLICK)) {
+        if ((hitsplat.isMine()) && event.getActor().getInteracting() instanceof NPC && config.withdrawPrayerPotions() && (config.usePrayerStyle() == PrayerStyle.LAZY_FLICK) || (config.usePrayerStyle() == PrayerStyle.PERFECT_LAZY_FLICK)) {
 
             flickerScript.resetLastAttack(true);
             Rs2Prayer.disableAllPrayers();
-            if (config.toggleQuickPray())
+            if (config.useQuickPrayer())
                 Rs2Prayer.toggleQuickPrayer(false);
 
 
@@ -281,10 +289,10 @@ public class PvmFighterPlugin extends Plugin {
         if (Microbot.getClient().isKeyPressed(KeyCode.KC_SHIFT) && event.getOption().equals(WALK_HERE) && event.getTarget().isEmpty()) {
             addMenuEntry(event, SET, SAFE_SPOT, 1);
         }
-        if (event.getOption().equals(ATTACK) && config.attackableNpcs().contains(getNpcNameFromMenuEntry(Text.removeTags(event.getTarget())))) {
+        if (event.getOption().equals(ATTACK) && config.npcTargets().contains(getNpcNameFromMenuEntry(Text.removeTags(event.getTarget())))) {
             addMenuEntry(event, REMOVE_FROM, event.getTarget(), 1);
         }
-        if (event.getOption().equals(ATTACK) && !config.attackableNpcs().contains(getNpcNameFromMenuEntry(Text.removeTags(event.getTarget())))) {
+        if (event.getOption().equals(ATTACK) && !config.npcTargets().contains(getNpcNameFromMenuEntry(Text.removeTags(event.getTarget())))) {
             addMenuEntry(event, ADD_TO, event.getTarget(), 1);
         }
 

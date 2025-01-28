@@ -62,7 +62,7 @@ public class AttackStyleScript extends Script {
 
     private void scheduledTask(PvmFighterConfig config) {
         // Early exit conditions
-        if (!Microbot.isLoggedIn() || !super.run() || !config.toggleEnableSkilling() || disableIfMaxed(config.toggleDisableOnMaxCombat()))
+        if (!Microbot.isLoggedIn() || !super.run() || !config.toggleSkilling() || disableIfMaxed(config.disableOnMaxCombat()))
             return;
 
         // Initialize levels if not done yet
@@ -224,7 +224,7 @@ public class AttackStyleScript extends Script {
     }
 
     private void selectSkills(PvmFighterConfig config) {
-        boolean balanceCombatSkills = config.toggleBalanceCombatSkills();
+        boolean balanceCombatSkills = config.balanceCombatSkills();
 
         boolean needAttack = needLevel(config.attackSkillTarget(), Skill.ATTACK);
         boolean needStrength = needLevel(config.strengthSkillTarget(), Skill.STRENGTH);
@@ -308,7 +308,7 @@ public class AttackStyleScript extends Script {
 
             boolean selectedSkill = false;
             for (Skill skill : attackStyle.getSkills()) {
-                if (isSkillControlled(attackStyle) && config.toggleAvoidControlled()) {
+                if (isSkillControlled(attackStyle) && config.avoidControlledTraining()) {
                     continue;
                 }
                 if (selectedSkills.contains(skill)) {

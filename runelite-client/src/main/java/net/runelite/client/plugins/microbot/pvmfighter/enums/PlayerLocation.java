@@ -15,6 +15,7 @@ public enum PlayerLocation {
     COMBAT_FIELD(null, null),
     SAFE_SPOT(null, null),
     BANK_LOCATION(null, null),
+    SLAYER_MASTER(null, null),
     OUTSIDE_POINT(new WorldArea(0, 0, 0, 0, 0), new WorldPoint(0, 0, 0));
 
     private WorldArea area;
@@ -38,9 +39,17 @@ public enum PlayerLocation {
         return currentLoc.orElse(PlayerLocation.OUTSIDE_POINT);
     }
 
+    public void setWorldPoint(WorldPoint point) {
+        this.point = point;
+    }
+
     public void setWorldPoint(WorldPoint point, int size) {
         this.area = getWorldAreaFromCenter(point, size, size);
         this.point = point;
+    }
+
+    public void setWorldArea(WorldArea worldArea) {
+        this.area = worldArea;
     }
 
     /**

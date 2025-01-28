@@ -1,6 +1,7 @@
 package net.runelite.client.plugins.microbot.pvmfighter;
 
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
@@ -8,30 +9,40 @@ import net.runelite.client.plugins.microbot.pvmfighter.bank.BankerScript;
 import net.runelite.client.plugins.microbot.pvmfighter.combat.*;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.Setup;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.SlayerTask;
 import net.runelite.client.plugins.microbot.pvmfighter.loot.LootScript;
-import net.runelite.client.plugins.microbot.shortestpath.TeleportationItem;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
 import net.runelite.client.plugins.microbot.util.antiban.enums.ActivityIntensity;
 import net.runelite.client.plugins.microbot.util.antiban.enums.PlayStyle;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.magic.Rs2Magic;
-import net.runelite.client.plugins.microbot.util.magic.Rs2Spells;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class PvmFighterScript extends Script {
     public static PlayerState playerState;
     public static PlayerLocation currentLocation;
+    public static List<String> npcTargets = new ArrayList<>();
+    public static SlayerTask slayerTask;
+    public static Setup setup;
+    public static boolean pickUpCannonFlag = false;
+    public static boolean cannonIsAssembledFlag = false;
     private final AttackNpcScript attackNpcScript = new AttackNpcScript();
     private final FoodScript foodScript = new FoodScript();
     private final LootScript lootScript = new LootScript();
     private final SafeSpot safeSpotScript = new SafeSpot();
     private final BankerScript bankerScript = new BankerScript();
+    private final CannonScript cannonScript = new CannonScript();
+    private final SlayerScript slayerScript = new SlayerScript();
 
     public boolean run(PvmFighterConfig config) {
         Microbot.enableAutoRunOn = false;
@@ -42,6 +53,41 @@ public class PvmFighterScript extends Script {
         Rs2Antiban.setActivity(Activity.GENERAL_COMBAT);
         Rs2Antiban.setActivityIntensity(ActivityIntensity.MODERATE);
         Rs2Antiban.setPlayStyle(PlayStyle.MODERATE);
+
+        if (config.toggleSlayer()) {
+            // check if player has a slayer task assigned
+            int creatureVarbitValue = Microbot.getVarbitPlayerValue(VarPlayer.SLAYER_TASK_CREATURE);
+            EnumComposition creatureEnum = Microbot.getEnum(EnumID.SLAYER_TASK_CREATURE);
+            String creatureName = creatureEnum.getStringValue(creatureVarbitValue);
+            if (creatureName != null) {
+                slayerTask = SlayerTask.findTaskByName(creatureName);
+                if (slayerTask != null) {
+                    npcTargets.addAll(List.of(slayerTask.getNpcName()));
+                    PlayerLocation.COMBAT_FIELD.setWorldArea(slayerTask.getWorldArea());
+                    PlayerLocation.COMBAT_FIELD.setWorldPoint(slayerTask.getWorldPoint());
+
+                    switch (config.selectCombatStyle()) {
+                        case MELEE:
+                            setup = slayerTask.getMeleeSetup();
+                            break;
+                        case MAGIC:
+                            setup = slayerTask.getMagicSetup();
+                            break;
+                        case RANGED:
+                            setup = slayerTask.getRangedSetup();
+                            break;
+                    }
+                } else {
+                    Microbot.showMessage("Slayer task not found, shutting down!!!");
+                    PvmFighterPlugin.shutdownFlag = true;
+                }
+            }
+        } else {
+            npcTargets = Arrays.stream(config.npcTargets().split(","))
+                    .map((name -> name.trim().toLowerCase()))
+                    .collect(Collectors.toList());
+            setup = config.inventorySetup();
+        }
 
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
@@ -63,6 +109,11 @@ public class PvmFighterScript extends Script {
                     case BANKING:
                         bankerScript.run(config);
                         break;
+                    case CANNON:
+                        cannonScript.run(config);
+                        break;
+                    case SLAYER_MASTER:
+                        slayerScript.run(config);
                 }
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
@@ -79,9 +130,12 @@ public class PvmFighterScript extends Script {
         lootScript.shutdown();
         bankerScript.shutdown();
         foodScript.shutdown();
+        cannonScript.shutdown();
+        slayerScript.shutdown();
 
         super.shutdown();
         Rs2Antiban.resetAntibanSettings();
+        npcTargets = new ArrayList<>();
     }
 
     private boolean checkIfInDesiredLocation() {
@@ -95,6 +149,9 @@ public class PvmFighterScript extends Script {
             case ATTACKING:
             case LOOTING:
                 walkToCombatZone();
+                break;
+            case SLAYER_MASTER:
+                walkToSlayerMaster();
                 break;
             case SAFEKEEPING:
                 walkToSafeSpot();
@@ -117,6 +174,12 @@ public class PvmFighterScript extends Script {
         sleepUntil(() -> PlayerLocation.COMBAT_FIELD.getArea().contains(Rs2Player.getWorldLocation()));
     }
 
+    private void walkToSlayerMaster() {
+        WorldPoint point = PlayerLocation.SLAYER_MASTER.getPoint();
+        Rs2Walker.walkTo(point, 3);
+        sleepUntil(() -> PlayerLocation.SLAYER_MASTER.getArea().contains(Rs2Player.getWorldLocation()));
+    }
+
     private void walkToSafeSpot() {
         WorldPoint point = PlayerLocation.SAFE_SPOT.getPoint();
         Rs2Walker.walkTo(point, 2);
@@ -129,19 +192,24 @@ public class PvmFighterScript extends Script {
             return;
         }
 
-        if (checkIfPlayerIsBeingAttack()) {
-            Microbot.log("Player is being attacked");
-            // if auto attack is true set attacking state, else safekeeping
-            if (config.toggleCombat()) {
-                playerState = PlayerState.ATTACKING;
-                return;
-            }
-        }
-
-        if (needToSafeKeep(config)) {
-            playerState = PlayerState.SAFEKEEPING;
+        if (needsToAttendCannon(config)) {
+            playerState = PlayerState.CANNON;
             return;
         }
+
+        if (config.toggleSlayer() && needsToGetSlayerTask()) {
+            playerState = PlayerState.SLAYER_MASTER;
+            return;
+        }
+
+//        if (checkIfPlayerIsBeingAttack()) {
+//            Microbot.log("Player is being attacked");
+//            // if auto attack is true set attacking state, else safekeeping
+//            if (config.toggleCombat()) {
+//                playerState = PlayerState.ATTACKING;
+//                return;
+//            }
+//        }
 
         if (areGroundItemsToLoot(config)) {
             playerState = PlayerState.LOOTING;
@@ -160,11 +228,25 @@ public class PvmFighterScript extends Script {
         return Rs2Player.isInCombat() && Rs2Antiban.isIdle() && AttackNpcScript.currentNPC == null;
     }
 
+    private boolean needsToGetSlayerTask() {
+        // check if player has a remaining slayer task
+        return Microbot.getVarbitPlayerValue(VarPlayer.SLAYER_TASK_SIZE) == 0;
+    }
+
+    private boolean needsToAttendCannon(PvmFighterConfig config) {
+        if (!config.useCannon() || !slayerTask.isCanUseCannon()) return false;
+        if (needsToGetSlayerTask() && cannonIsAssembledFlag) {
+            pickUpCannonFlag = true;
+            return true;
+        }
+        return Microbot.getVarbitPlayerValue(VarPlayer.CANNON_AMMO) == 0 && currentLocation.equals(PlayerLocation.COMBAT_FIELD);
+    }
+
     private boolean needToSafeKeep(PvmFighterConfig config) {
-        if (!config.toggleSafeSpot()) return false;
+        if (!config.useSafeSpot()) return false;
 
         if (PlayerLocation.SAFE_SPOT.getPoint() != null) {
-            return Rs2Player.getHealthPercentage() <= config.minimumHealthSafeSpot();
+            return Rs2Player.getHealthPercentage() <= config.minimumHealthToRetrieve();
         }
 
         return false;
@@ -172,29 +254,29 @@ public class PvmFighterScript extends Script {
 
     private boolean areGroundItemsToLoot(PvmFighterConfig config) {
         if (!config.toggleLootItems()) return false;
-        if (Rs2Inventory.getEmptySlots() <= config.minFreeSlots()) return false;
+        if (Rs2Inventory.getEmptySlots() <= config.minFreeInventorySlots()) return false;
 
         boolean result = false;
-        if (config.toggleLootItemsByName()) {
+        if (config.lootItemsByName()) {
             result = LootScript.hasItemsToLootByName(config);
         }
 
-        if (config.toggleLootItemsByPriceRange() && !result) {
+        if (config.lootItemsByPriceRange() && !result) {
             result = LootScript.hasItemsToLootByValue(config);
         }
 
-        if (config.toggleLootCoins() && !result) {
+        if (config.lootCoins() && !result) {
             result = LootScript.hasCoinsToLoot(config);
         }
 
-        if (config.toggleLootRunes() && !result) {
+        if (config.lootRunes() && !result) {
             result = LootScript.hasRunesToLoot(config);
         }
-        if (config.toggleLootBones() && !result) {
+        if (config.lootBones() && !result) {
             result = LootScript.hasBonesToLoot(config);
         }
 
-        if (config.toggleLootArrows() && !result) {
+        if (config.lootArrows() && !result) {
             result = LootScript.hasArrowsToLoot(config);
         }
 
@@ -204,16 +286,16 @@ public class PvmFighterScript extends Script {
     private boolean isReadyToBank(PvmFighterConfig config) {
         if (!config.toggleBanking()) return false;
         // while still have food don't bank
-        if (config.useFood() && !Rs2Inventory.getInventoryFood().isEmpty()) return false;
+        if (config.withdrawFood() && !Rs2Inventory.getInventoryFood().isEmpty()) return false;
 
-        log.info("minimum health: {}", config.minimumHealthSafeSpot());
-        log.info("player needs to retrieve: {}", Rs2Player.getHealthPercentageInt() <= config.minimumHealthSafeSpot());
-        return Rs2Inventory.getEmptySlots() <= config.minFreeSlots() || needsToRetreat(config);
+        log.info("minimum health: {}", config.minimumHealthToRetrieve());
+        log.info("player needs to retrieve: {}", Rs2Player.getHealthPercentageInt() <= config.minimumHealthToRetrieve());
+        return Rs2Inventory.getEmptySlots() <= config.minFreeInventorySlots() || needsToRetreat(config);
     }
 
     public static boolean needsToRetreat(PvmFighterConfig config) {
-        boolean healthIsLessThanMinimum = Rs2Player.getHealthPercentageInt() <= config.minimumHealthSafeSpot();
-        if (config.useFood() && Rs2Inventory.getInventoryFood().isEmpty() && healthIsLessThanMinimum) return true;
+        boolean healthIsLessThanMinimum = Rs2Player.getHealthPercentageInt() <= config.minimumHealthToRetrieve();
+        if (config.withdrawFood() && Rs2Inventory.getInventoryFood().isEmpty() && healthIsLessThanMinimum) return true;
 
         return healthIsLessThanMinimum;
     }

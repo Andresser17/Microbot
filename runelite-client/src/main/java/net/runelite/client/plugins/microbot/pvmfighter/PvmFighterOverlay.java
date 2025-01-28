@@ -15,7 +15,7 @@ import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
 import javax.inject.Inject;
 import java.awt.*;
 
-import static net.runelite.client.plugins.microbot.pvmfighter.combat.AttackNpcScript.attackableNpcs;
+import static net.runelite.client.plugins.microbot.pvmfighter.combat.AttackNpcScript.npcToAttack;
 import static net.runelite.client.plugins.microbot.pvmfighter.combat.FlickerScript.currentMonstersAttackingUs;
 import static net.runelite.client.ui.overlay.OverlayUtil.renderPolygon;
 
@@ -50,7 +50,7 @@ public class PvmFighterOverlay extends OverlayPanel {
 
     @Override
     public Dimension render(Graphics2D graphics) {
-        if (attackableNpcs == null) return null;
+        if (npcToAttack == null) return null;
 
         // render area
         LocalPoint lp =  LocalPoint.fromWorld(Microbot.getClient(), config.centerLocation());
@@ -66,13 +66,13 @@ public class PvmFighterOverlay extends OverlayPanel {
         LocalPoint sslp = LocalPoint.fromWorld(Microbot.getClient(), config.safeSpot());
         if (sslp != null) {
             Polygon safeSpotPoly = Perspective.getCanvasTileAreaPoly(Microbot.getClient(), sslp, 1);
-            if (safeSpotPoly != null && config.toggleSafeSpot()) {
+            if (safeSpotPoly != null && config.useSafeSpot()) {
                 renderPolygon(graphics, safeSpotPoly, RED_TRANSLUCENT);
             }
         }
 
         for (net.runelite.api.NPC npc :
-                attackableNpcs) {
+                npcToAttack) {
             if (npc != null && npc.getCanvasTilePoly() != null) {
                 try {
                     graphics.setColor(Color.CYAN);

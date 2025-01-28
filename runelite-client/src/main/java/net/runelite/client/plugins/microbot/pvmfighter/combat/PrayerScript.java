@@ -32,14 +32,14 @@ public class PrayerScript extends Script {
     }
 
     private void handlePrayer(PvmFighterConfig config) {
-        if (!Microbot.isLoggedIn() || !config.togglePrayer()) return;
-        if (config.prayerStyle() != PrayerStyle.CONTINUOUS && config.prayerStyle() != PrayerStyle.ALWAYS_ON) return;
-        log.info("Prayer style: " + config.prayerStyle().getName());
-        if (config.prayerStyle() == PrayerStyle.CONTINUOUS) {
+        if (!Microbot.isLoggedIn() || !config.withdrawPrayerPotions()) return;
+        if (config.usePrayerStyle() != PrayerStyle.CONTINUOUS && config.usePrayerStyle() != PrayerStyle.ALWAYS_ON) return;
+        log.info("Prayer style: " + config.usePrayerStyle().getName());
+        if (config.usePrayerStyle() == PrayerStyle.CONTINUOUS) {
             Rs2Prayer.toggleQuickPrayer(Rs2Combat.inCombat());
         } else {
             if (super.run())
-                Rs2Prayer.toggleQuickPrayer(config.prayerStyle() == PrayerStyle.ALWAYS_ON);
+                Rs2Prayer.toggleQuickPrayer(config.usePrayerStyle() == PrayerStyle.ALWAYS_ON);
         }
     }
 

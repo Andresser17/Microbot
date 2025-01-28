@@ -10,7 +10,6 @@ import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.grounditem.LootingParameters;
 import net.runelite.client.plugins.microbot.util.grounditem.Rs2GroundItem;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
-import net.runelite.client.plugins.microbot.util.magic.Rs2Magic;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,16 +22,16 @@ public class LootScript extends Script {
             if (PvmFighterScript.playerState != PlayerState.LOOTING) return;
             if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
 
-            if (config.toggleLootItemsByPriceRange()) {
+            if (config.lootItemsByPriceRange()) {
                 lootItemsByValue(config);
             }
 
-            if (config.toggleLootBones()) lootBones(config);
-            if (config.toggleLootRunes()) lootRunes(config);
-            if (config.toggleLootCoins()) lootCoins(config);
-            if (config.toggleLootArrows()) lootArrows(config);
+            if (config.lootBones()) lootBones(config);
+            if (config.lootRunes()) lootRunes(config);
+            if (config.lootCoins()) lootCoins(config);
+            if (config.lootArrows()) lootArrows(config);
 
-            if (config.toggleLootItemsByName()) {
+            if (config.lootItemsByName()) {
                 lootItemsByName(config);
             }
 
@@ -46,9 +45,9 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeSlots(),
-                config.toggleDelayedLooting(),
-                config.toggleOnlyLootMyItems(),
+                config.minFreeInventorySlots(),
+                config.delayedLooting(),
+                config.onlyLootMyItems(),
                 " arrow"
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
@@ -60,9 +59,9 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeSlots(),
-                config.toggleDelayedLooting(),
-                config.toggleOnlyLootMyItems(),
+                config.minFreeInventorySlots(),
+                config.delayedLooting(),
+                config.onlyLootMyItems(),
                 " arrow"
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
@@ -74,9 +73,9 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeSlots(),
-                config.toggleDelayedLooting(),
-                config.toggleOnlyLootMyItems(),
+                config.minFreeInventorySlots(),
+                config.delayedLooting(),
+                config.onlyLootMyItems(),
                 " bones"
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
@@ -88,9 +87,9 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeSlots(),
-                config.toggleDelayedLooting(),
-                config.toggleOnlyLootMyItems(),
+                config.minFreeInventorySlots(),
+                config.delayedLooting(),
+                config.onlyLootMyItems(),
                 " bones"
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
@@ -102,9 +101,9 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeSlots(),
-                config.toggleDelayedLooting(),
-                config.toggleOnlyLootMyItems(),
+                config.minFreeInventorySlots(),
+                config.delayedLooting(),
+                config.onlyLootMyItems(),
                 " rune"
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
@@ -116,9 +115,9 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeSlots(),
-                config.toggleDelayedLooting(),
-                config.toggleOnlyLootMyItems(),
+                config.minFreeInventorySlots(),
+                config.delayedLooting(),
+                config.onlyLootMyItems(),
                 " rune"
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
@@ -130,9 +129,9 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeSlots(),
-                config.toggleDelayedLooting(),
-                config.toggleOnlyLootMyItems(),
+                config.minFreeInventorySlots(),
+                config.delayedLooting(),
+                config.onlyLootMyItems(),
                 ItemID.COINS_995
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootById(params);
@@ -144,9 +143,9 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeSlots(),
-                config.toggleDelayedLooting(),
-                config.toggleOnlyLootMyItems(),
+                config.minFreeInventorySlots(),
+                config.delayedLooting(),
+                config.onlyLootMyItems(),
                 ItemID.COINS_995
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootById(params);
@@ -159,9 +158,9 @@ public class LootScript extends Script {
                 config.maxPriceOfItemsToLoot(),
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
-                config.minFreeSlots(),
-                config.toggleDelayedLooting(),
-                config.toggleOnlyLootMyItems()
+                config.minFreeInventorySlots(),
+                config.delayedLooting(),
+                config.onlyLootMyItems()
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByValue(params);
         Rs2GroundItem.lootItem(params, groundItems);
@@ -173,9 +172,9 @@ public class LootScript extends Script {
                 config.maxPriceOfItemsToLoot(),
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
-                config.minFreeSlots(),
-                config.toggleDelayedLooting(),
-                config.toggleOnlyLootMyItems()
+                config.minFreeInventorySlots(),
+                config.delayedLooting(),
+                config.onlyLootMyItems()
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByValue(params);
         return groundItems.size() >= config.minimumQuantityToLoot();
@@ -186,10 +185,10 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeSlots(),
-                config.toggleDelayedLooting(),
-                config.toggleOnlyLootMyItems(),
-                Arrays.stream(config.lootItemsByName().split(","))
+                config.minFreeInventorySlots(),
+                config.delayedLooting(),
+                config.onlyLootMyItems(),
+                Arrays.stream(config.nameOfItemsToLoot().split(","))
                         .map(String::trim).toArray(String[]::new)
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
@@ -201,10 +200,10 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeSlots(),
-                config.toggleDelayedLooting(),
-                config.toggleOnlyLootMyItems(),
-                Arrays.stream(config.lootItemsByName().split(","))
+                config.minFreeInventorySlots(),
+                config.delayedLooting(),
+                config.onlyLootMyItems(),
+                Arrays.stream(config.nameOfItemsToLoot().split(","))
                         .map(String::trim).toArray(String[]::new)
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);

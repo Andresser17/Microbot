@@ -49,8 +49,8 @@ public class BlastoiseFurnaceScript extends Script {
     public static boolean waitingXpDrop = false;
     private BlastoiseFurnaceConfig config;
     public static PlayerState playerState;
-    public static boolean coalBagIsFull;
-    public static boolean hasBarsToCollect;
+    public static boolean coalBagIsFull = false;
+    public static boolean hasBarsToCollect = false;
     public static boolean needsToPayFee = false;
 
     public boolean run(BlastoiseFurnaceConfig config) {
@@ -58,7 +58,7 @@ public class BlastoiseFurnaceScript extends Script {
 
         Microbot.enableAutoRunOn = false;
         Rs2Camera.resetZoom();
-        Rs2Camera.turnTo(new LocalPoint(1943, 4967, 0)); // turn camera to conveyor belt
+//        Rs2Camera.turnTo(new LocalPoint(1943, 4967, 0)); // turn camera to conveyor belt
         Rs2Antiban.resetAntibanSettings();
         Rs2Antiban.antibanSetupTemplates.applySmithingSetup();
         Rs2AntibanSettings.simulateMistakes = true;
@@ -66,29 +66,6 @@ public class BlastoiseFurnaceScript extends Script {
         Rs2Antiban.setActivity(Activity.SMELTING_STEEL_BARS_AT_BLAST_FURNACE);
         Rs2Antiban.setActivityIntensity(ActivityIntensity.MODERATE);
         Rs2Antiban.setPlayStyle(PlayStyle.MODERATE);
-
-//                                if (config.getBars().isRequiresCoalBag() && !Rs2Inventory.contains(ItemID.COAL_BAG_12019)) {
-//                            if (!Rs2Bank.hasItem(ItemID.COAL_BAG_12019)) {
-//                                Microbot.showMessage("get a coal bag");
-//                                this.shutdown();
-//                                return;
-//                            }
-//
-//                            Rs2Bank.withdrawItem(ItemID.COAL_BAG_12019);
-//                        }
-//
-//                        if (config.getBars().isRequiresGoldsmithGloves()) {
-//                            hasGauntlets = Rs2Inventory.contains(ItemID.GOLDSMITH_GAUNTLETS) || Rs2Equipment.isWearing(ItemID.GOLDSMITH_GAUNTLETS);
-//                            if (!hasGauntlets) {
-//                                if (!Rs2Bank.hasItem(ItemID.GOLDSMITH_GAUNTLETS)) {
-//                                    Microbot.showMessage("Need goldsmith gauntlets");
-//                                    this.shutdown();
-//                                    return;
-//                                }
-//
-//                                Rs2Bank.withdrawItem(ItemID.GOLDSMITH_GAUNTLETS);
-//                            }
-//                        }
 
         this.mainScheduledFuture = this.scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
@@ -102,7 +79,7 @@ public class BlastoiseFurnaceScript extends Script {
 
                         if (!Rs2Bank.isOpen()) {
                             Rs2Bank.openBank();
-                            Rs2Random.wait(2800, 3200); // wait until player reached bank chest
+                            sleepUntilFulfillCondition(Rs2Bank::isOpen, () -> Rs2Random.wait(1000, 1200)); // wait until player reached bank chest
                         }
 
                         if (Rs2Inventory.hasItem("bar")) {
@@ -164,18 +141,24 @@ public class BlastoiseFurnaceScript extends Script {
                         break;
                     case DEPOSIT_ORES:
                         Rs2GameObject.interact(ObjectID.CONVEYOR_BELT, "Put-ore-on");
-                        sleepUntilFulfillCondition(() -> !waitingXpDrop, () -> Rs2Random.wait(1000, 1200), 10); // Wait until the player stops moving
+                        Rs2Random.wait(800, 1200);
+                        Rs2Inventory.waitForInventoryChanges(() -> log.info("Waiting for inventory changed")); // Wait until the player stops moving
 
                         if (this.config.getBars().isRequiresCoalBag()) {
                             Rs2Inventory.interact(ItemID.COAL_BAG_12019, "Empty");
+                            coalBagIsFull = false;
                             Rs2Random.wait(1200, 1500);
 
                             Rs2GameObject.interact(ObjectID.CONVEYOR_BELT, "Put-ore-on");
                         }
                         break;
                     case COLLECT_BARS:
+                        // walk next to dispenser
+                        Rs2Walker.walkTo(new WorldPoint(1939, 4964, 0), 1);
+                        Rs2Random.wait(800, 1200);
+                        sleepUntil(() -> !Rs2Player.isMoving());
                         Rs2GameObject.interact(BAR_DISPENSER_ID, "Take");
-                        Rs2Random.wait(3500, 3600);
+                        Rs2Random.wait(800, 1200);
                         boolean howManyWidget = Rs2Widget.hasWidget("How many would you like");
                         boolean whatTakeWidget = Rs2Widget.hasWidget("What would you like to take");
                         if (howManyWidget || whatTakeWidget) {
@@ -250,21 +233,22 @@ public class BlastoiseFurnaceScript extends Script {
     }
 
     private boolean hasRequiredOresInBank(BlastoiseFurnaceConfig config) {
-        return config.getBars().getNecessaryOres().stream().allMatch(ore -> Rs2Bank.hasItem(ore[0]));
+        Bars bars = config.getBars();
+        if (bars.isRequiresCoalBag()) return Rs2Bank.hasItem(bars.getOreId()) && Rs2Bank.hasItem(ItemID.COAL);
+        return Rs2Bank.hasItem(bars.getOreId());
     }
 
     private void withdrawNecessaryOres(BlastoiseFurnaceConfig config) {
         int coalInBlastFurnace = Microbot.getVarbitValue(BLAST_FURNACE_COAL_VARBIT);
-        for (int[] ore : config.getBars().getNecessaryOres()) {
-            if (ore[0] == ItemID.COAL) {
-                Rs2Inventory.interact(ItemID.COAL_BAG_12019, "Fill");
-                coalBagIsFull = true;
-                // check if coal in blast furnace is less than required to smith a full inventory
-                if (config.getBars().isRequiresCoalBag() && coalInBlastFurnace < MAX_ORE_PER_INTERACTION * ore[1]) {
-                    Rs2Bank.withdrawAll(ore[0]);
-                    break;
-                }
-            } else Rs2Bank.withdrawAll(ore[0]);
+        log.info("coal: {}, {}", coalInBlastFurnace, ItemID.COAL);
+        if (coalInBlastFurnace < (MAX_ORE_PER_INTERACTION * config.getBars().getCoalQuantity())) {
+            Rs2Bank.withdrawAll(ItemID.COAL);
+        } else Rs2Bank.withdrawAll(config.getBars().getOreId());
+
+        if (config.getBars().isRequiresCoalBag() && !coalBagIsFull) {
+            Rs2Inventory.interact(ItemID.COAL_BAG_12019, "Fill");
+            coalBagIsFull = true;
+            Rs2Random.wait(1000, 1200);
         }
     }
 
@@ -317,7 +301,6 @@ public class BlastoiseFurnaceScript extends Script {
             Microbot.pauseAllScripts = false;
             Microbot.getSpecialAttackConfigs().reset();
         }
-
         super.shutdown();
     }
 }

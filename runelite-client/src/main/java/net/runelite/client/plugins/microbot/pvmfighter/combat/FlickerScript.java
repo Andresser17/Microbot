@@ -52,18 +52,18 @@ public class FlickerScript extends Script {
         }
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                if (!Microbot.isLoggedIn() || !config.togglePrayer()) return;
-                if (config.prayerStyle() != PrayerStyle.LAZY_FLICK && config.prayerStyle() != PrayerStyle.PERFECT_LAZY_FLICK)
+                if (!Microbot.isLoggedIn() || !config.withdrawPrayerPotions()) return;
+                if (config.usePrayerStyle() != PrayerStyle.LAZY_FLICK && config.usePrayerStyle() != PrayerStyle.PERFECT_LAZY_FLICK)
                     return;
-                if (config.prayerStyle() == PrayerStyle.LAZY_FLICK) {
+                if (config.usePrayerStyle() == PrayerStyle.LAZY_FLICK) {
                     tickToFlick = 1;
                 }
-                if (config.prayerStyle() == PrayerStyle.PERFECT_LAZY_FLICK) {
+                if (config.usePrayerStyle() == PrayerStyle.PERFECT_LAZY_FLICK) {
                     tickToFlick = 0;
                 }
                 npcs = Rs2Npc.getNpcsForPlayer();
-                usePrayer = config.togglePrayer();
-                flickQuickPrayer = config.toggleQuickPray();
+                usePrayer = config.withdrawPrayerPotions();
+                flickQuickPrayer = config.useQuickPrayer();
                 currentTick = Microbot.getClient().getTickCount();
                 // Keep track of which monsters still have aggro on the player
                 currentMonstersAttackingUs.forEach(monster -> {

@@ -3,8 +3,8 @@ package net.runelite.client.plugins.microbot.pvmfighter.combat;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.NPC;
 import net.runelite.client.plugins.microbot.Microbot;
-import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.CombatStyle;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.Spell;
@@ -20,9 +20,8 @@ import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterPlugin;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,7 @@ import java.util.stream.Collectors;
 public class AttackNpcScript {
 
     public static NPC currentNPC;
-    public static List<NPC> attackableNpcs = new ArrayList<>();
+    public static List<NPC> npcToAttack = new ArrayList<>();
     private boolean init = true;
     public static boolean isRunning = false;
 
@@ -45,82 +44,63 @@ public class AttackNpcScript {
         }
 
         try {
-            if (PvmFighterScript.playerState != PlayerState.ATTACKING) return;
+            if (PvmFighterScript.playerState != PlayerState.ATTACKING || PlayerLocation.COMBAT_FIELD.getArea() == null) return;
             if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
             if (PvmFighterPlugin.getCooldown() > 0) return;
             if (config.toggleCenterTile() && config.centerLocation().getX() == 0 && config.centerLocation().getY() == 0) {
                 Microbot.showMessage("Please set a center location");
                 PvmFighterPlugin.shutdownFlag = true;
             }
+
             isRunning = true;
-            switch (config.combatStyle()) {
-                case RANGED:
-                    if (!Rs2Equipment.hasEquipped(config.ammoToUse().getId())) {
-                        if (Rs2Inventory.hasItem(config.ammoToUse().getId())) {
-                            Rs2Inventory.equip(config.ammoToUse().getId());
-                        } else {
-                            Microbot.showMessage("Player has not selected ammunition available");
-                            PvmFighterPlugin.shutdownFlag = true;
-                        }
-                    }
-                    break;
-                case MAGIC:
-                    if (!Spell.checkIfPlayerHasNecessaryItems(config.spellToUse())) {
-                        Microbot.showMessage("Player has not necessary runes to make spell");
-                        PvmFighterPlugin.shutdownFlag = true;
-                    }
-                    break;
+            if (Objects.requireNonNull(config.selectCombatStyle()) == CombatStyle.MAGIC) {
+                if (!Spell.checkIfPlayerHasNecessaryItems(config.selectSpellToUse())) {
+                    Microbot.showMessage("Player has not necessary runes to make spell");
+                    PvmFighterPlugin.shutdownFlag = true;
+                }
             }
 
-            List<String> npcsToAttack = Arrays.stream(config.attackableNpcs().split(","))
-                    .map(String::trim)
-                    .collect(Collectors.toList());
-
-            attackableNpcs = Rs2Npc.getNpcs().filter(npc -> {
+            npcToAttack = Rs2Npc.getNpcs().filter(npc -> {
                 boolean isInArea = PlayerLocation.COMBAT_FIELD.getArea().contains(npc.getWorldLocation());
                 boolean isNotInteracting = (npc.getInteracting() == null || npc.getInteracting() == Microbot.getClient().getLocalPlayer());
-                boolean isInList = npcsToAttack.contains(npc.getName());
+                boolean isInList = PvmFighterScript.npcTargets.stream().anyMatch(npcName -> npcName.equalsIgnoreCase(npc.getName()));
                 return isInList && !npc.isDead() && isInArea && isNotInteracting && Rs2Npc.hasLineOfSight(npc);
             }).collect(Collectors.toList());
-//                    .sorted(Comparator.comparing((NPC npc) -> npc.getInteracting() == Microbot.getClient().getLocalPlayer() ? 0 : 1)
-//                            .thenComparingInt(npc -> npc.getLocalLocation()
-//                            .distanceTo(Rs2Player.getLocalLocation())))
-//                            .collect(Collectors.toList());
 
-            if (attackableNpcs.isEmpty()) {
-                Microbot.log("Not attackable npc found");
+            if (npcToAttack.isEmpty()) {
+                Microbot.log("Not target NPC found");
                 isRunning = false;
                 return;
             };
-            currentNPC = attackableNpcs.get(0);
+            currentNPC = npcToAttack.get(0);
 
             if (!Rs2Camera.isTileOnScreen(currentNPC.getLocalLocation()))
                 Rs2Camera.turnTo(currentNPC);
 
             Rs2Npc.interact(currentNPC, "attack");
-            PvmFighterPlugin.setCooldown(config.playStyle().getRandomTickInterval());
+            PvmFighterPlugin.setCooldown(config.selectPlayStyle().getRandomTickInterval());
             Microbot.status = "Attacking " + currentNPC.getName();
             Rs2Random.wait(1500, 2000);
             sleepUntilFulfillCondition(() -> {
-                log.info("Player is attacking");
+//                log.info("Player is attacking");
                 boolean isIdle = Rs2Antiban.isIdle();
-                log.info("isIdle {}", isIdle);
-                log.info("AttackNPC CurrentNPC: {}", currentNPC);
-                log.info("AttackNPC CurrentNPC is Dead: {}", currentNPC.isDead());
+//                log.info("isIdle {}", isIdle);
+//                log.info("AttackNPC CurrentNPC: {}", currentNPC);
+//                log.info("AttackNPC CurrentNPC is Dead: {}", currentNPC.isDead());
                 if (PvmFighterScript.needsToRetreat(config)) return true;
                 return isIdle && (currentNPC.isDead() || !Rs2Player.isInCombat());
             }, () -> Rs2Random.wait(1500, 1600));
             if (currentNPC.isDead()) currentNPC = null;
             Microbot.log("Combat finished");
 
-            // wait until loot appears
-            if (config.toggleLootItems()) {
-                Microbot.log("Waiting for loot");
-                Rs2Random.wait(1500, 2000);
-            }
+//            // wait until loot appears
+//            if (config.toggleLootItems()) {
+//                Microbot.log("Waiting for loot");
+//                Rs2Random.wait(1500, 2000);
+//            }
             isRunning = false;
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            log.info(ex.getMessage());
         }
     }
 
