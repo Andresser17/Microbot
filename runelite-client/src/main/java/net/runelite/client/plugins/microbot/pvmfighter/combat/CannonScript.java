@@ -11,6 +11,7 @@ import net.runelite.client.plugins.microbot.util.gameobject.Rs2Cannon;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
 import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
+import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 
 @Slf4j
 public class CannonScript extends Script {
@@ -39,6 +40,11 @@ public class CannonScript extends Script {
     private void setCannon(WorldPoint worldPoint) {
         if (Rs2Inventory.hasItem(new int[]{ItemID.CANNON_BARRELS, ItemID.CANNON_BASE, ItemID.CANNON_STAND, ItemID.CANNON_FURNACE})) {
             Rs2Inventory.interact(ItemID.CANNON_BASE, "Set-up");
+            Rs2Random.wait(3000, 4000);
+            GameObject cannon = Rs2GameObject.findObjectById(6, 3102);
+            if (cannon != null) {
+                Rs2GameObject.interact(cannon, "Fire");
+            }
         } else {
             Microbot.showMessage("Player has not cannon set in inventory");
             shutdown();

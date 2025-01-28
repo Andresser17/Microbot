@@ -182,7 +182,7 @@ public class PvmFighterScript extends Script {
 
     private void walkToSafeSpot() {
         WorldPoint point = PlayerLocation.SAFE_SPOT.getPoint();
-        Rs2Walker.walkTo(point, 2);
+        Rs2Walker.walkTo(point, 0);
         sleepUntil(() -> point.equals(Rs2Player.getWorldLocation()));
     }
 
@@ -197,7 +197,7 @@ public class PvmFighterScript extends Script {
             return;
         }
 
-        if (config.toggleSlayer() && needsToGetSlayerTask()) {
+        if (needsToGetSlayerTask(config)) {
             playerState = PlayerState.SLAYER_MASTER;
             return;
         }
@@ -216,6 +216,11 @@ public class PvmFighterScript extends Script {
             return;
         }
 
+        if (needsToReturnToSafeSpot(config)) {
+            playerState = PlayerState.SAFEKEEPING;
+            return;
+        }
+
         if (config.toggleCombat()) {
             playerState = PlayerState.ATTACKING;
             return;
@@ -228,25 +233,26 @@ public class PvmFighterScript extends Script {
         return Rs2Player.isInCombat() && Rs2Antiban.isIdle() && AttackNpcScript.currentNPC == null;
     }
 
-    private boolean needsToGetSlayerTask() {
+    private boolean needsToGetSlayerTask(PvmFighterConfig config) {
+        if (!config.toggleSlayer()) return false;
         // check if player has a remaining slayer task
         return Microbot.getVarbitPlayerValue(VarPlayer.SLAYER_TASK_SIZE) == 0;
     }
 
     private boolean needsToAttendCannon(PvmFighterConfig config) {
-        if (!config.useCannon() || !slayerTask.isCanUseCannon()) return false;
-        if (needsToGetSlayerTask() && cannonIsAssembledFlag) {
+        if (!config.useCannon() || (slayerTask != null && !slayerTask.isCanUseCannon())) return false;
+        if (needsToGetSlayerTask(config) && cannonIsAssembledFlag) {
             pickUpCannonFlag = true;
             return true;
         }
         return Microbot.getVarbitPlayerValue(VarPlayer.CANNON_AMMO) == 0 && currentLocation.equals(PlayerLocation.COMBAT_FIELD);
     }
 
-    private boolean needToSafeKeep(PvmFighterConfig config) {
+    private boolean needsToReturnToSafeSpot(PvmFighterConfig config) {
         if (!config.useSafeSpot()) return false;
 
         if (PlayerLocation.SAFE_SPOT.getPoint() != null) {
-            return Rs2Player.getHealthPercentage() <= config.minimumHealthToRetrieve();
+            return !Rs2Player.getWorldLocation().equals(PlayerLocation.SAFE_SPOT.getPoint());
         }
 
         return false;
