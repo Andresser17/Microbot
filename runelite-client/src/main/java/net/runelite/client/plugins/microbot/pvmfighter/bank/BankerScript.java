@@ -28,20 +28,11 @@ enum ItemToKeep {
     @Getter
     private final List<Integer> ids;
     private final Function<PvmFighterConfig, Boolean> withdrawItem;
-    private final Function<PvmFighterConfig, String> itemsToWithdraw;
     private final Function<PvmFighterConfig, Integer> quantityToWithdraw;
 
     ItemToKeep(Set<Integer> ids, Function<PvmFighterConfig, Boolean> withdrawItem, Function<PvmFighterConfig, Integer> quantityToWithdraw) {
         this.ids = new ArrayList<>(ids);
         this.withdrawItem = withdrawItem;
-        this.itemsToWithdraw = null;
-        this.quantityToWithdraw = quantityToWithdraw;
-    }
-
-    ItemToKeep(Set<Integer> ids, Function<PvmFighterConfig, Boolean> withdrawItem, Function<PvmFighterConfig, String> itemsToWithdraw, Function<PvmFighterConfig, Integer> quantityToWithdraw) {
-        this.ids = new ArrayList<>(ids);
-        this.withdrawItem = withdrawItem;
-        this.itemsToWithdraw = itemsToWithdraw;
         this.quantityToWithdraw = quantityToWithdraw;
     }
 
@@ -49,10 +40,6 @@ enum ItemToKeep {
         return withdrawItem.apply(config);
     }
 
-    public String[] getItemsToWithdraw(PvmFighterConfig config) {
-        assert itemsToWithdraw != null;
-        return Arrays.stream(itemsToWithdraw.apply(config).split(",")).map(String::trim).toArray(String[]::new);
-    }
 
     public int getQuantityToWithdraw(PvmFighterConfig config) {
         return quantityToWithdraw.apply(config);
@@ -92,30 +79,13 @@ public class BankerScript extends Script {
                 log.info("Item: {} Count: {}", item.name(), count);
                 if (count < item.getQuantityToWithdraw(config)) {
                     log.info("Withdrawing {} {}(s)", item.getQuantityToWithdraw(config) - count, item.name());
-                    if (item.name().equals("FOOD")) {
-                        String[] itemsToWithdraw = item.getItemsToWithdraw(config);
-                        int quantityToWithdraw = item.getQuantityToWithdraw(config);
-                        for (String foodName : itemsToWithdraw) {
-                            if (Rs2Bank.hasBankItem(foodName)) {
-                                int foodCount = Rs2Bank.count(foodName);
-                                if (foodCount >= quantityToWithdraw) {
-                                    Rs2Bank.withdrawX(foodName, quantityToWithdraw);
-                                    break;
-                                } else {
-                                    Rs2Bank.withdrawAll(foodName);
-                                    quantityToWithdraw = quantityToWithdraw - foodCount;
-                                }
-                            }
-                        }
-                    } else {
-                        ArrayList<Integer> ids = new ArrayList<>(item.getIds());
-                        Collections.reverse(ids);
-                        for (int id : ids) {
-                            log.info("Checking bank for item: {}", id);
-                            if (Rs2Bank.hasBankItem(id, item.getQuantityToWithdraw(config) - count)) {
-                                Rs2Bank.withdrawX(true, id, item.getQuantityToWithdraw(config) - count);
-                                break;
-                            }
+                    ArrayList<Integer> ids = new ArrayList<>(item.getIds());
+                    Collections.reverse(ids);
+                    for (int id : ids) {
+                        log.info("Checking bank for item: {}", id);
+                        if (Rs2Bank.hasBankItem(id, item.getQuantityToWithdraw(config) - count)) {
+                            Rs2Bank.withdrawX(true, id, item.getQuantityToWithdraw(config) - count);
+                            break;
                         }
                     }
                 }

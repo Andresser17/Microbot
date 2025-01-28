@@ -13,6 +13,7 @@ import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class LootScript extends Script {

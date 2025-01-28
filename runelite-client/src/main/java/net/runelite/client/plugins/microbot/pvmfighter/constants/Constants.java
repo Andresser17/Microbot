@@ -1056,6 +1056,7 @@ public class Constants {
     );
 
     public static final Set<Integer> FOOD_ITEM_IDS = ImmutableSet.of(
+            ItemID.ADMIRAL_PIE,
             ItemID.ANGLERFISH, ItemID.BLIGHTED_ANGLERFISH,
             ItemID.DARK_CRAB,
             ItemID.COOKED_KARAMBWAN,

@@ -17,6 +17,7 @@ import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
 import net.runelite.client.plugins.microbot.util.antiban.enums.ActivityIntensity;
 import net.runelite.client.plugins.microbot.util.antiban.enums.PlayStyle;
+import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
@@ -245,7 +246,8 @@ public class PvmFighterScript extends Script {
             pickUpCannonFlag = true;
             return true;
         }
-        return Microbot.getVarbitPlayerValue(VarPlayer.CANNON_AMMO) == 0 && currentLocation.equals(PlayerLocation.COMBAT_FIELD);
+        TileObject brokenCannon = Rs2GameObject.findObjectById(14916);
+        return (Microbot.getVarbitPlayerValue(VarPlayer.CANNON_AMMO) == 0 || brokenCannon != null) && currentLocation.equals(PlayerLocation.COMBAT_FIELD);
     }
 
     private boolean needsToReturnToSafeSpot(PvmFighterConfig config) {

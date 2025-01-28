@@ -357,7 +357,8 @@ public class Rs2GroundItem {
             return valueIsInPriceRange && isInRange && (!params.isAntiLureProtection() || (params.isAntiLureProtection() && groundItem.getOwnership() == OWNERSHIP_SELF));
         };
 
-        return GroundItemsPlugin.getCollectedGroundItems().values().stream().filter(filter).collect(Collectors.toList());
+        return GroundItemsPlugin.getCollectedGroundItems().values().stream()
+                .filter(filter).sorted((p1, p2) -> Integer.compare(p2.getGePrice(), p1.getGePrice())).collect(Collectors.toList());
     }
 
     public static List<GroundItem> getItemsToLootByName(LootingParameters params) {

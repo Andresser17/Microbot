@@ -6,6 +6,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum Setup {
+    MELEE(true, CombatStyle.MELEE,  true, false, false, 50, true, "Melee"),
+    MAGIC(true, CombatStyle.MAGIC, true, false, true, 50, true, "Magic"),
+    RANGED(true, CombatStyle.RANGED, true, true, true, 50, true, "Ranged"),
+
     SLAYER_MELEE(true, CombatStyle.MELEE,  true, false, false, 50, true, "Slayer Melee"),
     SLAYER_MAGIC(true, CombatStyle.MAGIC, true, false, true, 50, true, "Slayer Magic"),
     SLAYER_RANGED(true, CombatStyle.RANGED, true, true, true, 50, true, "Slayer Ranged"),
