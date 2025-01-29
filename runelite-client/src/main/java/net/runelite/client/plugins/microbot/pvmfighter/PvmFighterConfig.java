@@ -27,6 +27,7 @@ public interface PvmFighterConfig extends Config {
     String useSpecialAttack = "useSpecialAttack";
     String useCannon = "useCannon";
     String useSafeSpot = "useSafeSpot";
+    String safeSpotLocation = "safeSpotLocation";
     String minimumHealthToRetrieve = "minimumHealthToRetrieve";
     String selectPlayStyle = "selectPlayStyle";
     String selectCombatStyle = "selectCombatStyle";
@@ -271,12 +272,23 @@ public interface PvmFighterConfig extends Config {
         return false;
     }
 
+    @ConfigItem(
+            keyName = safeSpotLocation,
+            name = "Location",
+            description = "World point comma separate, ex: X, Y, Plane",
+            position = 6,
+            section = combatSection
+    )
+    default String safeSpotLocation() {
+        return "X, Y, Z";
+    }
+
     // Player minimum HP if is bellow walk to bank
     @ConfigItem(
             keyName = minimumHealthToRetrieve,
             name = "Minimum player health (%)",
             description = "if player health is less than the provided percentage, walk to bank",
-            position = 6,
+            position = 7,
             section = combatSection
     )
     default int minimumHealthToRetrieve() {
@@ -287,7 +299,7 @@ public interface PvmFighterConfig extends Config {
             keyName = selectPlayStyle,
             name = "Play Style",
             description = "Play Style",
-            position = 7,
+            position = 8,
             section = combatSection
     )
     default PlayStyle selectPlayStyle() {
@@ -298,7 +310,7 @@ public interface PvmFighterConfig extends Config {
             keyName = attackReachableNpc,
             name = "Only attack reachable NPC",
             description = "Only attack NPC that we can reach with melee",
-            position = 11,
+            position = 9,
             section = combatSection
     )
     default boolean attackReachableNpc() {
@@ -310,7 +322,7 @@ public interface PvmFighterConfig extends Config {
             keyName = "Center Tile",
             name = "Manual Center Tile",
             description = "Shift Right-click the ground to select the center tile",
-            position = 12,
+            position = 10,
             section = combatSection
     )
     default boolean toggleCenterTile() {
@@ -945,18 +957,6 @@ public interface PvmFighterConfig extends Config {
     default WorldPoint centerLocation() {
         return new WorldPoint(0, 0, 0);
     }
-
-    //hidden config item for safe spot location
-    @ConfigItem(
-            keyName = "SafeSpotLocation",
-            name = "Safe Spot Location",
-            description = "Safe Spot Location",
-            hidden = true
-    )
-    default WorldPoint safeSpot() {
-        return new WorldPoint(0, 0, 0);
-    }
-
 }
 
 

@@ -1,23 +1,14 @@
 package net.runelite.client.plugins.microbot.pvmfighter;
 
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.coords.WorldPoint;
-import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
-import net.runelite.client.plugins.microbot.pvmfighter.bank.BankerScript;
-import net.runelite.client.plugins.microbot.pvmfighter.combat.AttackNpcScript;
 import net.runelite.client.plugins.microbot.pvmfighter.combat.FoodScript;
-import net.runelite.client.plugins.microbot.pvmfighter.combat.SafeSpot;
-import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
-import net.runelite.client.plugins.microbot.pvmfighter.loot.LootScript;
-import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
 import net.runelite.client.plugins.microbot.util.misc.Rs2Food;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
-import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;

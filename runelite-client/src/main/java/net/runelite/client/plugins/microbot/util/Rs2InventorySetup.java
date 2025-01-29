@@ -1,19 +1,19 @@
 package net.runelite.client.plugins.microbot.util;
 
+import net.runelite.api.ItemID;
+import net.runelite.api.VarPlayer;
 import net.runelite.api.Varbits;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.inventorysetups.InventorySetup;
 import net.runelite.client.plugins.microbot.inventorysetups.InventorySetupsItem;
+import net.runelite.client.plugins.microbot.inventorysetups.InventorySetupsStackCompareID;
 import net.runelite.client.plugins.microbot.inventorysetups.MInventorySetupsPlugin;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
@@ -29,6 +29,10 @@ public class Rs2InventorySetup {
     InventorySetup inventorySetup;
 
     ScheduledFuture<?> _mainScheduler;
+
+    final ArrayList<Integer> CANNON_SET = new ArrayList<>(Arrays.asList(ItemID.CANNON_BARRELS, ItemID.CANNON_BASE, ItemID.CANNON_STAND, ItemID.CANNON_FURNACE));
+
+    final int CANNON_IS_PLACED_STATE = 4;
 
     /**
      * Constructor to initialize the Rs2InventorySetup with a specific setup name and scheduler.
@@ -89,15 +93,28 @@ public class Rs2InventorySetup {
             InventorySetupsItem inventorySetupsItem = entry.getValue().get(0);
             int key = entry.getKey();
 
+            // check if dwarf cannon set is assembled
+            if (CANNON_SET.contains(inventorySetupsItem.getId())) {
+                if (Microbot.getVarbitPlayerValue(VarPlayer.CANNON_STATE) == CANNON_IS_PLACED_STATE) continue;
+            }
+
             if (inventorySetupsItem.getId() == -1) continue;
 
             int withdrawQuantity = calculateWithdrawQuantity(entry.getValue(), inventorySetupsItem, key);
             if (withdrawQuantity == 0) continue;
 
-            if (!Rs2Bank.hasBankItem(inventorySetupsItem.getName(), withdrawQuantity)) {
-                Microbot.pauseAllScripts = true;
-                Microbot.showMessage("Bank is missing the following item " + inventorySetupsItem.getName());
-                break;
+            if (inventorySetupsItem.getStackCompare() == InventorySetupsStackCompareID.None
+            || inventorySetupsItem.getStackCompare() == InventorySetupsStackCompareID.Standard
+            || inventorySetupsItem.getStackCompare() == InventorySetupsStackCompareID.Greater_Than) {
+                if (!Rs2Bank.hasBankItem(inventorySetupsItem.getName(), withdrawQuantity)) {
+                    Microbot.showMessage("Bank is missing the following item or the necessary quantity" + inventorySetupsItem.getName());
+                    break;
+                }
+            } else if (inventorySetupsItem.getStackCompare() == InventorySetupsStackCompareID.Less_Than) {
+                if (!Rs2Bank.hasBankItem(inventorySetupsItem.getName())) {
+                    Microbot.showMessage("Bank is missing the following item " + inventorySetupsItem.getName());
+                    break;
+                }
             }
 
             withdrawItem(inventorySetupsItem, withdrawQuantity);
@@ -196,6 +213,7 @@ public class Rs2InventorySetup {
                     Rs2Bank.withdrawAndEquip(inventorySetupsItem.getName());
                     sleep(100, 250);
                 }
+
             } else {
                 if (inventorySetupsItem.getId() == -1 || !Rs2Bank.hasItem(inventorySetupsItem.getName()))
                     continue;
@@ -251,7 +269,10 @@ public class Rs2InventorySetup {
             } else {
                 withdrawQuantity = groupedByItems.get(key).size();
             }
-            if (!Rs2Inventory.hasItemAmount(inventorySetupsItem.getName(), withdrawQuantity, isStackable)) {
+            // check if dwarf cannon set is assembled
+            if (CANNON_SET.contains(inventorySetupsItem.getId())) {
+                if (Microbot.getVarbitPlayerValue(VarPlayer.CANNON_STATE) == CANNON_IS_PLACED_STATE) found = true;
+            } else if (!Rs2Inventory.hasItemAmount(inventorySetupsItem.getName(), withdrawQuantity, isStackable)) {
                 Microbot.log("Looking for " + inventorySetupsItem.getName() + " with amount " + withdrawQuantity);
                 found = false;
             }

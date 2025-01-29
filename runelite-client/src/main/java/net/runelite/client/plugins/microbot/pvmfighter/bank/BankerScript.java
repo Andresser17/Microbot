@@ -3,6 +3,7 @@ package net.runelite.client.plugins.microbot.pvmfighter.bank;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.plugins.microbot.Script;
+import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterPlugin;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.Rs2InventorySetup;
@@ -67,9 +68,11 @@ public class BankerScript extends Script {
         if (config.useInventorySetup()) {
             Rs2InventorySetup inventorySetup = new Rs2InventorySetup(config.inventorySetup().getInventorySetupName(), mainScheduledFuture);
             if (!inventorySetup.doesEquipmentMatch()) {
-                inventorySetup.loadEquipment();
+                boolean equipmentMatch = inventorySetup.loadEquipment();
+                if (!equipmentMatch) PvmFighterPlugin.shutdownFlag = true;
             }
-            inventorySetup.loadInventory();
+            boolean inventoryMatch = inventorySetup.loadInventory();
+            if (!inventoryMatch) PvmFighterPlugin.shutdownFlag = true;
             return true;
         }
 

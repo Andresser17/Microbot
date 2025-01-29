@@ -3,6 +3,7 @@ package net.runelite.client.plugins.microbot.pvmfighter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.plugins.cannon.CannonPlugin;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.pvmfighter.bank.BankerScript;
@@ -40,7 +41,6 @@ public class PvmFighterScript extends Script {
     private final AttackNpcScript attackNpcScript = new AttackNpcScript();
     private final FoodScript foodScript = new FoodScript();
     private final LootScript lootScript = new LootScript();
-    private final SafeSpot safeSpotScript = new SafeSpot();
     private final BankerScript bankerScript = new BankerScript();
     private final CannonScript cannonScript = new CannonScript();
     private final SlayerScript slayerScript = new SlayerScript();
@@ -88,6 +88,7 @@ public class PvmFighterScript extends Script {
                     .map((name -> name.trim().toLowerCase()))
                     .collect(Collectors.toList());
             setup = config.inventorySetup();
+            slayerTask = null;
         }
 
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
@@ -99,7 +100,6 @@ public class PvmFighterScript extends Script {
                 boolean desiredLocation = checkIfInDesiredLocation();
                 if (!desiredLocation && Rs2Antiban.isIdle()) walkToDesiredLocation();
 
-//                Microbot.log(String.format("PlayerState: %s, PlayerLocation: %s", playerState, currentLocation));
                 switch (playerState) {
                     case ATTACKING:
                         if (!AttackNpcScript.isRunning) attackNpcScript.run(config);
@@ -117,7 +117,7 @@ public class PvmFighterScript extends Script {
                         slayerScript.run(config);
                 }
             } catch (Exception ex) {
-                System.out.println(ex.getMessage());
+                log.info(ex.getMessage());
             }
         }, 0, 1000, TimeUnit.MILLISECONDS);
 
@@ -127,7 +127,6 @@ public class PvmFighterScript extends Script {
     @Override
     public void shutdown() {
         attackNpcScript.shutdown();
-        safeSpotScript.shutdown();
         lootScript.shutdown();
         bankerScript.shutdown();
         foodScript.shutdown();

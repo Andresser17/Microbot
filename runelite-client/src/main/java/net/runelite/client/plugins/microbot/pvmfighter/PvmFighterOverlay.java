@@ -6,6 +6,8 @@ import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.pvmfighter.model.Monster;
+import net.runelite.client.plugins.microbot.util.coords.Rs2LocalPoint;
+import net.runelite.client.plugins.microbot.util.coords.Rs2WorldPoint;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -63,7 +65,8 @@ public class PvmFighterOverlay extends OverlayPanel {
             }
         }
         // render safe spot
-        LocalPoint sslp = LocalPoint.fromWorld(Microbot.getClient(), config.safeSpot());
+//        LocalPoint sslp = LocalPoint.fromWorld(Microbot.getClient(), config.safeSpotLocation());
+        LocalPoint sslp = Rs2LocalPoint.fromWorldInstance(PvmFighterPlugin.safeSpotLocation);
         if (sslp != null) {
             Polygon safeSpotPoly = Perspective.getCanvasTileAreaPoly(Microbot.getClient(), sslp, 1);
             if (safeSpotPoly != null && config.useSafeSpot()) {

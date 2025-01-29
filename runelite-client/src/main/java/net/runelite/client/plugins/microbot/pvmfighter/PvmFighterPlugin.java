@@ -35,6 +35,7 @@ import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
 import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -62,6 +63,7 @@ public class PvmFighterPlugin extends Plugin {
     @Setter
     public static int cooldown = 0;
     public static boolean shutdownFlag = false;
+    public static WorldPoint safeSpotLocation;
     @Getter
     @Setter
     private final PvmFighterScript pvmFighterScript = new PvmFighterScript();
@@ -120,6 +122,14 @@ public class PvmFighterPlugin extends Plugin {
             PlayerLocation.BANK_LOCATION.setWorldPoint(config.bankLocation().getWorldPoint(), 10);
         }
 
+        if (config.useSafeSpot()) {
+            Integer[] coordinates = Arrays.stream(config.safeSpotLocation().split(","))
+                    .map((name -> Integer.parseInt(name.trim())))
+                    .toArray(Integer[]::new);
+            safeSpotLocation = new WorldPoint(coordinates[0], coordinates[1], coordinates[2]);
+            PlayerLocation.SAFE_SPOT.setWorldPoint(safeSpotLocation);
+        }
+
         pvmFighterScript.run(config);
         helperScript.run(config);
 
@@ -141,7 +151,7 @@ public class PvmFighterPlugin extends Plugin {
 
     private void resetLocation() {
         setCenter(new WorldPoint(0, 0, 0));
-        setSafeSpot(new WorldPoint(0, 0, 0));
+        safeSpotLocation = new WorldPoint(0, 0, 0);
     }
 
     private void setCenter(WorldPoint worldPoint)
@@ -153,15 +163,7 @@ public class PvmFighterPlugin extends Plugin {
         );
 
     }
-    // set safe spot
-    private void setSafeSpot(WorldPoint worldPoint)
-    {
-        configManager.setConfiguration(
-                PvmFighterConfig.GROUP,
-                "SafeSpotLocation",
-                worldPoint
-        );
-    }
+
     //set Inventory Setup
     private void setInventorySetup(InventorySetup inventorySetup) {
         configManager.setConfiguration(
@@ -203,14 +205,7 @@ public class PvmFighterPlugin extends Plugin {
     // on setting change
     @Subscribe
     public void onConfigChanged(ConfigChanged event) {
-        if (event.getKey().equals("SafeSpot")) {
-            if (!config.useSafeSpot()) {
-                // reset safe spot to default
-                setSafeSpot(new WorldPoint(0, 0, 0));
-            }
-        }
-
-        if (event.getKey().equals("NearestBankLocation") || event.getKey().equals("BankLocation")) {
+        if (event.getKey().equals(PvmFighterConfig.nearestBankLocation) || event.getKey().equals(PvmFighterConfig.bankLocation)) {
             if (config.useNearestBank()) {
                 PlayerLocation.BANK_LOCATION.setWorldPoint(Rs2Bank.getNearestBank().getWorldPoint(), 10);
             } else {
@@ -218,14 +213,15 @@ public class PvmFighterPlugin extends Plugin {
             }
         }
 
-        if (event.getKey().equals("SafeSpotLocation")) {
-            PlayerLocation.SAFE_SPOT.setWorldPoint(config.safeSpot(), 0);
+        if (event.getKey().equals(PvmFighterConfig.safeSpotLocation)) {
+            Integer[] coordinates = Arrays.stream(config.safeSpotLocation().split(","))
+                    .map((name -> Integer.parseInt(name.trim())))
+                    .toArray(Integer[]::new);
+            safeSpotLocation = new WorldPoint(coordinates[0], coordinates[1], coordinates[2]);
+            PlayerLocation.SAFE_SPOT.setWorldPoint(safeSpotLocation);
         }
 
-        if(event.getKey().equals("Combat")) {
-//            if (!config.toggleCombat() && config.toggleCenterTile()) {
-//                setCenter(new WorldPoint(0, 0, 0));
-//            }
+        if(event.getKey().equals(PvmFighterConfig.toggleCombat)) {
             if (config.toggleCombat() && PlayerLocation.COMBAT_FIELD.getArea() == null) {
                 setCenter(Rs2Player.getWorldLocation());
             }
@@ -233,6 +229,7 @@ public class PvmFighterPlugin extends Plugin {
                 Rs2Antiban.setPlayStyle(config.selectPlayStyle());
             }
         }
+
         if (event.getKey().equals(PvmFighterConfig.inventorySetup)) {
             MInventorySetupsPlugin.getInventorySetups().stream().filter(Objects::nonNull)
                     .filter(x -> x.getName().equalsIgnoreCase(config.inventorySetup().getInventorySetupName())).findFirst().ifPresent(this::setInventorySetup);
@@ -359,15 +356,16 @@ public class PvmFighterPlugin extends Plugin {
         }
         return null;
     }
+
     private void onMenuOptionClicked(MenuEntry entry) {
         if (entry.getOption().equals(SET) && entry.getTarget().equals(CENTER_TILE)) {
             setCenter(trueTile);
         }
+
         if (entry.getOption().equals(SET) && entry.getTarget().equals(SAFE_SPOT)) {
-            setSafeSpot(trueTile);
+            safeSpotLocation = trueTile;
+            PlayerLocation.SAFE_SPOT.setWorldPoint(trueTile);
         }
-
-
 
         if (entry.getType() != MenuAction.WALK) {
             lastClick = entry;

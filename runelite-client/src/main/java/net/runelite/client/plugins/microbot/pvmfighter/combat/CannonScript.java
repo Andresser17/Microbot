@@ -21,6 +21,7 @@ public class CannonScript extends Script {
     public void run(PvmFighterConfig config) {
         try {
             if (!fulfillConditionsToRun() && !config.useCannon()) return;
+            if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
             if (PvmFighterScript.pickUpCannonFlag) {
                 pickupCannon();
                 PvmFighterScript.pickUpCannonFlag = false;
@@ -28,7 +29,7 @@ public class CannonScript extends Script {
                 return;
             }
 
-            if (PvmFighterScript.slayerTask != null) {
+            if (config.toggleSlayer()) {
                 if (setCannon(PvmFighterScript.slayerTask.getWorldPoint())) PvmFighterScript.cannonIsAssembledFlag = true;
             }
             if (Rs2Cannon.repair())
