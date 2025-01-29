@@ -358,7 +358,15 @@ public class Rs2GroundItem {
         };
 
         return GroundItemsPlugin.getCollectedGroundItems().values().stream()
-                .filter(filter).sorted((p1, p2) -> Integer.compare(p2.getGePrice(), p1.getGePrice())).collect(Collectors.toList());
+                .filter(filter).sorted((p1, p2) -> {
+            int totalPrice1 = p1.isStackable() ? p1.getQuantity() * p1.getGePrice() : p1.getGePrice();
+            int totalPrice2 = p2.isStackable() ? p2.getQuantity() * p2.getGePrice() : p2.getGePrice();
+
+            return Integer.compare(totalPrice2, totalPrice1);
+        }).collect(Collectors.toList());
+
+//        return GroundItemsPlugin.getCollectedGroundItems().values().stream()
+//                .filter(filter).sorted((p1, p2) -> Integer.compare(p2.getGePrice(), p1.getGePrice())).collect(Collectors.toList());
     }
 
     public static List<GroundItem> getItemsToLootByName(LootingParameters params) {
