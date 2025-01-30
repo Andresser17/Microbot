@@ -27,6 +27,10 @@ public interface AIOMagicConfig extends Config {
 	String jewelleryToEnchant = "jewelleryToEnchant";
 	String stunSpell = "stunSpell";
 	String stunNpcName = "stunNpcName";
+	String degrimeStaff = "degrimeStaff";
+	String herbsToClean = "herbsToClean";
+	String toggleCleanAllHerbs = "toggleCleanAllHerbs";
+	String excludedHerbsToClean = "excludedHerbsToClean";
 
 	@ConfigSection(
 			name = "General Settings",
@@ -76,6 +80,13 @@ public interface AIOMagicConfig extends Config {
 			position = 4
 	)
 	String enchantSection = "enchant";
+
+	@ConfigSection(
+			name = "Degrime Settings",
+			description = "Configure degrime settings",
+			position = 5
+	)
+	String degrimeSection = "degrime";
 
 	@ConfigItem(
 			keyName = activity,
@@ -206,5 +217,49 @@ public interface AIOMagicConfig extends Config {
 	)
 	default Jewellery jewelleryToEnchant() {
 		return Jewellery.SAPPHIRE_RING;
+	}
+
+	@ConfigItem(
+			keyName = degrimeStaff,
+			name = "Staff",
+			description = "Staff to use, Earth staff or a variant",
+			position = 0,
+			section = degrimeSection
+	)
+	default EarthStaff degrimeStaff() {
+		return EarthStaff.STAFF_OF_EARTH;
+	}
+
+	@ConfigItem(
+			keyName = herbsToClean,
+			name = "Herbs to clean",
+			description = "Herbs to clean by name",
+			position = 1,
+			section = degrimeSection
+	)
+	default String herbsToClean() {
+		return "";
+	}
+
+	@ConfigItem(
+			keyName = toggleCleanAllHerbs,
+			name = "Clean all grimy hers",
+			description = "Clean all available herbs in bank",
+			position = 2,
+			section = degrimeSection
+	)
+	default boolean toggleCleanAllHerbs() {
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = excludedHerbsToClean,
+			name = "Excluded by name",
+			description = "Exclude the following herbs by name",
+			position = 3,
+			section = degrimeSection
+	)
+	default String excludedHerbsToClean() {
+		return "";
 	}
 }

@@ -62,6 +62,8 @@ public class AIOMagicPlugin extends Plugin {
 	private StunAlchScript stunAlchScript;
 	@Inject
 	private EnchantScript enchantScript;
+	@Inject
+	private DegrimeScript degrimeScript;
 
 	public static String version = "1.1.0";
 	
@@ -87,6 +89,16 @@ public class AIOMagicPlugin extends Plugin {
 	private Rs2Staff staff;
 	@Getter
 	private String stunNpcName;
+	@Getter
+	private EarthStaff degrimeStaff;
+	@Getter
+	private String herbsToClean;
+	@Getter
+	private boolean toggleCleanAllHerbs;
+	@Getter
+	private String excludedHerbsToClean;
+
+
 
 	@Override
 	protected void startUp() throws AWTException {
@@ -101,6 +113,12 @@ public class AIOMagicPlugin extends Plugin {
 		jewelleryToEnchant = config.jewelleryToEnchant();
 		stunSpell = config.stunSpell();
 		stunNpcName = config.stunNpcName();
+		degrimeStaff = config.degrimeStaff();
+		herbsToClean = config.herbsToClean();
+		toggleCleanAllHerbs = config.toggleCleanAllHerbs();
+		excludedHerbsToClean = config.excludedHerbsToClean();
+
+
 
 		if (overlayManager != null) {
 			overlayManager.add(aioMagicOverlay);
@@ -128,6 +146,9 @@ public class AIOMagicPlugin extends Plugin {
 			case STUNALCH:
 				stunAlchScript.run();
 				break;
+			case DEGRIME:
+				degrimeScript.run();
+				break;
 		}
 	}
 
@@ -139,6 +160,7 @@ public class AIOMagicPlugin extends Plugin {
 		teleAlchScript.shutdown();
 		enchantScript.shutdown();
 		stunAlchScript.shutdown();
+		degrimeScript.shutdown();
 		overlayManager.remove(aioMagicOverlay);
 	}
 
