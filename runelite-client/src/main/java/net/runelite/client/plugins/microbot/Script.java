@@ -23,9 +23,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
-
-import static java.awt.event.KeyEvent.CHAR_UNDEFINED;
 
 @Slf4j
 public abstract class Script implements IScript {
@@ -47,6 +44,7 @@ public abstract class Script implements IScript {
 
     /**
      * Get the total runtime of the script
+     *
      * @return
      */
     public Duration getRunTime() {
@@ -82,6 +80,7 @@ public abstract class Script implements IScript {
 
     /**
      * sleeps for a specified number of game ticks
+     *
      * @param ticksToWait
      * @return
      */
@@ -203,18 +202,18 @@ public abstract class Script implements IScript {
         if (Microbot.pauseAllScripts)
             return false;
 
-        if (Microbot.isLoggedIn()) {
-            synchronized (BlockingEventManager.class) {
-                if (!Microbot.getBlockingEventManager().getBlockingEvents().isEmpty()) {
-                    for (BlockingEvent blockingEvent : Microbot.getBlockingEventManager().getBlockingEvents()) {
-                        if (blockingEvent.validate()) {
-                            blockingEvent.execute();
-                            return false;
-                        }
+        synchronized (BlockingEventManager.class) {
+            if (!Microbot.getBlockingEventManager().getBlockingEvents().isEmpty()) {
+                for (BlockingEvent blockingEvent : Microbot.getBlockingEventManager().getBlockingEvents()) {
+                    if (blockingEvent.validate()) {
+                        blockingEvent.execute();
+                        return false;
                     }
                 }
             }
+        }
 
+        if (Microbot.isLoggedIn()) {
             boolean hasRunEnergy = Microbot.getClient().getEnergy() > Microbot.runEnergyThreshold;
             if (Microbot.enableAutoRunOn && hasRunEnergy)
                 Rs2Player.toggleRunEnergy(true);
