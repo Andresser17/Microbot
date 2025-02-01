@@ -40,7 +40,11 @@ public enum Setup {
 
     SLAYER_MELEE_ANTIPOISON(true, CombatStyle.MELEE,  true, false, false, 50, true, "Slayer Melee Anti-poison"),
     SLAYER_MAGIC_ANTIPOISON(true, CombatStyle.MAGIC, true, false, true, 50, true, "Slayer Magic Anti-poison"),
-    SLAYER_RANGED_ANTIPOISON(true, CombatStyle.RANGED, true, false, true, 50, true, "Slayer Ranged Anti-poison");
+    SLAYER_RANGED_ANTIPOISON(true, CombatStyle.RANGED, true, false, true, 50, true, "Slayer Ranged Anti-poison"),
+
+    SLAYER_MELEE_RESTORE(true, CombatStyle.MELEE,  true, false, false, 50, true, "Slayer Melee Restore"),
+    SLAYER_MAGIC_RESTORE(true, CombatStyle.MAGIC, true, false, true, 50, true, "Slayer Magic Restore"),
+    SLAYER_RANGED_RESTORE(true, CombatStyle.RANGED, true, false, true, 50, true, "Slayer Ranged Restore");
 
     final boolean toggleCombat;
     final CombatStyle combatStyle;

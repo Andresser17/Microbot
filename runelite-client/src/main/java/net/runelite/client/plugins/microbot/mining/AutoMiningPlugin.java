@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.microbot.mining.enums.PlayerLocation;
+import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
+import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 import javax.inject.Inject;
@@ -19,7 +22,7 @@ import java.awt.*;
 @Slf4j
 public class AutoMiningPlugin extends Plugin {
     @Inject
-    private AutoMiningConfig config;
+    public AutoMiningConfig config;
     @Provides
     AutoMiningConfig provideConfig(ConfigManager configManager) {
         return configManager.getConfig(AutoMiningConfig.class);
@@ -39,6 +42,10 @@ public class AutoMiningPlugin extends Plugin {
         if (overlayManager != null) {
             overlayManager.add(autoMiningOverlay);
         }
+
+        PlayerLocation.MINING_FIELD.setWorldPoint(Rs2Player.getWorldLocation(), config.area());
+        PlayerLocation.BANK_LOCATION.setWorldPoint(Rs2Bank.getNearestBank().getWorldPoint(), 10);
+
         autoMiningScript.run(config);
     }
 

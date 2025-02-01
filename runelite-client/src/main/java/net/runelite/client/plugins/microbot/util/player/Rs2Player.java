@@ -559,6 +559,10 @@ public class Rs2Player {
         return (Microbot.getClient().getBoostedSkillLevel(Skill.HITPOINTS) * 100) / Microbot.getClient().getRealSkillLevel(Skill.HITPOINTS);
     }
 
+    public static int getCurrentHealth() {
+        return Microbot.getClient().getBoostedSkillLevel(Skill.HITPOINTS);
+    }
+
     /**
      * Get a list of players around you
      *

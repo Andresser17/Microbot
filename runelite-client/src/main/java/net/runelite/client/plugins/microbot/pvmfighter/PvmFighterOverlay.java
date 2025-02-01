@@ -55,18 +55,21 @@ public class PvmFighterOverlay extends OverlayPanel {
         if (npcToAttack == null) return null;
 
         // render area
-        LocalPoint lp =  LocalPoint.fromWorld(Microbot.getClient(), config.centerLocation());
-        if (lp != null) {
-            Polygon poly = Perspective.getCanvasTileAreaPoly(Microbot.getClient(), lp, config.attackRadius());
+        if (!config.toggleSlayer()) {
+            LocalPoint lp =  LocalPoint.fromWorld(Microbot.getClient(), config.centerLocation());
+            if (lp != null) {
+                Polygon poly = Perspective.getCanvasTileAreaPoly(Microbot.getClient(), lp, config.attackRadius());
 
-            if (poly != null)
-            {
-                renderPolygon(graphics, poly, WHITE_TRANSLUCENT);
+                if (poly != null)
+                {
+                    renderPolygon(graphics, poly, WHITE_TRANSLUCENT);
+                }
             }
         }
+
         // render safe spot
 //        LocalPoint sslp = LocalPoint.fromWorld(Microbot.getClient(), config.safeSpotLocation());
-        LocalPoint sslp = Rs2LocalPoint.fromWorldInstance(PvmFighterPlugin.safeSpotLocation);
+        LocalPoint sslp = PvmFighterPlugin.safeSpotLocation != null ? Rs2LocalPoint.fromWorldInstance(PvmFighterPlugin.safeSpotLocation) : new LocalPoint(0, 0, 0);
         if (sslp != null) {
             Polygon safeSpotPoly = Perspective.getCanvasTileAreaPoly(Microbot.getClient(), sslp, 1);
             if (safeSpotPoly != null && config.useSafeSpot()) {

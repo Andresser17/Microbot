@@ -3,7 +3,10 @@ package net.runelite.client.plugins.microbot.mining.enums;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.runelite.api.Skill;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.SlayerTask;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
+
+import java.util.stream.Stream;
 
 @Getter
 @RequiredArgsConstructor
@@ -30,6 +33,14 @@ public enum Rocks {
     @Override
     public String toString() {
         return name;
+    }
+
+    public static Stream<Rocks> stream() {
+        return Stream.of(Rocks.values());
+    }
+
+    public static Rocks findTaskByName(String name) {
+        return stream().filter(rock -> rock.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
     
     public boolean hasRequiredLevel() {

@@ -6,6 +6,7 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.cannon.CannonPlugin;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
+import net.runelite.client.plugins.microbot.inventorysetups.InventorySetup;
 import net.runelite.client.plugins.microbot.pvmfighter.bank.BankerScript;
 import net.runelite.client.plugins.microbot.pvmfighter.combat.*;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
@@ -13,6 +14,7 @@ import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.Setup;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.SlayerTask;
 import net.runelite.client.plugins.microbot.pvmfighter.loot.LootScript;
+import net.runelite.client.plugins.microbot.util.Rs2InventorySetup;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
@@ -36,6 +38,8 @@ public class PvmFighterScript extends Script {
     public static List<String> npcTargets = new ArrayList<>();
     public static SlayerTask slayerTask;
     public static Setup setup;
+    public static Rs2InventorySetup inventorySetup;
+    private static boolean init = true;
     public static boolean pickUpCannonFlag = false;
     public static boolean cannonIsAssembledFlag = false;
     private final AttackNpcScript attackNpcScript = new AttackNpcScript();
@@ -55,7 +59,9 @@ public class PvmFighterScript extends Script {
         Rs2Antiban.setActivityIntensity(ActivityIntensity.MODERATE);
         Rs2Antiban.setPlayStyle(PlayStyle.MODERATE);
 
-        if (config.toggleSlayer()) {
+        if (config.useInventorySetup()) {
+            inventorySetup = new Rs2InventorySetup(config.inventorySetup().getInventorySetupName(), mainScheduledFuture);
+        } else if (config.toggleSlayer()) {
             // check if player has a slayer task assigned
             int creatureVarbitValue = Microbot.getVarbitPlayerValue(VarPlayer.SLAYER_TASK_CREATURE);
             EnumComposition creatureEnum = Microbot.getEnum(EnumID.SLAYER_TASK_CREATURE);
@@ -78,6 +84,8 @@ public class PvmFighterScript extends Script {
                             setup = slayerTask.getRangedSetup();
                             break;
                     }
+
+                    inventorySetup = new Rs2InventorySetup(setup.getInventorySetupName(), mainScheduledFuture);
                 } else {
                     Microbot.showMessage("Slayer task not found, shutting down!!!");
                     PvmFighterPlugin.shutdownFlag = true;
@@ -136,6 +144,8 @@ public class PvmFighterScript extends Script {
         super.shutdown();
         Rs2Antiban.resetAntibanSettings();
         npcTargets = new ArrayList<>();
+        init = true;
+        inventorySetup = null;
     }
 
     private boolean checkIfInDesiredLocation() {
@@ -187,6 +197,11 @@ public class PvmFighterScript extends Script {
     }
 
     private void getPlayerState(PvmFighterConfig config) {
+        if (init && !equipmentMatch(config)) {
+            playerState = PlayerState.BANKING;
+            return;
+        } else if (!init && equipmentMatch(config)) init = false;
+
         if (isReadyToBank(config)) {
             playerState = PlayerState.BANKING;
             return;
@@ -298,6 +313,11 @@ public class PvmFighterScript extends Script {
         log.info("minimum health: {}", config.minimumHealthToRetrieve());
         log.info("player needs to retrieve: {}", Rs2Player.getHealthPercentageInt() <= config.minimumHealthToRetrieve());
         return Rs2Inventory.getEmptySlots() <= config.minFreeInventorySlots() || needsToRetreat(config);
+    }
+
+    public boolean equipmentMatch(PvmFighterConfig config) {
+        if (!config.useInventorySetup() && !config.toggleSlayer()) return true;
+        return inventorySetup.doesEquipmentMatch();
     }
 
     public static boolean needsToRetreat(PvmFighterConfig config) {

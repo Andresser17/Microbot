@@ -2,9 +2,8 @@ package net.runelite.client.plugins.microbot.pvmfighter;
 
 
 import net.runelite.client.plugins.microbot.Microbot;
-import net.runelite.client.plugins.microbot.cooking.enums.PlayerLocation;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
-import net.runelite.client.plugins.microbot.util.bank.enums.BankLocation;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -30,10 +29,9 @@ public class PvmFighterInfoOverlay extends OverlayPanel {
         try {
             panelComponent.setPreferredSize(new Dimension(250, 400));
             panelComponent.getChildren().add(TitleComponent.builder()
-                    .text("PVM Fighter")
+                    .text(String.format("PVM Fighter V%s", PvmFighterPlugin.version))
                     .color(Color.GREEN)
                     .build());
-
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(String.format("Play style: %s", Rs2Antiban.getPlayStyle()))
@@ -41,14 +39,15 @@ public class PvmFighterInfoOverlay extends OverlayPanel {
                     .build());
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(String.format("Helper state: %s", HelperScript.helperState))
+                    .right(String.format("Safe Spot: %s", PlayerLocation.SAFE_SPOT.getPoint()))
                     .build());
             panelComponent.getChildren().add(LineComponent.builder()
-                    .left(String.format("Health percentage: %s", Rs2Player.getHealthPercentageInt()))
-                    .right("Attack cooldown: " + PvmFighterPlugin.getCooldown())
+                    .left(String.format("Slayer Task: %s", PvmFighterScript.slayerTask.getName()))
+                    .right(String.format("Inventory Setup: %s", PvmFighterScript.setup.getInventorySetupName()))
                     .build());
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(Microbot.status)
-                    .right("Version:" + PvmFighterPlugin.version)
+                    .right(String.format("Health percentage: %s", Rs2Player.getHealthPercentageInt()))
                     .build());
 
 

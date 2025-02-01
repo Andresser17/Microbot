@@ -110,9 +110,7 @@ public class PvmFighterPlugin extends Plugin {
         if (config.toggleSlayer()) {
             PlayerLocation.SLAYER_MASTER.setWorldPoint(config.slayerMaster().getWorldPoint());
             PlayerLocation.SLAYER_MASTER.setWorldArea(config.slayerMaster().getWorldArea());
-        }
-
-        if (!config.toggleSlayer()) {
+        } else {
             PlayerLocation.COMBAT_FIELD.setWorldPoint(config.centerLocation(), config.attackRadius());
         }
 

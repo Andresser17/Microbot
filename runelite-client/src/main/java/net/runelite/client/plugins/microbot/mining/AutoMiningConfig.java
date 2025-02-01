@@ -1,7 +1,6 @@
 package net.runelite.client.plugins.microbot.mining;
 
 import net.runelite.client.config.*;
-import net.runelite.client.plugins.microbot.mining.enums.Rocks;
 
 @ConfigGroup("Mining")
 @ConfigInformation("<h2>Auto Mining</h2>" +
@@ -31,19 +30,19 @@ public interface AutoMiningConfig extends Config {
             position = 0,
             section = generalSection
     )
-    default Rocks ORE()
+    default String oresToMine()
     {
-        return Rocks.TIN;
+        return "Tin Ore";
     }
 
     @ConfigItem(
-            keyName = "DistanceToStray",
-            name = "Distance to Stray",
+            keyName = "Area",
+            name = "Area",
             description = "Set how far you can travel from your initial position in tiles",
             position = 2,
             section = generalSection
     )
-    default int distanceToStray()
+    default int area()
     {
         return 20;
     }
@@ -61,13 +60,13 @@ public interface AutoMiningConfig extends Config {
     }
 
     @ConfigItem(
-            keyName = "ItemsToBank",
-            name = "Items to bank (Comma seperated)",
-            description = "Items to bank",
+            keyName = "ItemsToKeep",
+            name = "Items to Keep",
+            description = "Items to keep in inventory, separate with coma",
             position = 4
     )
-    default String itemsToBank() {
-        return "ore";
+    default String itemsToKeep() {
+        return "Rune Pickaxe";
     }
 
 }

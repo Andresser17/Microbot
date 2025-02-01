@@ -9,9 +9,12 @@ import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.Rs2InventorySetup;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
 import net.runelite.client.plugins.microbot.pvmfighter.constants.Constants;
+import net.runelite.client.plugins.microbot.util.misc.Rs2Food;
+import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 
 import java.util.*;
 import java.util.function.Function;
@@ -49,12 +52,13 @@ enum ItemToKeep {
 
 @Slf4j
 public class BankerScript extends Script {
+
     public void run(PvmFighterConfig config) {
         try {
             if (PvmFighterScript.playerState != PlayerState.BANKING) return;
             if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
+            if (!Rs2Bank.isOpen()) Rs2Bank.openBank();
 
-            Rs2Bank.openBank();
             depositAllExcept(config);
             withdrawUpkeepItems(config);
             Rs2Random.wait(800, 1600);
@@ -65,13 +69,14 @@ public class BankerScript extends Script {
     }
 
     public boolean withdrawUpkeepItems(PvmFighterConfig config) {
-        if (config.useInventorySetup()) {
-            Rs2InventorySetup inventorySetup = new Rs2InventorySetup(config.inventorySetup().getInventorySetupName(), mainScheduledFuture);
-            if (!inventorySetup.doesEquipmentMatch()) {
-                boolean equipmentMatch = inventorySetup.loadEquipment();
+        if (config.useInventorySetup() || config.toggleSlayer()) {
+            if (PvmFighterScript.inventorySetup.isMainSchedulerCancelled())
+                PvmFighterScript.inventorySetup = new Rs2InventorySetup(PvmFighterScript.setup.getInventorySetupName(), mainScheduledFuture);
+            if (!PvmFighterScript.inventorySetup.doesEquipmentMatch()) {
+                boolean equipmentMatch = PvmFighterScript.inventorySetup.loadEquipment();
                 if (!equipmentMatch) PvmFighterPlugin.shutdownFlag = true;
             }
-            boolean inventoryMatch = inventorySetup.loadInventory();
+            boolean inventoryMatch = PvmFighterScript.inventorySetup.loadInventory();
             if (!inventoryMatch) PvmFighterPlugin.shutdownFlag = true;
             return true;
         }
@@ -86,7 +91,21 @@ public class BankerScript extends Script {
                     Collections.reverse(ids);
                     for (int id : ids) {
                         log.info("Checking bank for item: {}", id);
-                        if (Rs2Bank.hasBankItem(id, item.getQuantityToWithdraw(config) - count)) {
+                        if (item.name().equals("FOOD") && !Rs2Player.isFullHealth()) {
+                            Rs2Food food = Rs2Food.getFoodById(id);
+                            int foodToWithdraw = (Rs2Player.getMaxHealth() - Rs2Player.getCurrentHealth()) / food.getHeal();
+                            // calculate food to withdraw to restore health
+                            if (Rs2Bank.hasBankItem(id, foodToWithdraw)) {
+                                Rs2Bank.withdrawX(id, foodToWithdraw);
+                                Rs2Random.wait(900, 1200);
+                                sleepUntilFulfillCondition(() -> {
+                                    if (Rs2Inventory.hasItem(id)) {
+                                        return Rs2Inventory.interact(id, "Eat");
+                                    }
+                                    return false;
+                                }, () -> Rs2Random.wait(800, 1200));
+                            }
+                        } else if (Rs2Bank.hasBankItem(id, item.getQuantityToWithdraw(config) - count)) {
                             Rs2Bank.withdrawX(true, id, item.getQuantityToWithdraw(config) - count);
                             break;
                         }

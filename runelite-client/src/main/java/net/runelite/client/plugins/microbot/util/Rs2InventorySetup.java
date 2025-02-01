@@ -70,7 +70,7 @@ public class Rs2InventorySetup {
      *
      * @return true if the scheduler is cancelled, false otherwise.
      */
-    private boolean isMainSchedulerCancelled() {
+    public boolean isMainSchedulerCancelled() {
         return _mainScheduler != null && _mainScheduler.isCancelled();
     }
 
@@ -106,12 +106,12 @@ public class Rs2InventorySetup {
             if (inventorySetupsItem.getStackCompare() == InventorySetupsStackCompareID.None
             || inventorySetupsItem.getStackCompare() == InventorySetupsStackCompareID.Standard
             || inventorySetupsItem.getStackCompare() == InventorySetupsStackCompareID.Greater_Than) {
-                if (!Rs2Bank.hasBankItem(inventorySetupsItem.getName(), withdrawQuantity)) {
+                if (!Rs2Bank.hasBankItem(inventorySetupsItem.getId(), withdrawQuantity)) {
                     Microbot.showMessage("Bank is missing the following item or the necessary quantity" + inventorySetupsItem.getName());
                     break;
                 }
             } else if (inventorySetupsItem.getStackCompare() == InventorySetupsStackCompareID.Less_Than) {
-                if (!Rs2Bank.hasBankItem(inventorySetupsItem.getName())) {
+                if (!Rs2Bank.hasItem(inventorySetupsItem.getId())) {
                     Microbot.showMessage("Bank is missing the following item " + inventorySetupsItem.getName());
                     break;
                 }

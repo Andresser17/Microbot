@@ -13,6 +13,7 @@ import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.SlayerTask;
+import net.runelite.client.plugins.microbot.util.Rs2InventorySetup;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
@@ -56,6 +57,8 @@ public class SlayerScript extends Script {
                                 PvmFighterScript.setup = PvmFighterScript.slayerTask.getRangedSetup();
                                 break;
                         }
+
+                        PvmFighterScript.inventorySetup = new Rs2InventorySetup(PvmFighterScript.setup.getInventorySetupName(), mainScheduledFuture);
                     } else {
                         Microbot.showMessage("Slayer task not found, shutting down!!!");
                         PvmFighterPlugin.shutdownFlag = true;
