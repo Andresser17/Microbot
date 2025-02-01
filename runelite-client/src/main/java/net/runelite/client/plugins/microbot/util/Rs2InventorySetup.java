@@ -85,12 +85,14 @@ public class Rs2InventorySetup {
             return false;
         }
         Rs2Bank.depositAllExcept(itemsToNotDeposit());
-        Map<Integer, List<InventorySetupsItem>> groupedByItems = inventorySetup.getInventory().stream().collect(Collectors.groupingBy(InventorySetupsItem::getId));
+//        Map<Integer, List<InventorySetupsItem>> groupedByItems = inventorySetup.getInventory().stream().collect(Collectors.groupingBy(InventorySetupsItem::getId));
+        Map<Integer, InventorySetupsItem> groupedByItems = inventorySetup.getInventory()
+                .stream().collect(Collectors.toMap(InventorySetupsItem::getId, value -> value));
 
-        for (Map.Entry<Integer, List<InventorySetupsItem>> entry : groupedByItems.entrySet()) {
+        for (Map.Entry<Integer, InventorySetupsItem> entry : groupedByItems.entrySet()) {
             if (isMainSchedulerCancelled()) break;
 
-            InventorySetupsItem inventorySetupsItem = entry.getValue().get(0);
+            InventorySetupsItem inventorySetupsItem = entry.getValue();
             int key = entry.getKey();
 
             // check if dwarf cannon set is assembled
@@ -100,7 +102,7 @@ public class Rs2InventorySetup {
 
             if (inventorySetupsItem.getId() == -1) continue;
 
-            int withdrawQuantity = calculateWithdrawQuantity(entry.getValue(), inventorySetupsItem, key);
+            int withdrawQuantity = calculateWithdrawQuantity(inventorySetupsItem, key);
             if (withdrawQuantity == 0) continue;
 
             if (inventorySetupsItem.getStackCompare() == InventorySetupsStackCompareID.None
@@ -151,6 +153,30 @@ public class Rs2InventorySetup {
         } else {
             withdrawQuantity = items.size() - (int) Rs2Inventory.items().stream().filter(x -> x.getId() == key).count();
             if (Rs2Inventory.hasItemAmount(inventorySetupsItem.getName(), items.size())) {
+                return 0;
+            }
+        }
+        return withdrawQuantity;
+    }
+
+    /**
+     * Calculates the quantity of an item to withdraw based on the current inventory state.
+     *
+     * @param item The inventory setup item.
+     * @param key                The item ID.
+     * @return The quantity to withdraw.
+     */
+    private int calculateWithdrawQuantity(InventorySetupsItem item, int key) {
+        int withdrawQuantity;
+        Rs2Item rs2Item = Rs2Inventory.get(key);
+        if (rs2Item != null && rs2Item.isStackable()) {
+            withdrawQuantity = item.getQuantity() - rs2Item.quantity;
+            if (Rs2Inventory.hasItemAmount(item.getName(), item.getQuantity())) {
+                return 0;
+            }
+        } else {
+            withdrawQuantity = item.getQuantity();
+            if (Rs2Inventory.hasItemAmount(item.getName(), withdrawQuantity)) {
                 return 0;
             }
         }

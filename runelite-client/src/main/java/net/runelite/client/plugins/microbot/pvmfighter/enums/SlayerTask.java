@@ -61,7 +61,7 @@ public enum SlayerTask {
     JUNGLE_HORROR("Jungle Horrors", new String[]{"Jungle Horror"}, true, new WorldArea(3668, 3008, 107, 34, 0),
             new WorldPoint(3694, 3022, 0), Setup.SLAYER_MELEE, Setup.SLAYER_MAGIC, Setup.SLAYER_RANGED),
     KALPHITE("Kalphite", new String[]{"Kalphite Worker", "Kalphite Soldier", "Kalphite Guardian", "Kalphite Queen"}, true, new WorldArea(3263, 9473, 82, 79, 0),
-            new WorldPoint(3298, 9501, 0), Setup.SLAYER_MELEE, Setup.SLAYER_MAGIC, Setup.SLAYER_RANGED),
+            new WorldPoint(3298, 9501, 0), Setup.SLAYER_MELEE_ANTIPOISON, Setup.SLAYER_MAGIC_ANTIPOISON, Setup.SLAYER_RANGED_ANTIPOISON),
     KURASK("Kurask", new String[]{"Kurask"}, false, new WorldArea(2689, 9987, 21, 22, 0),
             new WorldPoint(2699, 9999, 0), Setup.SLAYER_MELEE_KURASK, Setup.SLAYER_MAGIC_KURASK, Setup.SLAYER_RANGED_KURASK),
     LESSER_DEMON("Lesser Demons", new String[]{"Lesser Demon"}, true, new WorldArea(2145, 9329, 24, 14, 0),

@@ -1,5 +1,6 @@
 package net.runelite.client.plugins.microbot.mining;
 
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.GameObject;
 import net.runelite.api.Skill;
 import net.runelite.api.coords.WorldPoint;
@@ -13,12 +14,14 @@ import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
+import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class AutoMiningScript extends Script {
     public static final String version = "1.4.3";
     private static final int GEM_MINE_UNDERGROUND = 11410;
@@ -28,7 +31,6 @@ public class AutoMiningScript extends Script {
     PlayerLocation currentLocation;
 
     public boolean run(AutoMiningConfig config) {
-        initialPlayerLocation = null;
         Rs2Antiban.resetAntibanSettings();
         Rs2Antiban.antibanSetupTemplates.applyMiningSetup();
         Rs2AntibanSettings.naturalMouse = true;
@@ -36,21 +38,23 @@ public class AutoMiningScript extends Script {
         Rs2AntibanSettings.moveMouseOffScreen = true;
         Rs2AntibanSettings.actionCooldownChance = 0.1;
 
-        oresToMine = Arrays.stream(config.oresToMine().split(",")).map((name) -> Rocks.findTaskByName(name.trim().toLowerCase())).toArray(Rocks[]::new);
+        oresToMine = Arrays.stream(config.oresToMine().split(",")).map((name) -> Rocks.findRockByName(name.trim().toLowerCase())).toArray(Rocks[]::new);
 
         // check if player has level to mine provided ores
         Arrays.stream(oresToMine).forEach(ore -> {
-            if (!ore.hasRequiredLevel()) {
-                Microbot.showMessage("You do not have the required mining level to mine this ore.");
+            if (ore != null) {
+                if (!ore.hasRequiredLevel()) {
+                    Microbot.showMessage("You do not have the required mining level to mine this ore.");
+                    shutdown();
+                }
+            } else {
+                Microbot.showMessage("Ore not found. Enter full name, ex: iron ore");
                 shutdown();
             }
         });
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
                 if (!fulfillConditionsToRun() || Rs2AntibanSettings.actionCooldownActive) return;
-                if (initialPlayerLocation == null) {
-                    initialPlayerLocation = Rs2Player.getWorldLocation();
-                }
 
 //                if (Rs2Equipment.isWearing("Dragon pickaxe"))
 //                    Rs2Combat.setSpecState(true, 1000);
@@ -61,6 +65,8 @@ public class AutoMiningScript extends Script {
                 boolean desiredLocation = checkIfInDesiredLocation();
                 if (!desiredLocation && Rs2Antiban.isIdle()) walkToDesiredLocation();
 
+//                log.info("PlayerState: {}", playerState);
+                log.info("Mining field: {}, {}", PlayerLocation.MINING_FIELD.getArea().getX(), PlayerLocation.MINING_FIELD.getArea().getY());
                 switch (playerState) {
                     case MINING:
                         if (playerState.getPlayerLocation() != currentLocation) return;
@@ -120,16 +126,16 @@ public class AutoMiningScript extends Script {
         }
     }
 
-    private void walkToSelectedBank() {
-        WorldPoint point = PlayerLocation.BANK_LOCATION.getPoint();
-        Rs2Walker.walkTo(point, 8);
-        sleepUntil(() -> point.equals(Rs2Player.getWorldLocation()));
-    }
-
     private void walkToMiningField() {
         WorldPoint point = PlayerLocation.MINING_FIELD.getPoint();
+        Rs2Walker.walkTo(point, 0);
+        sleepUntilFulfillCondition(() -> PlayerLocation.MINING_FIELD.getArea().contains(Rs2Player.getWorldLocation()), () -> Rs2Random.wait(800, 1200));
+    }
+
+    private void walkToSelectedBank() {
+        WorldPoint point = PlayerLocation.BANK_LOCATION.getPoint();
         Rs2Walker.walkTo(point, 3);
-        sleepUntil(() -> PlayerLocation.MINING_FIELD.getArea().contains(Rs2Player.getWorldLocation()));
+        sleepUntilFulfillCondition(() -> PlayerLocation.BANK_LOCATION.getArea().contains(Rs2Player.getWorldLocation()), () -> Rs2Random.wait(800, 1200));
     }
 
     private void getPlayerState(AutoMiningConfig config) {

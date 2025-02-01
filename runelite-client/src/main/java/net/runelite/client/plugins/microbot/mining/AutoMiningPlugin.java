@@ -44,7 +44,12 @@ public class AutoMiningPlugin extends Plugin {
         }
 
         PlayerLocation.MINING_FIELD.setWorldPoint(Rs2Player.getWorldLocation(), config.area());
-        PlayerLocation.BANK_LOCATION.setWorldPoint(Rs2Bank.getNearestBank().getWorldPoint(), 10);
+
+        if (config.useNearestBank()) {
+            PlayerLocation.BANK_LOCATION.setWorldPoint(Rs2Bank.getNearestBank().getWorldPoint(), 10);
+        } else {
+            PlayerLocation.BANK_LOCATION.setWorldPoint(config.bankLocation().getWorldPoint(), 10);
+        }
 
         autoMiningScript.run(config);
     }

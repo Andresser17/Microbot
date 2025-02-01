@@ -35,22 +35,28 @@ public class AutoMiningOverlay extends OverlayPanel {
                     .color(Color.GREEN)
                     .build());
 
-            panelComponent.getChildren().add(LineComponent.builder().build());
+            panelComponent.getChildren().add(LineComponent.builder()
+                    .left(String.format("PlayerState: %s", plugin.autoMiningScript.playerState))
+                    .build());
+
+            panelComponent.getChildren().add(LineComponent.builder()
+                    .left(String.format("PlayerLocation: %s", plugin.autoMiningScript.currentLocation))
+                    .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(Microbot.status)
                     .build());
 
             // render area
-            LocalPoint lp =  LocalPoint.fromWorld(Microbot.getClient(), Rs2Player.getWorldLocation());
-            if (lp != null) {
-                Polygon poly = Perspective.getCanvasTileAreaPoly(Microbot.getClient(), lp, plugin.config.area());
-
-                if (poly != null)
-                {
-                    renderPolygon(graphics, poly, WHITE_TRANSLUCENT);
-                }
-            }
+//            LocalPoint lp =  LocalPoint.fromWorld(Microbot.getClient(), Rs2Player.getWorldLocation());
+//            if (lp != null) {
+//                Polygon poly = Perspective.getCanvasTileAreaPoly(Microbot.getClient(), lp, plugin.config.area());
+//
+//                if (poly != null)
+//                {
+//                    renderPolygon(graphics, poly, WHITE_TRANSLUCENT);
+//                }
+//            }
         } catch(Exception ex) {
             System.out.println(ex.getMessage());
         }

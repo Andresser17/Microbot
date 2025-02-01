@@ -1,6 +1,7 @@
 package net.runelite.client.plugins.microbot.mining;
 
 import net.runelite.client.config.*;
+import net.runelite.client.plugins.microbot.util.bank.enums.BankLocation;
 
 @ConfigGroup("Mining")
 @ConfigInformation("<h2>Auto Mining</h2>" +
@@ -60,13 +61,37 @@ public interface AutoMiningConfig extends Config {
     }
 
     @ConfigItem(
+            keyName = "bankLocation",
+            name = "Bank Location",
+            description = "Select bank to use",
+            position = 4,
+            section = generalSection
+    )
+    default BankLocation bankLocation()
+    {
+        return BankLocation.EDGEVILLE;
+    }
+
+    @ConfigItem(
+            keyName = "useNearestBank",
+            name = "Use nearest bank",
+            description = "Use nearest bank location, this will override selected bank location",
+            position = 5,
+            section = generalSection
+    )
+    default boolean useNearestBank()
+    {
+        return false;
+    }
+
+    @ConfigItem(
             keyName = "ItemsToKeep",
             name = "Items to Keep",
             description = "Items to keep in inventory, separate with coma",
-            position = 4
+            position = 6
     )
     default String itemsToKeep() {
-        return "Rune Pickaxe";
+        return "Pickaxe";
     }
 
 }
