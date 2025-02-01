@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class AutoMiningScript extends Script {
-    public static final String version = "1.4.3";
+    public static final String version = "1.5";
     private static final int GEM_MINE_UNDERGROUND = 11410;
     private static final int BASALT_MINE = 11425;
     private Rocks[] oresToMine;
@@ -63,17 +63,17 @@ public class AutoMiningScript extends Script {
                 getPlayerState(config);
                 currentLocation = PlayerLocation.checkCurrentPlayerLocation();
                 boolean desiredLocation = checkIfInDesiredLocation();
-                if (!desiredLocation && Rs2Antiban.isIdle()) walkToDesiredLocation();
+                if (!desiredLocation) walkToDesiredLocation();
 
-//                log.info("PlayerState: {}", playerState);
-                log.info("Mining field: {}, {}", PlayerLocation.MINING_FIELD.getArea().getX(), PlayerLocation.MINING_FIELD.getArea().getY());
+//                log.info("PlayerState: {}, CurrentLocation: {}", playerState, currentLocation);
+//                log.info("Mining field: {}, {}", PlayerLocation.MINING_FIELD.getArea().getX(), PlayerLocation.MINING_FIELD.getArea().getY());
                 switch (playerState) {
                     case MINING:
                         if (playerState.getPlayerLocation() != currentLocation) return;
 
                         GameObject rock = null;
                         for (Rocks ore : oresToMine) {
-                            rock = Rs2GameObject.findReachableObject(ore.getName(), true, config.area(), initialPlayerLocation);
+                            rock = Rs2GameObject.findReachableObject(ore.getName(), true, config.area(), PlayerLocation.MINING_FIELD.getPoint());
                             if (rock != null) break;
                         }
 
@@ -100,7 +100,7 @@ public class AutoMiningScript extends Script {
                         String[] itemToKeepNames = Arrays.stream(config.itemsToKeep().split(","))
                                 .map((name) -> name.trim().toLowerCase()).toArray(String[]::new);
 
-                        Rs2Bank.depositAllExcept(itemToKeepNames);
+                        Rs2Bank.depositAllExcept(false, itemToKeepNames);
                         break;
                 }
             } catch (Exception ex) {
@@ -120,6 +120,7 @@ public class AutoMiningScript extends Script {
         switch (playerState) {
             case MINING:
                 walkToMiningField();
+                break;
             case BANKING:
                 walkToSelectedBank();
                 break;
@@ -128,7 +129,7 @@ public class AutoMiningScript extends Script {
 
     private void walkToMiningField() {
         WorldPoint point = PlayerLocation.MINING_FIELD.getPoint();
-        Rs2Walker.walkTo(point, 0);
+        Rs2Walker.walkTo(point, 3);
         sleepUntilFulfillCondition(() -> PlayerLocation.MINING_FIELD.getArea().contains(Rs2Player.getWorldLocation()), () -> Rs2Random.wait(800, 1200));
     }
 
