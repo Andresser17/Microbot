@@ -10,6 +10,8 @@ import net.runelite.client.plugins.microbot.util.inventory.InteractOrder;
 
 @ConfigGroup("autocooking")
 public interface AutoCookingConfig extends Config {
+    String recipientToFill = "recipientToFill";
+    String heatingLocation = "heatingLocation";
 
     @ConfigSection(
             name = "General",
@@ -31,6 +33,13 @@ public interface AutoCookingConfig extends Config {
             position = 2
     )
     String cookingSection = "cooking";
+
+    @ConfigSection(
+            name = "Heating",
+            description = "Fill recipients with water then heat with a stove",
+            position = 3
+    )
+    String heatingSection = "heating";
 
     @ConfigItem(
             name = "Guide",
@@ -154,5 +163,27 @@ public interface AutoCookingConfig extends Config {
     )
     default boolean bankBurntFood() {
         return false;
+    }
+
+    @ConfigItem(
+            keyName = recipientToFill,
+            name = "Recipient",
+            position = 0,
+            description = "Select recipient to fill",
+            section = heatingSection
+    )
+    default Recipient recipientToFill() {
+        return Recipient.CUP;
+    }
+
+    @ConfigItem(
+            keyName = heatingLocation,
+            name = "Location",
+            position = 1,
+            description = "Location with a water source, a stove, and a near bank",
+            section = heatingSection
+    )
+    default HeatingLocation heatingLocation() {
+        return HeatingLocation.EDGEVILLE;
     }
 }

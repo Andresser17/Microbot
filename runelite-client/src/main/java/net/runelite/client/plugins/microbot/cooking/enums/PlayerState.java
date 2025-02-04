@@ -8,6 +8,7 @@ public enum PlayerState {
     COOKING(PlayerLocation.COOKING_AREA),
     BANKING(PlayerLocation.BANK_LOCATION),
     DROPPING(PlayerLocation.OUTSIDE_POINT),
+    FILLING(PlayerLocation.COOKING_AREA),
     IDLE(PlayerLocation.OUTSIDE_POINT);
 
     private final PlayerLocation playerLocation;

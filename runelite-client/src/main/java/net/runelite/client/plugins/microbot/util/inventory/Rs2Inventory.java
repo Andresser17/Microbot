@@ -2271,6 +2271,11 @@ public class Rs2Inventory {
                                 initialItem.getId() == currentItem.getId() && initialItem.getQuantity() == currentItem.getQuantity()));
     }
 
+    /**
+     * Sleep while inventory space is reducing or increasing
+     *
+     * @return
+     */
     public static boolean whileInventoryIsChanging(Runnable actionWhileWaiting) {
         int currentSize = 0;
         int currentStackableSize = 0;

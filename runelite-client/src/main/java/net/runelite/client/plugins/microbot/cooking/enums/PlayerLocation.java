@@ -51,6 +51,10 @@ public enum PlayerLocation {
         this.point = point;
     }
 
+    public void setWorldArea(WorldArea area) {
+        this.area = area;
+    }
+
     /**
      * Creates a WorldArea around a central WorldPoint.
      *

@@ -3,6 +3,7 @@ package net.runelite.client.plugins.microbot.pvmfighter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.pvmfighter.combat.FoodScript;
+import net.runelite.client.plugins.microbot.pvmfighter.combat.PotionScript;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 public class HelperScript extends Script {
     public static PlayerState helperState;
     private final FoodScript foodScript = new FoodScript();
+    private final PotionScript potionScript = new PotionScript();
 
     public boolean run(PvmFighterConfig config) {
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
@@ -36,9 +38,12 @@ public class HelperScript extends Script {
                     case EATING:
                         foodScript.run(config);
                         break;
+                    case POTION:
+                        potionScript.run(config);
+                        break;
                 }
             } catch (Exception ex) {
-                System.out.println(ex.getMessage());
+                log.info(ex.getMessage());
             }
         }, 0, 1000, TimeUnit.MILLISECONDS);
 
@@ -48,11 +53,12 @@ public class HelperScript extends Script {
     @Override
     public void shutdown() {
         foodScript.shutdown();
+        potionScript.shutdown();
         super.shutdown();
     }
 
     private void getPlayerState(PvmFighterConfig config) {
-        if (needToEat(config)) {
+        if (needsToEat(config)) {
             helperState = PlayerState.EATING;
             return;
         }
@@ -60,7 +66,7 @@ public class HelperScript extends Script {
         helperState = PlayerState.IDLE;
     }
 
-    private boolean needToEat(PvmFighterConfig config) {
+    private boolean needsToEat(PvmFighterConfig config) {
         if (!config.toggleFood()) return false;
 
         // get food that heal value is less than lost health

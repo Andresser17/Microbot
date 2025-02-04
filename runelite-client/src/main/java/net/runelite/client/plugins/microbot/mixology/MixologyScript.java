@@ -7,6 +7,7 @@ import net.runelite.api.ObjectID;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
+import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
@@ -47,13 +48,18 @@ public class MixologyScript extends Script {
 
     public boolean run(MixologyConfig config) {
         Microbot.enableAutoRunOn = false;
+        Rs2Antiban.resetAntibanSettings();
+        Rs2Antiban.antibanSetupTemplates.applyHerbloreSetup();
+        Rs2AntibanSettings.naturalMouse = true;
+        Rs2AntibanSettings.simulateMistakes = true;
+        Rs2AntibanSettings.moveMouseOffScreen = true;
+        Rs2AntibanSettings.actionCooldownChance = 0.1;
+
         currentMoxPoints = 0;
         currentAgaPoints = 0;
         currentLyePoints = 0;
         leverRetries = 0;
-        if (!Rs2AntibanSettings.naturalMouse) {
-            Microbot.log("Hey! Did you know this script works really well with natural mouse? Feel free to enable it in the antiban settings.");
-        }
+
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
                 if (!Microbot.isLoggedIn()) return;

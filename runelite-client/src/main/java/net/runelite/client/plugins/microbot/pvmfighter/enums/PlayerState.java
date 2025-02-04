@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum PlayerState {
     ATTACKING(PlayerLocation.COMBAT_FIELD),
     EATING(PlayerLocation.COMBAT_FIELD),
+    POTION(PlayerLocation.COMBAT_FIELD),
     LOOTING(PlayerLocation.COMBAT_FIELD),
     SAFEKEEPING(PlayerLocation.SAFE_SPOT),
     BANKING(PlayerLocation.BANK_LOCATION),
