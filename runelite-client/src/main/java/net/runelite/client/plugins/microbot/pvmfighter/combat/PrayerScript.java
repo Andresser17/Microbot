@@ -23,8 +23,6 @@ public class PrayerScript extends Script {
             try {
                 if (!Microbot.isLoggedIn()) return;
 
-                Rs2
-
                 handlePrayer(config);
             } catch (Exception ex) {
                 System.err.println("Error: " + ex.getMessage());

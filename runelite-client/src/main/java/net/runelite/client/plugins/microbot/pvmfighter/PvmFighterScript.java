@@ -274,7 +274,6 @@ public class PvmFighterScript extends Script {
 
     private boolean areGroundItemsToLoot(PvmFighterConfig config) {
         if (!config.toggleLootItems()) return false;
-        if (Rs2Inventory.getEmptySlots() <= config.minFreeInventorySlots()) return false;
 
         boolean result = false;
         if (config.lootItemsByName()) {
@@ -305,12 +304,10 @@ public class PvmFighterScript extends Script {
 
     private boolean isReadyToBank(PvmFighterConfig config) {
         if (!config.toggleBanking()) return false;
-        // while still have food don't bank
-        if (config.withdrawFood() && !Rs2Inventory.getInventoryFood().isEmpty()) return false;
 
-        log.info("minimum health: {}", config.minimumHealthToRetrieve());
-        log.info("player needs to retrieve: {}", Rs2Player.getHealthPercentageInt() <= config.minimumHealthToRetrieve());
-        return Rs2Inventory.getEmptySlots() <= config.minFreeInventorySlots() || needsToRetreat(config);
+//        log.info("minimum health: {}", config.minimumHealthToRetrieve());
+//        log.info("player needs to retrieve: {}", Rs2Player.getHealthPercentageInt() <= config.minimumHealthToRetrieve());
+        return Rs2Inventory.isFull() || needsToRetreat(config);
     }
 
     public boolean equipmentMatch(PvmFighterConfig config) {
@@ -320,7 +317,7 @@ public class PvmFighterScript extends Script {
 
     public static boolean needsToRetreat(PvmFighterConfig config) {
         boolean healthIsLessThanMinimum = Rs2Player.getHealthPercentageInt() <= config.minimumHealthToRetrieve();
-        if (config.withdrawFood() && Rs2Inventory.getInventoryFood().isEmpty() && healthIsLessThanMinimum) return true;
+        if (Rs2Inventory.getInventoryFood().isEmpty() && healthIsLessThanMinimum) return true;
 
         return healthIsLessThanMinimum;
     }

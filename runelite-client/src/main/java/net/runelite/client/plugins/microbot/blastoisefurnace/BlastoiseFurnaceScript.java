@@ -6,8 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.coords.LocalPoint;
-import net.runelite.client.plugins.microbot.shortestpath.ShortestPathPlugin;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 
@@ -21,25 +19,20 @@ import net.runelite.client.plugins.microbot.util.antiban.enums.ActivityIntensity
 import net.runelite.client.plugins.microbot.util.antiban.enums.PlayStyle;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.camera.Rs2Camera;
-import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
-import net.runelite.client.plugins.microbot.util.settings.Rs2Settings;
-import net.runelite.client.plugins.microbot.util.walker.Rs2MiniMap;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
-
-import static net.runelite.api.ItemID.COAL;
-import static net.runelite.api.ItemID.GOLD_ORE;
 
 @Slf4j
 public class BlastoiseFurnaceScript extends Script {
     private static final int BAR_DISPENSER_ID = 9092;
-    private static final int MAX_ORE_PER_INTERACTION = 27;
+    private static final int MAX_ORE_PER_TRIP = 28;
+    private static final int MAX_ORE_PER_TRIP_WITH_CB = 27;
     private static final int BLAST_FURNACE_HOUR_RATE = 72000;
     private static final int BLAST_FURNACE_FOREMAN_FEE = 2500;
     private static final int BLAST_FURNACE_COAL_VARBIT = Varbits.BLAST_FURNACE_COAL;
@@ -52,6 +45,7 @@ public class BlastoiseFurnaceScript extends Script {
     public static boolean coalBagIsFull = false;
     public static boolean hasBarsToCollect = false;
     public static boolean needsToPayFee = false;
+    public static int oreInInventoryCurrentTrip = -1;
 
     public boolean run(BlastoiseFurnaceConfig config) {
         this.config = config;
@@ -97,7 +91,6 @@ public class BlastoiseFurnaceScript extends Script {
                         if (!hasBarsToCollect) withdrawNecessaryOres(config);
                         Rs2Random.wait(800, 1000);
                         Rs2Bank.closeBank();
-                        Rs2Random.wait(300, 500);
                         break;
                     case PAY_FEE:
                         if (Rs2Inventory.hasItemAmount(ItemID.COINS_995, BLAST_FURNACE_FOREMAN_FEE)) {
@@ -142,7 +135,7 @@ public class BlastoiseFurnaceScript extends Script {
                     case DEPOSIT_ORES:
                         Rs2GameObject.interact(ObjectID.CONVEYOR_BELT, "Put-ore-on");
                         Rs2Random.wait(800, 1200);
-                        Rs2Inventory.waitForInventoryChanges(() -> log.info("Waiting for inventory changed")); // Wait until the player stops moving
+                        sleepUntilFulfillCondition(() -> !Rs2Inventory.hasItem(oreInInventoryCurrentTrip), () -> Rs2Random.wait(800, 1200));
 
                         if (this.config.getBars().isRequiresCoalBag()) {
                             Rs2Inventory.interact(ItemID.COAL_BAG_12019, "Empty");
@@ -224,7 +217,7 @@ public class BlastoiseFurnaceScript extends Script {
     }
 
     private boolean isReadyToDepositOres(BlastoiseFurnaceConfig config) {
-        return Rs2Inventory.hasItemAmount("ore", MAX_ORE_PER_INTERACTION) || Rs2Inventory.hasItemAmount("coal", MAX_ORE_PER_INTERACTION);
+        return Rs2Inventory.hasItemAmount("ore", MAX_ORE_PER_TRIP_WITH_CB) || Rs2Inventory.hasItemAmount("coal", MAX_ORE_PER_TRIP_WITH_CB);
     }
 
     private boolean isReadyToCollectBars() {
@@ -241,14 +234,22 @@ public class BlastoiseFurnaceScript extends Script {
     private void withdrawNecessaryOres(BlastoiseFurnaceConfig config) {
         int coalInBlastFurnace = Microbot.getVarbitValue(BLAST_FURNACE_COAL_VARBIT);
         log.info("coal: {}, {}", coalInBlastFurnace, ItemID.COAL);
-        if (coalInBlastFurnace < (MAX_ORE_PER_INTERACTION * config.getBars().getCoalQuantity())) {
-            Rs2Bank.withdrawAll(ItemID.COAL);
-        } else Rs2Bank.withdrawAll(config.getBars().getOreId());
 
-        if (config.getBars().isRequiresCoalBag() && !coalBagIsFull) {
-            Rs2Inventory.interact(ItemID.COAL_BAG_12019, "Fill");
-            coalBagIsFull = true;
-            Rs2Random.wait(1000, 1200);
+        Bars bars = config.getBars();
+        if (bars.isRequiresCoalBag()) {
+            if (!coalBagIsFull) {
+                Rs2Inventory.interact(ItemID.COAL_BAG_12019, "Fill");
+                coalBagIsFull = true;
+                Rs2Random.wait(1000, 1200);
+            }
+
+            if (coalInBlastFurnace >= (MAX_ORE_PER_TRIP_WITH_CB * bars.getCoalQuantity())) {
+                Rs2Bank.withdrawAll(bars.getOreId());
+                oreInInventoryCurrentTrip = bars.getOreId();
+            } else {
+                Rs2Bank.withdrawAll(ItemID.COAL);
+                oreInInventoryCurrentTrip = ItemID.COAL;
+            }
         }
     }
 
@@ -292,15 +293,9 @@ public class BlastoiseFurnaceScript extends Script {
     }
 
     public void shutdown() {
-        if (mainScheduledFuture != null && !mainScheduledFuture.isDone()) {
-            mainScheduledFuture.cancel(true);
-            ShortestPathPlugin.exit();
-            if (Microbot.getClientThread().scheduledFuture != null)
-                Microbot.getClientThread().scheduledFuture.cancel(true);
-            initialPlayerLocation = null;
-            Microbot.pauseAllScripts = false;
-            Microbot.getSpecialAttackConfigs().reset();
-        }
+        coalBagIsFull = false;
+        hasBarsToCollect = false;
+        oreInInventoryCurrentTrip = -1;
         super.shutdown();
     }
 }

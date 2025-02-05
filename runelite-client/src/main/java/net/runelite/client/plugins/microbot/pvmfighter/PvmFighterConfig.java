@@ -77,22 +77,6 @@ public interface PvmFighterConfig extends Config {
     String toggleBank = "toggleBank";
     String bankLocation = "bankLocation";
     String nearestBankLocation = "nearestBankLocation";
-    String withdrawFood = "withdrawFood";
-    String amountOfFoodToWithdraw = "amountOfFoodToWithdraw";
-    String minFreeInventorySlots = "minFreeInventorySlots";
-    String withdrawStaminaPotions = "withdrawStaminaPotions";
-    String staminaPotionsAmount = "staminaPotionsAmount";
-    String withdrawRestorePotions = "withdrawRestorePotions";
-    String restorePotionsAmount = "restorePotionsAmount";
-    String withdrawPrayerPotions  = "withdrawPrayerPotions";
-    String prayerPotionsAmount = "prayerPotionsAmount";
-    String withdrawAntiPoisonPotions = "withdrawAntiPoisonPotions";
-    String antiPoisonPotionsAmount = "antiPoisonPotionsAmount";
-    String withdrawAntiFirePotions = "withdrawAntiFirePotions";
-    String antiFirePotionAmount = "antiFirePotionAmount";
-    String withdrawCombatPotions = "withdrawCombatPotions";
-    String combatPotionsAmount = "combatPotionsAmount";
-    String ignoreTeleportItems = "ignoreTeleportItems";
     // Slayer
     String toggleSlayer = "toggleSlayer";
     String slayerMaster = "slayerMaster";
@@ -741,7 +725,7 @@ public interface PvmFighterConfig extends Config {
             section = bankingSection
     )
     default BankLocation bankLocation() {
-        return BankLocation.AL_KHARID;
+        return BankLocation.EDGEVILLE;
     }
 
     @ConfigItem(
@@ -755,197 +739,7 @@ public interface PvmFighterConfig extends Config {
         return true;
     }
 
-    @Range(max = 28)
-    @ConfigItem(
-            keyName = minFreeInventorySlots,
-            name = "Min. free slots",
-            description = "Minimum free inventory slots to bank, if less than this, will bank items",
-            position = 3,
-            section = bankingSection
-    )
-    default int minFreeInventorySlots() {
-        return 5;
-    }
-
-    @ConfigItem(
-            keyName = withdrawStaminaPotions,
-            name = "Withdraw stamina potions",
-            description = "Use stamina potions when banking",
-            position = 4,
-            section = bankingSection
-    )
-    default boolean withdrawStaminaPotions() {
-        return false;
-    }
-
-    @ConfigItem(
-            keyName = staminaPotionsAmount,
-            name = "Stamina potions amount",
-            description = "Amount of stamina potions to withdraw",
-            position = 5,
-            section = bankingSection
-    )
-    default int staminaPotionsAmount() {
-        return 0;
-    }
-
-    @ConfigItem(
-            keyName = withdrawFood,
-            name = "Withdraw food",
-            description = "Use food when banking",
-            position = 6,
-            section = bankingSection
-    )
-    default boolean withdrawFood() {
-        return false;
-    }
-
-    @ConfigItem(
-            keyName = amountOfFoodToWithdraw,
-            name = "Amount of food to withdraw",
-            description = "Amount of food to withdraw",
-            position = 7,
-            section = bankingSection
-    )
-    default int amountOfFoodToWithdraw() {
-        return 0;
-    }
-
-    // checkbox to use restore potions when banking
-    @ConfigItem(
-            keyName = withdrawRestorePotions,
-            name = "Withdraw restore potions",
-            description = "Use restore potions when banking",
-            position = 10,
-            section = bankingSection
-    )
-    default boolean withdrawRestorePotions() {
-        return false;
-    }
-
-    @ConfigItem(
-            keyName = restorePotionsAmount,
-            name = "Restore Potions",
-            description = "Amount of restore potions to withdraw",
-            position = 11,
-            section = bankingSection
-    )
-    default int restorePotionsAmount() {
-        return 0;
-    }
-
-    // checkbox to use prayer potions when banking
-    @ConfigItem(
-            keyName = withdrawPrayerPotions,
-            name = "Withdraw prayer potions",
-            description = "Use prayer potions when banking",
-            position = 12,
-            section = bankingSection
-    )
-    default boolean withdrawPrayerPotions() {
-        return false;
-    }
-
-    @ConfigItem(
-            keyName = prayerPotionsAmount,
-            name = "Prayer potions amount",
-            description = "Amount of prayer potions to withdraw",
-            position = 13,
-            section = bankingSection
-    )
-    default int prayerPotionsAmount() {
-        return 0;
-    }
-
-    @ConfigItem(
-            keyName = withdrawAntiPoisonPotions,
-            name = "Withdraw anti-poison potions",
-            description = "Use anti-poison potions when banking",
-            position = 14,
-            section = bankingSection
-    )
-    default boolean withdrawAntiPoison() {
-        return false;
-    }
-
-    @ConfigItem(
-            keyName = antiPoisonPotionsAmount,
-            name = "Anti-poison potions amount",
-            description = "Amount of anti-poison potions to withdraw",
-            position = 15,
-            section = bankingSection
-    )
-    default int antiPoisonAmount() {
-        return 0;
-    }
-
-    @ConfigItem(
-            keyName = withdrawAntiFirePotions,
-            name = "Withdraw anti-fire potions",
-            description = "Use anti-fire potions when banking",
-            position = 16,
-            section = bankingSection
-    )
-    default boolean withdrawAntiFirePotion() {
-        return false;
-    }
-
-    @ConfigItem(
-            keyName = antiFirePotionAmount,
-            name = "Anti-fire Potions",
-            description = "Amount of anti-fire potions to withdraw",
-            position = 17,
-            section = bankingSection
-    )
-    default int antiFireAmount() {
-        return 0;
-    }
-
-    @ConfigItem(
-            keyName = withdrawCombatPotions,
-            name = "Withdraw combat potions",
-            description = "Use combat potions when banking",
-            position = 18,
-            section = bankingSection
-    )
-    default boolean withdrawCombatPotions() {
-        return false;
-    }
-
-    @ConfigItem(
-            keyName = combatPotionsAmount,
-            name = "Combat potions amount",
-            description = "Amount of combat potions to withdraw",
-            position = 19,
-            section = bankingSection
-    )
-    default int combatPotionsAmount() {
-        return 0;
-    }
-
-    @ConfigItem(
-            keyName = ignoreTeleportItems,
-            name = "Ignore Teleport Items",
-            description = "ignore teleport items when banking",
-            position = 20,
-            section = bankingSection
-    )
-    default boolean ignoreTeleportItems() {
-        return true;
-    }
-
     // Hidden configurations
-
-    // Hidden config item for inventory setup
-    @ConfigItem(
-            keyName = "inventorySetupHidden",
-            name = "inventorySetupHidden",
-            description = "inventorySetupHidden",
-            hidden = true
-    )
-    default InventorySetup inventorySetupHidden() {
-        return null;
-    }
 
     //hidden config item for center location
     @ConfigItem(
