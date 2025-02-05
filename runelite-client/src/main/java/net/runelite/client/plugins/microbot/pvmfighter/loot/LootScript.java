@@ -46,7 +46,7 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeInventorySlots(),
+                0,
                 config.delayedLooting(),
                 config.onlyLootMyItems(),
                 " arrow"
@@ -60,7 +60,7 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeInventorySlots(),
+                0,
                 config.delayedLooting(),
                 config.onlyLootMyItems(),
                 " arrow"
@@ -74,7 +74,7 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeInventorySlots(),
+                0,
                 config.delayedLooting(),
                 config.onlyLootMyItems(),
                 " bones"
@@ -88,7 +88,7 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeInventorySlots(),
+                0,
                 config.delayedLooting(),
                 config.onlyLootMyItems(),
                 " bones"
@@ -102,7 +102,7 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeInventorySlots(),
+                0,
                 config.delayedLooting(),
                 config.onlyLootMyItems(),
                 " rune"
@@ -116,7 +116,7 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeInventorySlots(),
+                0,
                 config.delayedLooting(),
                 config.onlyLootMyItems(),
                 " rune"
@@ -130,7 +130,7 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeInventorySlots(),
+                0,
                 config.delayedLooting(),
                 config.onlyLootMyItems(),
                 ItemID.COINS_995
@@ -144,7 +144,7 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeInventorySlots(),
+                0,
                 config.delayedLooting(),
                 config.onlyLootMyItems(),
                 ItemID.COINS_995
@@ -159,7 +159,7 @@ public class LootScript extends Script {
                 config.maxPriceOfItemsToLoot(),
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
-                config.minFreeInventorySlots(),
+                0,
                 config.delayedLooting(),
                 config.onlyLootMyItems()
         );
@@ -173,7 +173,7 @@ public class LootScript extends Script {
                 config.maxPriceOfItemsToLoot(),
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
-                config.minFreeInventorySlots(),
+                0,
                 config.delayedLooting(),
                 config.onlyLootMyItems()
         );
@@ -186,7 +186,7 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeInventorySlots(),
+                0,
                 config.delayedLooting(),
                 config.onlyLootMyItems(),
                 Arrays.stream(config.nameOfItemsToLoot().split(","))
@@ -201,7 +201,7 @@ public class LootScript extends Script {
                 PlayerLocation.COMBAT_FIELD.getArea(),
                 1,
                 1,
-                config.minFreeInventorySlots(),
+                0,
                 config.delayedLooting(),
                 config.onlyLootMyItems(),
                 Arrays.stream(config.nameOfItemsToLoot().split(","))

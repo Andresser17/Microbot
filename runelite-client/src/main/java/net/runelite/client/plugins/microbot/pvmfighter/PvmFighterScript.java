@@ -57,9 +57,7 @@ public class PvmFighterScript extends Script {
         Rs2Antiban.setActivityIntensity(ActivityIntensity.MODERATE);
         Rs2Antiban.setPlayStyle(PlayStyle.MODERATE);
 
-        if (config.useInventorySetup()) {
-            inventorySetup = new Rs2InventorySetup(config.inventorySetup().getInventorySetupName(), mainScheduledFuture);
-        } else if (config.toggleSlayer()) {
+        if (config.toggleSlayer()) {
             // check if player has a slayer task assigned
             int creatureVarbitValue = Microbot.getVarbitPlayerValue(VarPlayer.SLAYER_TASK_CREATURE);
             EnumComposition creatureEnum = Microbot.getEnum(EnumID.SLAYER_TASK_CREATURE);
@@ -93,7 +91,10 @@ public class PvmFighterScript extends Script {
             npcTargets = Arrays.stream(config.npcTargets().split(","))
                     .map((name -> name.trim().toLowerCase()))
                     .collect(Collectors.toList());
-            setup = config.inventorySetup();
+            if (config.useInventorySetup()) {
+                inventorySetup = new Rs2InventorySetup(config.inventorySetup().getInventorySetupName(), mainScheduledFuture);
+                setup = config.inventorySetup();
+            }
             slayerTask = null;
         }
 
@@ -142,6 +143,7 @@ public class PvmFighterScript extends Script {
         super.shutdown();
         Rs2Antiban.resetAntibanSettings();
         npcTargets = new ArrayList<>();
+        slayerTask = null;
         init = true;
         inventorySetup = null;
     }

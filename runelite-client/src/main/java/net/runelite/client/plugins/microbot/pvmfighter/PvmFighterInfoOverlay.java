@@ -42,8 +42,8 @@ public class PvmFighterInfoOverlay extends OverlayPanel {
                     .right(String.format("Safe Spot: %s", PlayerLocation.SAFE_SPOT.getPoint()))
                     .build());
             panelComponent.getChildren().add(LineComponent.builder()
-                    .left(String.format("Slayer Task: %s", PvmFighterScript.slayerTask.getName()))
-                    .right(String.format("Inventory Setup: %s", PvmFighterScript.setup.getInventorySetupName()))
+                    .left(String.format("Slayer Task: %s", PvmFighterScript.slayerTask != null ? PvmFighterScript.slayerTask.getName() : "None"))
+                    .right(String.format("Inventory Setup: %s", PvmFighterScript.setup != null ? PvmFighterScript.setup.getInventorySetupName() : "None"))
                     .build());
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(Microbot.status)

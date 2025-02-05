@@ -60,6 +60,7 @@ public class AttackNpcScript {
                 }
             }
 
+            log.info("npcs: {}", PvmFighterScript.npcTargets);
             npcToAttack = Rs2Npc.getNpcs().filter(npc -> {
                 boolean isInArea = PlayerLocation.COMBAT_FIELD.getArea().contains(npc.getWorldLocation());
                 boolean isNotInteracting = (npc.getInteracting() == null || npc.getInteracting() == Microbot.getClient().getLocalPlayer());

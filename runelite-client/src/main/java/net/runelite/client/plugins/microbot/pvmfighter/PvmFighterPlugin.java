@@ -68,7 +68,6 @@ public class PvmFighterPlugin extends Plugin {
     @Setter
     private final PvmFighterScript pvmFighterScript = new PvmFighterScript();
     private final HelperScript helperScript = new HelperScript();
-    private final FlickerScript flickerScript = new FlickerScript();
     @Inject
     private PvmFighterConfig config;
     @Inject
@@ -240,9 +239,6 @@ public class PvmFighterPlugin extends Plugin {
     public void onGameTick(GameTick gameTick) {
         if (cooldown > 0 && !Rs2Combat.inCombat())
             cooldown--;
-        //execute flicker script
-        if(config.withdrawPrayerPotions())
-            flickerScript.onGameTick();
 
         if (shutdownFlag) {
             shutDown();
@@ -252,24 +248,10 @@ public class PvmFighterPlugin extends Plugin {
 
     @Subscribe
     public void onNpcDespawned(NpcDespawned npcDespawned) {
-        if(config.withdrawPrayerPotions())
-            flickerScript.onNpcDespawned(npcDespawned);
     }
 
     @Subscribe
     public void onHitsplatApplied(HitsplatApplied event){
-        if (event.getActor() != Microbot.getClient().getLocalPlayer()) return;
-        final Hitsplat hitsplat = event.getHitsplat();
-
-        if ((hitsplat.isMine()) && event.getActor().getInteracting() instanceof NPC && config.withdrawPrayerPotions() && (config.usePrayerStyle() == PrayerStyle.LAZY_FLICK) || (config.usePrayerStyle() == PrayerStyle.PERFECT_LAZY_FLICK)) {
-
-            flickerScript.resetLastAttack(true);
-            Rs2Prayer.disableAllPrayers();
-            if (config.useQuickPrayer())
-                Rs2Prayer.toggleQuickPrayer(false);
-
-
-        }
     }
     @Subscribe
     public void onMenuOpened(MenuOpened event) {

@@ -26,7 +26,7 @@ public class SlayerScript extends Script {
         try {
             if (PvmFighterScript.playerState != PlayerState.SLAYER_MASTER) return;
             if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
-
+            log.info("Is running");
             // locate slayer master
             NPC slayerMaster = Rs2Npc.getNpc(config.slayerMaster().getName());
             if (slayerMaster != null) {

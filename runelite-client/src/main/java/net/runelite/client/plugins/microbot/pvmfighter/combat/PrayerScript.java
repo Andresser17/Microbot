@@ -32,7 +32,6 @@ public class PrayerScript extends Script {
     }
 
     private void handlePrayer(PvmFighterConfig config) {
-        if (!Microbot.isLoggedIn() || !config.withdrawPrayerPotions()) return;
         if (config.usePrayerStyle() != PrayerStyle.CONTINUOUS && config.usePrayerStyle() != PrayerStyle.ALWAYS_ON) return;
         log.info("Prayer style: " + config.usePrayerStyle().getName());
         if (config.usePrayerStyle() == PrayerStyle.CONTINUOUS) {
