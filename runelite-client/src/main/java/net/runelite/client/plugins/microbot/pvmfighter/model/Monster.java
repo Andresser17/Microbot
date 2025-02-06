@@ -3,7 +3,7 @@ package net.runelite.client.plugins.microbot.pvmfighter.model;
 import net.runelite.api.NPC;
 import net.runelite.client.plugins.microbot.util.npc.Rs2NpcManager;
 import net.runelite.client.plugins.microbot.util.npc.Rs2NpcStats;
-import net.runelite.client.plugins.microbot.pvmfighter.enums.AttackStyle;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.CombatStyle;
 
 public class Monster {
     public int id;
@@ -13,7 +13,7 @@ public class Monster {
     public boolean delete;
 
     public int lastAttack = 0;
-    public AttackStyle attackStyle;
+    public CombatStyle attackStyle;
 
     public Monster(int npcId, int attackAnim) {
         this.id = npcId;

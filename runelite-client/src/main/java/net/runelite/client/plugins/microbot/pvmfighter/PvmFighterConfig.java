@@ -601,22 +601,22 @@ public interface PvmFighterConfig extends Config {
                 "Always On: Quick prayer is always on";
     }
 
-    // Skilling
     @ConfigItem(
             keyName = toggleSkilling,
-            name = "Enable Skilling",
-            description = "Enable Skilling",
+            name = "Toggle Combat Training",
+            description = "Train combat skills to an specific level",
             position = 0,
             section = skillingSection
     )
     default boolean toggleSkilling() {
         return false;
     }
+
     @ConfigItem(
             keyName = balanceCombatSkills,
             name = "Balance combat skills",
             description = "Balance combat skills",
-            position = 0,
+            position = 1,
             section = skillingSection
     )
     default boolean balanceCombatSkills() {
@@ -626,7 +626,7 @@ public interface PvmFighterConfig extends Config {
             keyName = avoidControlledTraining,
             name = "No Controlled Attack",
             description = "Avoid Controlled attack style so you won't accidentally train unwanted combat skills",
-            position = 1,
+            position = 2,
             section = skillingSection
     )
     default boolean avoidControlledTraining() {
@@ -636,7 +636,7 @@ public interface PvmFighterConfig extends Config {
             keyName = attackStyleChangeDelay,
             name = "Change Delay",
             description = "Attack Style Change Delay In Seconds",
-            position = 2,
+            position = 3,
             section = skillingSection
     )
     default int attackStyleChangeDelay() {
@@ -646,7 +646,7 @@ public interface PvmFighterConfig extends Config {
             keyName = disableOnMaxCombat,
             name = "Disable on Max Combat",
             description = "Disable on Max Combat",
-            position = 3,
+            position = 4,
             section = skillingSection
     )
     default boolean disableOnMaxCombat() {
@@ -656,7 +656,7 @@ public interface PvmFighterConfig extends Config {
             keyName = attackSkillTarget,
             name = "Attack Level Target",
             description = "Attack level target",
-            position = 97,
+            position = 5,
             section = skillingSection
     )
     default int attackSkillTarget() {
@@ -666,7 +666,7 @@ public interface PvmFighterConfig extends Config {
             keyName = strengthSkillTarget,
             name = "Strength Level Target",
             description = "Strength level target",
-            position = 98,
+            position = 6,
             section = skillingSection
     )
     default int strengthSkillTarget() {
@@ -676,7 +676,7 @@ public interface PvmFighterConfig extends Config {
             keyName = defenceSkillTarget,
             name = "Defence Level Target",
             description = "Defence level target",
-            position = 99,
+            position = 7,
             section = skillingSection
     )
     default int defenceSkillTarget() {

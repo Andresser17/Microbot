@@ -3,20 +3,20 @@ package net.runelite.client.plugins.microbot.pvmfighter.enums;
 /**
  * This class provides a utility method for mapping a string representation of an attack style to an AttackStyle enum.
  */
-public class AttackStyleMapper {
+public class CombatStyleMapper {
     /**
      * Maps a string representation of an attack style to an AttackStyle enum.
      * The mapping is case-insensitive and can handle multiple attack styles separated by a comma.
      * @param style The string representation of the attack style.
      * @return The corresponding AttackStyle enum.
      */
-    public static AttackStyle mapToAttackStyle(String style) {
+    public static CombatStyle mapToCombatStyle(String style) {
         // Convert style to lowercase for case-insensitive matching
         String lowerCaseStyle = style.toLowerCase();
 
         // Check if the style contains multiple attack styles separated by a comma
         if (lowerCaseStyle.contains(",")) {
-            return AttackStyle.MIXED;
+            return CombatStyle.MIXED;
         }
 
         // Check for presence of melee sub-styles
@@ -33,17 +33,17 @@ public class AttackStyleMapper {
 
         // Determine the appropriate AttackStyle based on the presence of different styles
         if (hasMelee && hasMagic && hasRanged) {
-            return AttackStyle.MIXED;
+            return CombatStyle.MIXED;
         } else if ((hasMelee && hasMagic) || (hasMelee && hasRanged) || (hasMagic && hasRanged)) {
-            return AttackStyle.MIXED;
+            return CombatStyle.MIXED;
         } else if (hasMelee) {
-            return AttackStyle.MELEE;
+            return CombatStyle.MELEE;
         } else if (hasMagic) {
-            return AttackStyle.MAGE;
+            return CombatStyle.MAGIC;
         } else if (hasRanged) {
-            return AttackStyle.RANGED;
+            return CombatStyle.RANGED;
         } else {
-            return AttackStyle.MIXED;  // Default case if style does not match any category.
+            return CombatStyle.MIXED;  // Default case if style does not match any category.
         }
     }
 }

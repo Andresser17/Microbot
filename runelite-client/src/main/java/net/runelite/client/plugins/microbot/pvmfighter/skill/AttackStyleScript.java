@@ -1,6 +1,5 @@
 package net.runelite.client.plugins.microbot.pvmfighter.skill;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.widgets.WidgetInfo;
@@ -12,30 +11,7 @@ import net.runelite.client.plugins.microbot.util.tabs.Rs2Tab;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
-
-enum AttackStyle {
-    ACCURATE("Accurate", Skill.ATTACK),
-    AGGRESSIVE("Aggressive", Skill.STRENGTH),
-    DEFENSIVE("Defensive", Skill.DEFENCE),
-    CONTROLLED("Controlled", Skill.ATTACK, Skill.STRENGTH, Skill.DEFENCE),
-    RANGING("Ranging", Skill.RANGED),
-    LONGRANGE("Longrange", Skill.RANGED, Skill.DEFENCE),
-    CASTING("Casting", Skill.MAGIC),
-    DEFENSIVE_CASTING("Defensive Casting", Skill.MAGIC, Skill.DEFENCE),
-    OTHER("Other");
-
-    @Getter
-    private final String name;
-    @Getter
-    private final Skill[] skills;
-
-    AttackStyle(String name, Skill... skills) {
-        this.name = name;
-        this.skills = skills;
-    }
-}
 
 @Slf4j
 public class AttackStyleScript extends Script {
@@ -43,7 +19,7 @@ public class AttackStyleScript extends Script {
     public static int equippedWeaponTypeVarbit;
     private final Set<Skill> selectedSkills = EnumSet.noneOf(Skill.class);
     boolean initializedLevels = false;
-    private AttackStyle attackStyle;
+    public static AttackStyle attackStyle;
     private AttackStyle attackStyleToTrain;
     // Starting skill levels
     private int attackLevel;
@@ -52,17 +28,21 @@ public class AttackStyleScript extends Script {
     // Time delay to no change attack style to often
     private int attackStyleChangeDelay = 0;
     long lastAttackStyleChangeTime = System.currentTimeMillis();
+    private boolean init = true;
 
-    public boolean run(PvmFighterConfig config) {
-        attackStyleChangeDelay = config.attackStyleChangeDelay();
-        lastAttackStyleChangeTime = System.currentTimeMillis();
-        mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> scheduledTask(config), 0, 1, TimeUnit.SECONDS);
-        return true;
+    public void run(PvmFighterConfig config) {
+        if (init) {
+            attackStyleChangeDelay = config.attackStyleChangeDelay();
+            lastAttackStyleChangeTime = System.currentTimeMillis();
+            init = false;
+        }
+
+        scheduledTask(config);
     }
 
     private void scheduledTask(PvmFighterConfig config) {
         // Early exit conditions
-        if (!Microbot.isLoggedIn() || !super.run() || !config.toggleSkilling() || disableIfMaxed(config.disableOnMaxCombat()))
+        if (!fulfillConditionsToRun() || !config.toggleSkilling() || disableIfMaxed(config.disableOnMaxCombat()))
             return;
 
         // Initialize levels if not done yet
@@ -90,7 +70,7 @@ public class AttackStyleScript extends Script {
         // Update attack style information
         updateAttackStyleInfo();
 
-        if (attackStyle == AttackStyle.LONGRANGE || attackStyle == AttackStyle.RANGING) {
+        if (attackStyle == AttackStyle.LONG_RANGE || attackStyle == AttackStyle.RANGING) {
             WeaponAttackType weaponAttackType = WeaponAttackType.getById(equippedWeaponTypeVarbit);
             // check if any of the attack options is rapid
             if (weaponAttackType != null && weaponAttackType.getAttackOptions().stream().anyMatch(attackOption -> attackOption.getStyle().equals("Rapid"))) {
@@ -122,8 +102,6 @@ public class AttackStyleScript extends Script {
         if (attackStyle != attackStyleToTrain) {
             changeAttackStyle(config, componentToDisplay);
         }
-
-
     }
 
     private boolean isTimeForAttackStyleChange() {
@@ -364,6 +342,6 @@ public class AttackStyleScript extends Script {
     @Override
     public void shutdown() {
         super.shutdown();
-
+        init = true;
     }
 }

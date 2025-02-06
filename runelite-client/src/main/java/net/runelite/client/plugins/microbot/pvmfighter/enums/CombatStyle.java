@@ -6,10 +6,10 @@ import lombok.Getter;
 public enum CombatStyle {
     MELEE("Melee"),
     RANGED("Ranged"),
-    MAGIC("Magic");
+    MAGIC("Magic"),
+    MIXED("Mixed");
 
     private final String name;
-
 
     CombatStyle(String name) {
         this.name = name;

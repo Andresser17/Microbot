@@ -1,10 +1,12 @@
 package net.runelite.client.plugins.microbot.pvmfighter;
 
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Skill;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.pvmfighter.combat.FoodScript;
 import net.runelite.client.plugins.microbot.pvmfighter.combat.PotionScript;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
+import net.runelite.client.plugins.microbot.pvmfighter.skill.AttackStyleScript;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
@@ -25,6 +27,7 @@ public class HelperScript extends Script {
     public static PlayerState helperState;
     private final FoodScript foodScript = new FoodScript();
     private final PotionScript potionScript = new PotionScript();
+    private final AttackStyleScript attackStyleScript = new AttackStyleScript();
 
     public boolean run(PvmFighterConfig config) {
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
@@ -40,6 +43,9 @@ public class HelperScript extends Script {
                         break;
                     case POTION:
                         potionScript.run(config);
+                        break;
+                    case MELEE_STYLE:
+                        attackStyleScript.run(config);
                         break;
                 }
             } catch (Exception ex) {
@@ -63,6 +69,11 @@ public class HelperScript extends Script {
             return;
         }
 
+        if (needsToChangeAttackStyle(config)) {
+            helperState = PlayerState.MELEE_STYLE;
+            return;
+        }
+
         helperState = PlayerState.IDLE;
     }
 
@@ -78,5 +89,11 @@ public class HelperScript extends Script {
         }).findFirst();
 
         return foodToEat.isPresent() && !Rs2Player.isFullHealth();
+    }
+
+    private boolean needsToChangeAttackStyle(PvmFighterConfig config) {
+        return config.attackSkillTarget() == Rs2Player.getRealSkillLevel(Skill.ATTACK)
+                || config.attackSkillTarget() == Rs2Player.getRealSkillLevel(Skill.STRENGTH)
+                || config.attackSkillTarget() == Rs2Player.getRealSkillLevel(Skill.DEFENCE);
     }
 }

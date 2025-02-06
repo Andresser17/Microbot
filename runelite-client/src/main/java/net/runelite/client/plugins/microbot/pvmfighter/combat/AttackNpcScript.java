@@ -52,6 +52,8 @@ public class AttackNpcScript {
                 PvmFighterPlugin.shutdownFlag = true;
             }
 
+
+
             isRunning = true;
             if (Objects.requireNonNull(config.selectCombatStyle()) == CombatStyle.MAGIC) {
                 if (!Spell.checkIfPlayerHasNecessaryItems(config.selectSpellToUse())) {
