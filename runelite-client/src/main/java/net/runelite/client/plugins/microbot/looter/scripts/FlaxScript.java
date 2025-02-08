@@ -4,7 +4,7 @@ import net.runelite.api.GameObject;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.looter.AutoLooterConfig;
-import net.runelite.client.plugins.microbot.looter.enums.PlayerState;
+import net.runelite.client.plugins.microbot.looter.enums.LooterState;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
@@ -21,7 +21,7 @@ import static net.runelite.client.plugins.microbot.util.Global.sleepUntilTrue;
 
 public class FlaxScript extends Script {
 
-    PlayerState state;
+    LooterState state;
     boolean init = true;
 
     public boolean run(AutoLooterConfig config) {
@@ -51,7 +51,7 @@ public class FlaxScript extends Script {
                 switch (state) {
                     case LOOTING:
                         if (Rs2Inventory.getEmptySlots() <= config.minFreeSlots()) {
-                            state = PlayerState.BANKING;
+                            state = LooterState.BANKING;
                             return;
                         }
                         if (config.hopWhenPlayerDetected() && Rs2Player.hopIfPlayerDetected(1, 10, 10)) return;
@@ -66,14 +66,14 @@ public class FlaxScript extends Script {
                     case BANKING:
                         if (!Rs2Bank.bankItemsAndWalkBackToOriginalPosition(List.of("flax"), initialPlayerLocation, config.minFreeSlots()))
                             return;
-                        state = PlayerState.LOOTING;
+                        state = LooterState.LOOTING;
                         break;
                     case WALKING:
                         Rs2Walker.walkTo(config.flaxLocation().getWorldPoint(), 6);
                         sleepUntilTrue(() -> isNearFlaxLocation(config, 6) && !Rs2Player.isMoving(), 600, 300000);
                         if (!isNearFlaxLocation(config, 6)) return;
                         initialPlayerLocation = Rs2Player.getWorldLocation();
-                        state = PlayerState.LOOTING;
+                        state = LooterState.LOOTING;
                         break;
                 }
 
@@ -96,16 +96,16 @@ public class FlaxScript extends Script {
 
     private void getState(AutoLooterConfig config) {
         if (!isNearFlaxLocation(config, 6)) {
-            state = PlayerState.WALKING;
+            state = LooterState.WALKING;
             init = false;
             return;
         }
         if (Rs2Inventory.getEmptySlots() <= config.minFreeSlots()) {
-            state = PlayerState.BANKING;
+            state = LooterState.BANKING;
             init = false;
             return;
         }
-        state = PlayerState.LOOTING;
+        state = LooterState.LOOTING;
         init = false;
     }
 

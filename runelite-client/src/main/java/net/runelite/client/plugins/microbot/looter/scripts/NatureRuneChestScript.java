@@ -4,7 +4,7 @@ import net.runelite.api.GameObject;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.looter.AutoLooterConfig;
-import net.runelite.client.plugins.microbot.looter.enums.PlayerState;
+import net.runelite.client.plugins.microbot.looter.enums.LooterState;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
@@ -21,7 +21,7 @@ import static net.runelite.client.plugins.microbot.util.Global.sleepUntilTrue;
 
 public class NatureRuneChestScript extends Script {
 
-    PlayerState state;
+    LooterState state;
     boolean init = true;
 
     public boolean run(AutoLooterConfig config) {
@@ -68,7 +68,7 @@ public class NatureRuneChestScript extends Script {
                         Rs2Walker.walkTo(config.natureRuneChestLocation().getWorldPoint());
                         sleepUntilTrue(() -> isNearNatureRuneChest(config, 6) && !Rs2Player.isMoving(), 600, 300000);
                         if (!isNearNatureRuneChest(config, 6)) return;
-                        state = PlayerState.LOOTING;
+                        state = LooterState.LOOTING;
                         break;
                 }
 
@@ -91,11 +91,11 @@ public class NatureRuneChestScript extends Script {
 
     private void getState(AutoLooterConfig config) {
         if (!isNearNatureRuneChest(config, 6)) {
-            state = PlayerState.WALKING;
+            state = LooterState.WALKING;
             init = false;
             return;
         }
-        state = PlayerState.LOOTING;
+        state = LooterState.LOOTING;
         init = false;
     }
 

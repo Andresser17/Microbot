@@ -3,7 +3,7 @@ package net.runelite.client.plugins.microbot.looter.enums;
 import lombok.Getter;
 
 @Getter
-public enum PlayerState {
+public enum LooterState {
     LOOTING(PlayerLocation.LOOT_FIELD),
     BANKING(PlayerLocation.NEAREST_BANK),
     STALE(PlayerLocation.OUTSIDE_POINT),
@@ -11,7 +11,7 @@ public enum PlayerState {
 
     private final PlayerLocation playerLocation;
 
-    PlayerState(PlayerLocation playerLocation) {
+    LooterState(PlayerLocation playerLocation) {
         this.playerLocation = playerLocation;
     }
 }
