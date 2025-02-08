@@ -11,6 +11,7 @@ import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.Setup;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.SlayerTask;
+import net.runelite.client.plugins.microbot.pvmfighter.helpers.FoodScript;
 import net.runelite.client.plugins.microbot.pvmfighter.loot.LootScript;
 import net.runelite.client.plugins.microbot.util.Rs2InventorySetup;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
@@ -309,7 +310,7 @@ public class PvmFighterScript extends Script {
 
 //        log.info("minimum health: {}", config.minimumHealthToRetrieve());
 //        log.info("player needs to retrieve: {}", Rs2Player.getHealthPercentageInt() <= config.minimumHealthToRetrieve());
-        return Rs2Inventory.isFull() || needsToRetreat(config);
+        return (Rs2Inventory.isFull() && Rs2Inventory.getInventoryFood().isEmpty()) || needsToRetreat(config);
     }
 
     public boolean equipmentMatch(PvmFighterConfig config) {

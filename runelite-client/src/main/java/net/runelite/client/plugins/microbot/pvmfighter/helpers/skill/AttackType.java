@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.microbot.pvmfighter.skill;
+package net.runelite.client.plugins.microbot.pvmfighter.helpers.skill;
 
 public enum AttackType {
     CHOP,
