@@ -88,7 +88,7 @@ public class BlastoiseFurnaceScript extends Script {
 
                         if (config.useStamina()) useRunEnergyPotions();
 
-                        if (!hasBarsToCollect) withdrawNecessaryOres(config);
+                        if (!isReadyToCollectBars()) withdrawNecessaryOres(config);
                         Rs2Random.wait(800, 1000);
                         Rs2Bank.closeBank();
                         break;
@@ -147,10 +147,11 @@ public class BlastoiseFurnaceScript extends Script {
                         break;
                     case COLLECT_BARS:
                         // walk next to dispenser
-                        Rs2Walker.walkTo(new WorldPoint(1939, 4964, 0), 1);
-                        Rs2Random.wait(800, 1200);
-                        sleepUntil(() -> !Rs2Player.isMoving());
+//                        Rs2Walker.walkTo(new WorldPoint(1939, 4964, 0), 1);
+//                        Rs2Random.wait(800, 1200);
+//                        sleepUntil(() -> !Rs2Player.isMoving());
                         Rs2GameObject.interact(BAR_DISPENSER_ID, "Take");
+                        sleepUntil(() -> !Rs2Player.isMoving());
                         Rs2Random.wait(800, 1200);
                         boolean howManyWidget = Rs2Widget.hasWidget("How many would you like");
                         boolean whatTakeWidget = Rs2Widget.hasWidget("What would you like to take");
@@ -221,8 +222,7 @@ public class BlastoiseFurnaceScript extends Script {
     }
 
     private boolean isReadyToCollectBars() {
-        hasBarsToCollect = Bars.stream().anyMatch(bar -> Microbot.getVarbitValue(bar.getBarVarbit()) > 0) && !Rs2Inventory.isFull();
-        return hasBarsToCollect;
+        return Bars.stream().anyMatch(bar -> Microbot.getVarbitValue(bar.getBarVarbit()) > 0) && !Rs2Inventory.isFull();
     }
 
     private boolean hasRequiredOresInBank(BlastoiseFurnaceConfig config) {
