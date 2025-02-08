@@ -2,7 +2,6 @@ package net.runelite.client.plugins.microbot.pvmfighter;
 
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.config.*;
-import net.runelite.client.plugins.microbot.inventorysetups.InventorySetup;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.*;
 import net.runelite.client.plugins.microbot.util.antiban.enums.PlayStyle;
 import net.runelite.client.plugins.microbot.util.bank.enums.BankLocation;
@@ -34,8 +33,8 @@ public interface PvmFighterConfig extends Config {
     String selectSpellToUse = "selectSpellToUse";
     String attackReachableNpc = "attackReachableNpc";
     // Consumables
-    String toggleFood = "toggleFood";
-    String usePrayerPotion = "usePrayerPotion";
+    String useFood = "toggleFood";
+    String usePotion = "usePrayerPotion";
     String useCombatPotion = "useCombatPotion";
     String useRangingPotion = "useRangingPotion";
     String useAntiPoison = "useAntiPoison";
@@ -316,68 +315,24 @@ public interface PvmFighterConfig extends Config {
     // Consumables Section
 
     @ConfigItem(
-            keyName = toggleFood,
+            keyName = useFood,
             name = "Auto eat food",
             description = "Automatically eats food",
             position = 0,
             section = consumablesSection
     )
-    default boolean toggleFood() {
+    default boolean useFood() {
         return false;
     }
 
     @ConfigItem(
-            keyName = usePrayerPotion,
-            name = "Auto drink prayer potion",
-            description = "Automatically drinks prayer potions",
+            keyName = usePotion,
+            name = "Auto drink potion",
+            description = "Automatically drinks potions",
             position = 1,
             section = consumablesSection
     )
-    default boolean usePrayerPotion() {
-        return false;
-    }
-
-    @ConfigItem(
-            keyName = useCombatPotion,
-            name = "Auto drink super combat potion",
-            description = "Automatically drinks combat potions",
-            position = 2,
-            section = consumablesSection
-    )
-    default boolean useCombatPotion() {
-        return false;
-    }
-
-    @ConfigItem(
-            keyName = useRangingPotion,
-            name = "Auto drink Ranging/Bastion potion",
-            description = "Automatically drinks Ranging/Bastion potions",
-            position = 3,
-            section = consumablesSection
-    )
-    default boolean useRangingPotion() {
-        return false;
-    }
-
-    @ConfigItem(
-            keyName = useAntiPoison,
-            name = "Use AntiPoison",
-            description = "Use AntiPoison",
-            position = 4,
-            section = consumablesSection
-    )
-    default boolean useAntiPoison() {
-        return false;
-    }
-
-    @ConfigItem(
-            keyName = eatUntilFulfillHealth,
-            name = "Eat food until 100% health",
-            description = "Eat inventory food until player health is full",
-            position = 5,
-            section = consumablesSection
-    )
-    default boolean eatUntilFulfillHealth() {
+    default boolean usePotion() {
         return false;
     }
 

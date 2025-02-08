@@ -1,12 +1,11 @@
 package net.runelite.client.plugins.microbot.pvmfighter;
 
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Skill;
 import net.runelite.client.plugins.microbot.Script;
-import net.runelite.client.plugins.microbot.pvmfighter.combat.FoodScript;
-import net.runelite.client.plugins.microbot.pvmfighter.combat.PotionScript;
+import net.runelite.client.plugins.microbot.pvmfighter.helpers.FoodScript;
+import net.runelite.client.plugins.microbot.pvmfighter.helpers.PotionScript;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
-import net.runelite.client.plugins.microbot.pvmfighter.skill.AttackStyleScript;
+import net.runelite.client.plugins.microbot.pvmfighter.helpers.skill.AttackStyleScript;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
@@ -36,6 +35,9 @@ public class HelperScript extends Script {
                 // check if player is in desired location
                 getPlayerState(config);
 
+//                log.info("currentStyle: {}", AttackStyleScript.currentAttackStyle);
+//                int value = Microbot.getVarbitPlayerValue(VarPlayer.ATTACK_STYLE);
+//                log.info("value: {}", value);
 //                Microbot.log(String.format("HelperState: %s", helperState));
                 switch (helperState) {
                     case EATING:
@@ -44,7 +46,7 @@ public class HelperScript extends Script {
                     case POTION:
                         potionScript.run(config);
                         break;
-                    case MELEE_STYLE:
+                    case ATTACK_STYLE:
                         attackStyleScript.run(config);
                         break;
                 }
@@ -60,6 +62,7 @@ public class HelperScript extends Script {
     public void shutdown() {
         foodScript.shutdown();
         potionScript.shutdown();
+        attackStyleScript.shutdown();
         super.shutdown();
     }
 
@@ -69,8 +72,13 @@ public class HelperScript extends Script {
             return;
         }
 
-        if (needsToChangeAttackStyle(config)) {
-            helperState = PlayerState.MELEE_STYLE;
+        if (potionScript.needsToDrinkPotion(config)) {
+            helperState = PlayerState.POTION;
+            return;
+        }
+
+        if (attackStyleScript.needsToChangeAttackStyle(config)) {
+            helperState = PlayerState.ATTACK_STYLE;
             return;
         }
 
@@ -78,7 +86,7 @@ public class HelperScript extends Script {
     }
 
     private boolean needsToEat(PvmFighterConfig config) {
-        if (!config.toggleFood()) return false;
+        if (!config.useFood()) return false;
 
         // get food that heal value is less than lost health
         Optional<Rs2Item> foodToEat = Rs2Inventory.getInventoryFood().stream().filter(food -> {
@@ -89,11 +97,5 @@ public class HelperScript extends Script {
         }).findFirst();
 
         return foodToEat.isPresent() && !Rs2Player.isFullHealth();
-    }
-
-    private boolean needsToChangeAttackStyle(PvmFighterConfig config) {
-        return config.attackSkillTarget() == Rs2Player.getRealSkillLevel(Skill.ATTACK)
-                || config.attackSkillTarget() == Rs2Player.getRealSkillLevel(Skill.STRENGTH)
-                || config.attackSkillTarget() == Rs2Player.getRealSkillLevel(Skill.DEFENCE);
     }
 }

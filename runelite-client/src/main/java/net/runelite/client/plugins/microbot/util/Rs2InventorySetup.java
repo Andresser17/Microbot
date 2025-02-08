@@ -1,5 +1,6 @@
 package net.runelite.client.plugins.microbot.util;
 
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ItemID;
 import net.runelite.api.VarPlayer;
 import net.runelite.api.Varbits;
@@ -24,6 +25,7 @@ import static net.runelite.client.plugins.microbot.util.Global.sleep;
  * Handles loading inventory and equipment setups, verifying matches, and ensuring
  * the correct items are equipped and in the inventory.
  */
+@Slf4j
 public class Rs2InventorySetup {
 
     InventorySetup inventorySetup;
@@ -80,46 +82,42 @@ public class Rs2InventorySetup {
      * @return true if the inventory matches the setup after loading, false otherwise.
      */
     public boolean loadInventory() {
-        Rs2Bank.openBank();
-        if (!Rs2Bank.isOpen()) {
-            return false;
-        }
-        Rs2Bank.depositAllExcept(itemsToNotDeposit());
-//        Map<Integer, List<InventorySetupsItem>> groupedByItems = inventorySetup.getInventory().stream().collect(Collectors.groupingBy(InventorySetupsItem::getId));
-        Map<Integer, InventorySetupsItem> groupedByItems = inventorySetup.getInventory()
-                .stream().collect(Collectors.toMap(InventorySetupsItem::getId, value -> value));
+        if(!Rs2Bank.isOpen()) Rs2Bank.openBank();
 
-        for (Map.Entry<Integer, InventorySetupsItem> entry : groupedByItems.entrySet()) {
+        Rs2Bank.depositAllExcept(itemsToNotDeposit());
+        Map<Integer, List<InventorySetupsItem>> groupedByItems = inventorySetup.getInventory().stream().collect(Collectors.groupingBy(InventorySetupsItem::getId));
+
+        for (Map.Entry<Integer, List<InventorySetupsItem>> groupedItem : groupedByItems.entrySet()) {
             if (isMainSchedulerCancelled()) break;
 
-            InventorySetupsItem inventorySetupsItem = entry.getValue();
-            int key = entry.getKey();
+            InventorySetupsItem item = groupedItem.getValue().get(0);
+            int itemQuantity = groupedItem.getValue().size();
+            int key = groupedItem.getKey();
 
+            if (key == -1) continue;
             // check if dwarf cannon set is assembled
-            if (CANNON_SET.contains(inventorySetupsItem.getId())) {
+            if (CANNON_SET.contains(key)) {
                 if (Microbot.getVarbitPlayerValue(VarPlayer.CANNON_STATE) == CANNON_IS_PLACED_STATE) continue;
             }
 
-            if (inventorySetupsItem.getId() == -1) continue;
-
-            int withdrawQuantity = calculateWithdrawQuantity(inventorySetupsItem, key);
+            int withdrawQuantity = calculateWithdrawQuantity(item, itemQuantity);
             if (withdrawQuantity == 0) continue;
 
-            if (inventorySetupsItem.getStackCompare() == InventorySetupsStackCompareID.None
-            || inventorySetupsItem.getStackCompare() == InventorySetupsStackCompareID.Standard
-            || inventorySetupsItem.getStackCompare() == InventorySetupsStackCompareID.Greater_Than) {
-                if (!Rs2Bank.hasBankItem(inventorySetupsItem.getId(), withdrawQuantity)) {
-                    Microbot.showMessage("Bank is missing the following item or the necessary quantity" + inventorySetupsItem.getName());
+            if (item.getStackCompare() == InventorySetupsStackCompareID.None
+            || item.getStackCompare() == InventorySetupsStackCompareID.Standard
+            || item.getStackCompare() == InventorySetupsStackCompareID.Greater_Than) {
+                if (!Rs2Bank.hasBankItem(item.getId(), withdrawQuantity)) {
+                    Microbot.showMessage("Bank is missing the following item or the necessary quantity" + item.getName());
                     break;
                 }
-            } else if (inventorySetupsItem.getStackCompare() == InventorySetupsStackCompareID.Less_Than) {
-                if (!Rs2Bank.hasItem(inventorySetupsItem.getId())) {
-                    Microbot.showMessage("Bank is missing the following item " + inventorySetupsItem.getName());
+            } else if (item.getStackCompare() == InventorySetupsStackCompareID.Less_Than) {
+                if (!Rs2Bank.hasItem(key)) {
+                    Microbot.showMessage("Bank is missing the following item " + item.getName());
                     break;
                 }
             }
 
-            withdrawItem(inventorySetupsItem, withdrawQuantity);
+            withdrawItem(item, withdrawQuantity);
         }
 
         sleep(1000);
@@ -130,58 +128,34 @@ public class Rs2InventorySetup {
     /**
      * Calculates the quantity of an item to withdraw based on the current inventory state.
      *
-     * @param items              List of items to consider.
      * @param inventorySetupsItem The inventory setup item.
-     * @param key                The item ID.
+     * @param size                total quantity of items
      * @return The quantity to withdraw.
      */
-    private int calculateWithdrawQuantity(List<InventorySetupsItem> items, InventorySetupsItem inventorySetupsItem, int key) {
+    private int calculateWithdrawQuantity(InventorySetupsItem inventorySetupsItem, int size) {
         int withdrawQuantity;
-        if (items.size() == 1) {
-            Rs2Item rs2Item = Rs2Inventory.get(key);
+        if (size == 1) {
+            Rs2Item rs2Item = Rs2Inventory.get(inventorySetupsItem.getId());
             if (rs2Item != null && rs2Item.isStackable()) {
                 withdrawQuantity = inventorySetupsItem.getQuantity() - rs2Item.quantity;
                 if (Rs2Inventory.hasItemAmount(inventorySetupsItem.getName(), inventorySetupsItem.getQuantity())) {
                     return 0;
                 }
             } else {
-                withdrawQuantity = items.get(0).getQuantity();
+                withdrawQuantity = inventorySetupsItem.getQuantity();
                 if (Rs2Inventory.hasItemAmount(inventorySetupsItem.getName(), withdrawQuantity)) {
                     return 0;
                 }
             }
         } else {
-            withdrawQuantity = items.size() - (int) Rs2Inventory.items().stream().filter(x -> x.getId() == key).count();
-            if (Rs2Inventory.hasItemAmount(inventorySetupsItem.getName(), items.size())) {
+            withdrawQuantity = size - (int) Rs2Inventory.items().stream().filter(x -> x.getId() == inventorySetupsItem.getId()).count();
+            if (Rs2Inventory.hasItemAmount(inventorySetupsItem.getName(), size)) {
                 return 0;
             }
         }
         return withdrawQuantity;
     }
 
-    /**
-     * Calculates the quantity of an item to withdraw based on the current inventory state.
-     *
-     * @param item The inventory setup item.
-     * @param key                The item ID.
-     * @return The quantity to withdraw.
-     */
-    private int calculateWithdrawQuantity(InventorySetupsItem item, int key) {
-        int withdrawQuantity;
-        Rs2Item rs2Item = Rs2Inventory.get(key);
-        if (rs2Item != null && rs2Item.isStackable()) {
-            withdrawQuantity = item.getQuantity() - rs2Item.quantity;
-            if (Rs2Inventory.hasItemAmount(item.getName(), item.getQuantity())) {
-                return 0;
-            }
-        } else {
-            withdrawQuantity = item.getQuantity();
-            if (Rs2Inventory.hasItemAmount(item.getName(), withdrawQuantity)) {
-                return 0;
-            }
-        }
-        return withdrawQuantity;
-    }
 
     /**
      * Withdraws an item from the bank.

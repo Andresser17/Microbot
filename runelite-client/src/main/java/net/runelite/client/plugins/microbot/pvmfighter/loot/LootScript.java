@@ -10,6 +10,7 @@ import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.util.grounditem.LootingParameters;
 import net.runelite.client.plugins.microbot.util.grounditem.Rs2GroundItem;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,8 +24,8 @@ public class LootScript extends Script {
             if (PvmFighterScript.playerState != PlayerState.LOOTING) return;
             if (PvmFighterScript.currentLocation != PvmFighterScript.playerState.getPlayerLocation()) return;
 
-            if (config.lootItemsByPriceRange()) {
-                lootItemsByValue(config);
+            if (config.lootItemsByName()) {
+                lootItemsByName(config);
             }
 
             if (config.lootBones()) lootBones(config);
@@ -32,8 +33,9 @@ public class LootScript extends Script {
             if (config.lootCoins()) lootCoins(config);
             if (config.lootArrows()) lootArrows(config);
 
-            if (config.lootItemsByName()) {
-                lootItemsByName(config);
+
+            if (config.lootItemsByPriceRange()) {
+                lootItemsByValue(config);
             }
 
         } catch (Exception ex) {
@@ -178,7 +180,10 @@ public class LootScript extends Script {
                 config.onlyLootMyItems()
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByValue(params);
-        return groundItems.size() >= config.minimumQuantityToLoot();
+        if (Rs2Inventory.isFull()) {
+            // check if item is stackable and you already have it in inventory
+            return groundItems.stream().anyMatch(groundItem -> groundItem.isStackable() && Rs2Inventory.hasItem(groundItem.getId()));
+        } else return groundItems.size() >= config.minimumQuantityToLoot();
     }
 
     private void lootItemsByName(PvmFighterConfig config) {
@@ -208,7 +213,10 @@ public class LootScript extends Script {
                         .map(String::trim).toArray(String[]::new)
         );
         List<GroundItem> groundItems = Rs2GroundItem.getItemsToLootByName(params);
-        return groundItems.size() >= config.minimumQuantityToLoot();
+        if (Rs2Inventory.isFull()) {
+            // check if item is stackable
+            return groundItems.stream().anyMatch(groundItem -> groundItem.isStackable() && Rs2Inventory.hasItem(groundItem.getId()));
+        } else return groundItems.size() >= config.minimumQuantityToLoot();
     }
 
     public void shutdown() {
