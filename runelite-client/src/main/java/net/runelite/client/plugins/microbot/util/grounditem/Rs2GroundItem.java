@@ -315,9 +315,9 @@ public class Rs2GroundItem {
 
 
     public static boolean lootItemBasedOnValue(LootingParameters params) {
-        Predicate<GroundItem> filter = groundItem -> groundItem.getGePrice() > params.getMinValue() && (groundItem.getGePrice() / groundItem.getQuantity()) < params.getMaxValue() &&
-                groundItem.getLocation().distanceTo(Microbot.getClient().getLocalPlayer().getWorldLocation()) < params.getRange() &&
-                (!params.isAntiLureProtection() || (params.isAntiLureProtection() && groundItem.getOwnership() == OWNERSHIP_SELF));
+        Predicate<GroundItem> filter = groundItem -> groundItem.getGePrice() > params.getMinValue()
+                && (groundItem.getGePrice() / groundItem.getQuantity()) < params.getMaxValue()
+                && groundItem.getLocation().distanceTo(Microbot.getClient().getLocalPlayer().getWorldLocation()) < params.getRange() && groundItem.getOwnership() == OWNERSHIP_SELF;
 
         List<GroundItem> groundItems = GroundItemsPlugin.getCollectedGroundItems().values().stream()
                 .filter(filter)
@@ -343,8 +343,9 @@ public class Rs2GroundItem {
     public static List<GroundItem> getItemsToLootById(LootingParameters params) {
         final Predicate<GroundItem> filter = (groundItem) -> {
             boolean isInRange = params.getArea().contains(groundItem.getLocation());
+            boolean canLoot = !Rs2Inventory.isFull() || groundItem.isStackable() && Rs2Inventory.hasItem(groundItem.getItemId());
             boolean idMatch = Arrays.stream(params.getIds()).anyMatch(id -> id == groundItem.getId());
-            return isInRange && (!params.isAntiLureProtection() || (params.isAntiLureProtection() && groundItem.getOwnership() == OWNERSHIP_SELF)) && idMatch;
+            return isInRange && groundItem.getOwnership() == OWNERSHIP_SELF && idMatch && canLoot;
         };
 
         return GroundItemsPlugin.getCollectedGroundItems().values().stream().filter(filter).collect(Collectors.toList());
@@ -353,8 +354,9 @@ public class Rs2GroundItem {
     public static List<GroundItem> getItemsToLootByValue(LootingParameters params) {
         final Predicate<GroundItem> filter = (groundItem) -> {
             boolean isInRange = params.getArea().contains(groundItem.getLocation());
+            boolean canLoot = !Rs2Inventory.isFull() || groundItem.isStackable() && Rs2Inventory.hasItem(groundItem.getItemId());
             boolean valueIsInPriceRange = groundItem.getGePrice() > params.getMinValue() && (groundItem.getGePrice() / groundItem.getQuantity()) < params.getMaxValue();
-            return valueIsInPriceRange && isInRange && (!params.isAntiLureProtection() || (params.isAntiLureProtection() && groundItem.getOwnership() == OWNERSHIP_SELF));
+            return valueIsInPriceRange && isInRange && groundItem.getOwnership() == OWNERSHIP_SELF && canLoot;
         };
 
         return GroundItemsPlugin.getCollectedGroundItems().values().stream()
@@ -372,8 +374,9 @@ public class Rs2GroundItem {
     public static List<GroundItem> getItemsToLootByName(LootingParameters params) {
         final Predicate<GroundItem> filter = (groundItem) -> {
             boolean isInRange = params.getArea().contains(groundItem.getLocation());
+            boolean canLoot = !Rs2Inventory.isFull() || groundItem.isStackable() && Rs2Inventory.hasItem(groundItem.getItemId());
             boolean nameMatch = Arrays.stream(params.getNames()).anyMatch(name -> groundItem.getName().toLowerCase().contains(name.toLowerCase()));
-            return isInRange && (!params.isAntiLureProtection() || (params.isAntiLureProtection() && groundItem.getOwnership() == OWNERSHIP_SELF)) && nameMatch;
+            return isInRange && groundItem.getOwnership() == OWNERSHIP_SELF && nameMatch && canLoot;
         };
 
          return GroundItemsPlugin.getCollectedGroundItems().values().stream().filter(filter).collect(Collectors.toList());
@@ -400,7 +403,6 @@ public class Rs2GroundItem {
         if (optional.isPresent()) {
             GroundItem closestItem = optional.get();
             if (closestItem.getQuantity() < params.getMinQuantity()) return false;
-            if (Rs2Inventory.getEmptySlots() <= params.getMinInvSlots()) return true;
             coreLoot(closestItem);
         }
 
