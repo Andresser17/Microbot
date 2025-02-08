@@ -4,7 +4,7 @@ import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.looter.AutoLooterConfig;
 import net.runelite.client.plugins.microbot.looter.enums.DefaultLooterStyle;
-import net.runelite.client.plugins.microbot.looter.enums.PlayerState;
+import net.runelite.client.plugins.microbot.looter.enums.LooterState;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
@@ -15,6 +15,7 @@ import net.runelite.client.plugins.microbot.util.grounditem.Rs2GroundItem;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
+import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -22,18 +23,19 @@ import java.util.stream.Collectors;
 
 public class DefaultScript extends Script {
 
-    PlayerState state = PlayerState.LOOTING;
+    LooterState state = LooterState.LOOTING;
 
     public boolean run(AutoLooterConfig config) {
         Microbot.enableAutoRunOn = false;
+        initialPlayerLocation = null;
         Rs2Antiban.resetAntibanSettings();
         applyAntiBanSettings();
         Rs2Antiban.setActivity(Activity.GENERAL_COLLECTING);
-
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
                 if (!super.run()) return;
                 if (!Microbot.isLoggedIn() || Rs2Player.isMoving() || Rs2Combat.inCombat()) return;
+                if (Microbot.pauseAllScripts) return;
                 if (Rs2AntibanSettings.actionCooldownActive) return;
                 long startTime = System.currentTimeMillis();
 
@@ -74,19 +76,13 @@ public class DefaultScript extends Script {
                             }
                         }
                         if (Rs2Inventory.getEmptySlots() <= config.minFreeSlots()) {
-                            state = PlayerState.BANKING;
+                            state = LooterState.BANKING;
                             return;
                         }
                         break;
                     case BANKING:
-                        if (config.looterStyle() == DefaultLooterStyle.ITEM_LIST) {
-                            if (!Rs2Bank.bankItemsAndWalkBackToOriginalPosition(Arrays.stream(config.listOfItemsToLoot().split(",")).collect(Collectors.toList()), initialPlayerLocation, config.minFreeSlots()))
-                                return;
-                        } else {
-                            if (!Rs2Bank.bankItemsAndWalkBackToOriginalPosition(Rs2Inventory.all().stream().map(Rs2Item::getName).collect(Collectors.toList()), initialPlayerLocation, config.minFreeSlots()))
-                                return;
-                        }
-                        state = PlayerState.LOOTING;
+                        if (Rs2Inventory.getEmptySlots() <= config.minFreeSlots()) return;
+                        state = LooterState.LOOTING;
                         break;
                 }
 
@@ -95,7 +91,7 @@ public class DefaultScript extends Script {
                 System.out.println("Total time for loop " + totalTime);
 
             } catch (Exception ex) {
-                Microbot.log(ex.getMessage());
+                Microbot.log("Error in DefaultScript: " + ex.getMessage());
             }
         }, 0, 200, TimeUnit.MILLISECONDS);
         return true;
@@ -105,6 +101,34 @@ public class DefaultScript extends Script {
     public void shutdown(){
         super.shutdown();
         Rs2Antiban.resetAntibanSettings();
+    }
+    
+    public boolean handleWalk(AutoLooterConfig config) {
+        scheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
+            try {
+                if (Microbot.pauseAllScripts) return;
+                if (initialPlayerLocation == null) return;
+
+                if (state == LooterState.LOOTING) {
+                    if (Rs2Player.getWorldLocation().distanceTo(initialPlayerLocation) > config.distanceToStray()) {
+                        Rs2Walker.walkTo(initialPlayerLocation);
+                    }
+                    return;
+                }
+
+                if (state == LooterState.BANKING) {
+                    if (config.looterStyle() == DefaultLooterStyle.ITEM_LIST) {
+                        Rs2Bank.bankItemsAndWalkBackToOriginalPosition(Arrays.stream(config.listOfItemsToLoot().split(",")).collect(Collectors.toList()), initialPlayerLocation, config.minFreeSlots());
+                    } else {
+                        Rs2Bank.bankItemsAndWalkBackToOriginalPosition(Rs2Inventory.all().stream().map(Rs2Item::getName).collect(Collectors.toList()), initialPlayerLocation, config.minFreeSlots());
+                    }
+                    return;
+                }
+            } catch (Exception ex) {
+                Microbot.log("Error in handleWalk: " + ex.getMessage());
+            }
+        }, 0, 1000, TimeUnit.MILLISECONDS);
+        return true;
     }
 
     private void applyAntiBanSettings() {

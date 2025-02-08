@@ -20,7 +20,7 @@ import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
 import net.runelite.client.plugins.microbot.util.magic.Rs2Magic;
-import net.runelite.client.plugins.microbot.util.math.Random;
+import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.tabs.Rs2Tab;
@@ -131,7 +131,7 @@ public class MageTrainingArenaScript extends Script {
                             .collect(Collectors.toList());
 
                     if (!missingPoints.isEmpty()) {
-                        var index = Random.random(0, missingPoints.size());
+                        var index = Rs2Random.between(0, missingPoints.size());
                         var nextRooms = Arrays.stream(Rooms.values())
                                 .filter(room -> room.getPoints() == missingPoints.get(index))
                                 .collect(Collectors.toList());
@@ -302,7 +302,7 @@ public class MageTrainingArenaScript extends Script {
             return;
         }
 
-        if (validateRoomRequirements()) return;
+        if (!isRoomRequirementsValid()) return;
 
         if (Rs2Inventory.isFull()){
             if (!Rs2Walker.walkTo(new WorldPoint(3363, 9640, 0)))
@@ -331,7 +331,7 @@ public class MageTrainingArenaScript extends Script {
                 .orElse(null);
 
         if (object == null) {
-            var index = Random.random(0, 4);
+            var index = Rs2Random.between(0, 4);
             Rs2Walker.walkTo(new WorldPoint[]{
                     new WorldPoint(3347, 9655, 0),
                     new WorldPoint(3378, 9655, 0),
@@ -349,7 +349,7 @@ public class MageTrainingArenaScript extends Script {
             itemId = bonusShape.getItemId();
 
         if (Rs2Inventory.contains(ItemID.DRAGONSTONE_6903) || Rs2Inventory.count(itemId) >= shapesToPick){
-            shapesToPick = Random.random(2, 4);
+            shapesToPick = Rs2Random.between(2, 4);
 
             Rs2Magic.cast(enchant);
             sleepUntil(() -> Rs2Tab.getCurrentTab() == InterfaceTab.INVENTORY);
@@ -380,7 +380,7 @@ public class MageTrainingArenaScript extends Script {
             return;
         }
 
-        if (validateRoomRequirements()) return;
+        if (!isRoomRequirementsValid()) return;
 
         var room = mtaPlugin.getTelekineticRoom();
         var teleRoom = Arrays.stream(TelekineticRooms.values())
@@ -409,7 +409,7 @@ public class MageTrainingArenaScript extends Script {
         var targetConverted = WorldPoint.fromLocalInstance(Microbot.getClient(), Objects.requireNonNull(localTarget));
 
         if (Microbot.getClient().getScale() < 400) {
-            Rs2Camera.setZoom(Random.random(400, 430));
+            Rs2Camera.setZoom(Rs2Random.between(400, 430));
         }
 
         if (room.getGuardian().getWorldLocation().equals(room.getFinishLocation())){
@@ -460,7 +460,7 @@ public class MageTrainingArenaScript extends Script {
             }
         }
 
-        if (validateRoomRequirements()) {
+        if (!isRoomRequirementsValid()) {
             leaveRoom();
             return;
         }
@@ -483,8 +483,8 @@ public class MageTrainingArenaScript extends Script {
             var maxHp = Microbot.getClient().getRealSkillLevel(Skill.HITPOINTS);
             if ((currentHp * 100) / maxHp < nextHpThreshold){
                 var maxAmountToEat = (maxHp - currentHp) / (btp ? 8 : 2);
-                var amountToEat = Random.random(Math.min(2, maxAmountToEat), Math.min(6, maxAmountToEat));
-                nextHpThreshold = Random.random(config.healingThresholdMin(), config.healingThresholdMax());
+                var amountToEat = Rs2Random.between(Math.min(2, maxAmountToEat), Math.min(6, maxAmountToEat));
+                nextHpThreshold = Rs2Random.between(config.healingThresholdMin(), config.healingThresholdMax());
                 for (int i = 0; i < amountToEat; i++) {
                     Rs2Inventory.interact(btp ? ItemID.PEACH : ItemID.BANANA, "eat");
 
@@ -511,7 +511,7 @@ public class MageTrainingArenaScript extends Script {
             return;
         }
 
-        if (validateRoomRequirements()) return;
+        if (!isRoomRequirementsValid()) return;
 
         var room = mtaPlugin.getAlchemyRoom();
         var best = room.getBest();
@@ -540,13 +540,13 @@ public class MageTrainingArenaScript extends Script {
         }
     }
 
-    private boolean validateRoomRequirements() {
+    private boolean isRoomRequirementsValid() {
         if (!currentRoom.getRequirements().getAsBoolean()) {
             Microbot.log("You're missing room requirements. Please restock or fix your staves settings.");
             sleep(5000);
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     private void buyReward(Rewards reward){
