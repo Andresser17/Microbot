@@ -12,7 +12,7 @@ import net.runelite.client.plugins.microbot.inventorysetups.MInventorySetupsPlug
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
 
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
@@ -135,7 +135,7 @@ public class Rs2InventorySetup {
     private int calculateWithdrawQuantity(InventorySetupsItem inventorySetupsItem, int size) {
         int withdrawQuantity;
         if (size == 1) {
-            Rs2Item rs2Item = Rs2Inventory.get(inventorySetupsItem.getId());
+            Rs2ItemModel rs2Item = Rs2Inventory.get(inventorySetupsItem.getId());
             if (rs2Item != null && rs2Item.isStackable()) {
                 withdrawQuantity = inventorySetupsItem.getQuantity() - rs2Item.quantity;
                 if (Rs2Inventory.hasItemAmount(inventorySetupsItem.getName(), inventorySetupsItem.getQuantity())) {
@@ -155,7 +155,6 @@ public class Rs2InventorySetup {
         }
         return withdrawQuantity;
     }
-
 
     /**
      * Withdraws an item from the bank.

@@ -27,7 +27,7 @@ public class NatureRuneChestScript extends Script {
     public boolean run(AutoLooterConfig config) {
         Microbot.enableAutoRunOn = false;
 
-        if (config.hopWhenPlayerDetected()) {
+        if (config.worldHop()) {
             Microbot.showMessage("Make sure autologin plugin is enabled and randomWorld checkbox is checked!");
         }
         Rs2Antiban.resetAntibanSettings();
@@ -48,7 +48,7 @@ public class NatureRuneChestScript extends Script {
 
                 switch (state) {
                     case LOOTING:
-                        if (config.hopWhenPlayerDetected()) {
+                        if (config.worldHop()) {
                             Rs2Player.logoutIfPlayerDetected(1, 10);
                             return;
                         }

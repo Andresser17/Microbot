@@ -2,6 +2,8 @@ package net.runelite.client.plugins.microbot.mining;
 
 import net.runelite.client.config.*;
 import net.runelite.client.plugins.microbot.util.bank.enums.BankLocation;
+import net.runelite.client.plugins.microbot.mining.enums.Rocks;
+import net.runelite.client.plugins.microbot.util.inventory.InteractOrder;
 
 @ConfigGroup("Mining")
 @ConfigInformation("<h2>Auto Mining</h2>" +
@@ -23,6 +25,20 @@ public interface AutoMiningConfig extends Config {
             position = 0
     )
     String generalSection = "general";
+
+    @ConfigSection(
+            name = "Dropping",
+            description = "Dropping settings",
+            position = 1
+    )
+    String droppingSection = "droppingSection";
+
+    @ConfigSection(
+            name = "Banking",
+            description = "Banking settings",
+            position = 2
+    )
+    String bankingSection = "bankingSection";
 
     @ConfigItem(
             keyName = "Ore",
@@ -52,8 +68,8 @@ public interface AutoMiningConfig extends Config {
             keyName = "UseBank",
             name = "UseBank",
             description = "Use bank and walk back to original location",
-            position = 3,
-            section = generalSection
+            position = 0,
+            section = bankingSection
     )
     default boolean useBank()
     {
@@ -64,8 +80,8 @@ public interface AutoMiningConfig extends Config {
             keyName = "bankLocation",
             name = "Bank Location",
             description = "Select bank to use",
-            position = 4,
-            section = generalSection
+            position = 1,
+            section = bankingSection
     )
     default BankLocation bankLocation()
     {
@@ -76,8 +92,8 @@ public interface AutoMiningConfig extends Config {
             keyName = "useNearestBank",
             name = "Use nearest bank",
             description = "Use nearest bank location, this will override selected bank location",
-            position = 5,
-            section = generalSection
+            position = 2,
+            section = bankingSection
     )
     default boolean useNearestBank()
     {
@@ -85,13 +101,24 @@ public interface AutoMiningConfig extends Config {
     }
 
     @ConfigItem(
+            keyName = "dropOrder",
+            name = "Drop Order",
+            description = "Order for dropping items",
+            position = 0,
+            section = droppingSection
+    )
+    default InteractOrder interactOrder() {
+        return InteractOrder.STANDARD;
+    }
+
+    @ConfigItem(
             keyName = "ItemsToKeep",
             name = "Items to Keep",
             description = "Items to keep in inventory, separate with coma",
-            position = 6
+            position = 1,
+            section = droppingSection
     )
     default String itemsToKeep() {
         return "Pickaxe";
     }
-
 }
