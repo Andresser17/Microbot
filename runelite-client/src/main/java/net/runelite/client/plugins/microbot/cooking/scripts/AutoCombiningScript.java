@@ -10,14 +10,13 @@ import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
 
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -44,8 +43,8 @@ public class AutoCombiningScript extends Script {
                         // combine items
                         int[][] combiningOrder = combiningItem.getCombiningOrder();
                         for (int[] ingredients : combiningOrder) {
-                            Rs2Item ingredient1 = Rs2Inventory.get(ingredients[0]);
-                            Rs2Item ingredient2 = Rs2Inventory.get(ingredients[1]);
+                            Rs2ItemModel ingredient1 = Rs2Inventory.get(ingredients[0]);
+                            Rs2ItemModel ingredient2 = Rs2Inventory.get(ingredients[1]);
                             if (ingredient1 != null && ingredient2 != null) {
                                 Rs2Inventory.combine(ingredient1, ingredient2);
                                 Rs2Random.wait(800, 1200);

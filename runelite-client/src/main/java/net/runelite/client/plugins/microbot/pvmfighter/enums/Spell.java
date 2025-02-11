@@ -2,14 +2,10 @@ package net.runelite.client.plugins.microbot.pvmfighter.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import net.runelite.api.Item;
 import net.runelite.api.ItemID;
 import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
-import net.runelite.client.plugins.microbot.util.player.Rs2Player;
-
+import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -67,7 +63,7 @@ public enum Spell {
     public static boolean checkIfPlayerHasNecessaryItems(Spell spell) {
         return Arrays.stream(spell.getRunes()).allMatch(rune -> {
             if (Rs2Inventory.hasItem(rune[0])) {
-                Rs2Item runesItem = Rs2Inventory.get(rune[0]);
+                Rs2ItemModel runesItem = Rs2Inventory.get(rune[0]);
                 return runesItem.quantity >= rune[1];
             }
 

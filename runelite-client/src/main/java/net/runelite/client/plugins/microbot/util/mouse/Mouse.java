@@ -67,6 +67,8 @@ public abstract class Mouse {
 
     public abstract Mouse click(Point point, boolean rightClick);
 
+    public abstract Mouse click(Point point, boolean rightClick, NewMenuEntry entry);
+
     public abstract Mouse click(Point point, NewMenuEntry entry);
 
     public abstract Mouse click();

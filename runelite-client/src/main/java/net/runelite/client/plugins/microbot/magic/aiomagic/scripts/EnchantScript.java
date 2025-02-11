@@ -12,14 +12,12 @@ import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
 import net.runelite.client.plugins.microbot.util.magic.Rs2Magic;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 
 import javax.inject.Inject;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class EnchantScript extends Script {
@@ -58,7 +56,7 @@ public class EnchantScript extends Script {
                 switch (playerState) {
                     case CASTING:
                         if (Rs2Inventory.hasItem(jewelleryToEnchant.getNormalId())) {
-                            Rs2Item jewelleryItem = Rs2Inventory.get(jewelleryToEnchant.getNormalId());
+                            Rs2ItemModel jewelleryItem = Rs2Inventory.get(jewelleryToEnchant.getNormalId());
                             Rs2Magic.enchant(enchantSpell, jewelleryItem);
 //                            Rs2Player.waitForAnimation(1200);
                             while (Rs2Player.waitForXpDrop(Skill.MAGIC)) {

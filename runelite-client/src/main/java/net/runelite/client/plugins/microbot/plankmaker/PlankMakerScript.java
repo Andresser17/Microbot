@@ -15,7 +15,7 @@ import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.camera.Rs2Camera;
 import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
@@ -230,8 +230,8 @@ public class PlankMakerScript extends Script {
     private boolean isReadyToProcess(PlankMakerConfig config) {
         String requiredLogs = config.plankToMake().getRequiredLogs();
         if (Rs2Inventory.hasItem(requiredLogs)) {
-            Rs2Item logs = Rs2Inventory.get(requiredLogs);
-            Rs2Item coins = Rs2Inventory.get(ItemID.COINS_995);
+            Rs2ItemModel logs = Rs2Inventory.get(requiredLogs);
+            Rs2ItemModel coins = Rs2Inventory.get(ItemID.COINS_995);
             return coins.quantity >= (config.plankToMake().getNecessaryCoins() * logs.quantity);
         }
         return false;

@@ -3,11 +3,8 @@ package net.runelite.client.plugins.microbot.magic.aiomagic.enums;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.runelite.api.ItemID;
-import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
-import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
 
-import java.lang.reflect.Array;
+
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;

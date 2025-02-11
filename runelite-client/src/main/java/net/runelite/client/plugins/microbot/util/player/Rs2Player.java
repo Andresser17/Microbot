@@ -18,6 +18,7 @@ import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.microbot.util.grounditem.Rs2GroundItem;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
+import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.menu.NewMenuEntry;
 import net.runelite.client.plugins.microbot.util.misc.Rs2Potion;
 import net.runelite.client.plugins.microbot.util.misc.Rs2UiHelper;
@@ -302,6 +303,15 @@ public class Rs2Player {
      */
     public static boolean isWalking() {
         return Rs2Player.isMoving();
+    }
+
+    public static boolean isWalking(boolean wait) {
+        return isWalking(wait, 500, 600);
+    }
+
+    public static boolean isWalking(boolean wait, int start, int end) {
+        if (wait) Rs2Random.wait(start, end); // wait for player to start walking
+        return isWalking();
     }
 
     /**

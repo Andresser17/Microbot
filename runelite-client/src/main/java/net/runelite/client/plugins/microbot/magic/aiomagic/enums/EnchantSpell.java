@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import net.runelite.api.ItemID;
 import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
 import net.runelite.client.plugins.skillcalculator.skills.MagicAction;
 
 import java.util.Optional;
@@ -155,7 +155,7 @@ public enum EnchantSpell {
     public static boolean checkIfPlayerHasNecessaryRunes(EnchantSpell spell) {
         return spell.getRunes().stream().allMatch(rune -> {
             if (Rs2Inventory.hasItem(rune[0])) {
-                Rs2Item runesItem = Rs2Inventory.get(rune[0]);
+                Rs2ItemModel runesItem = Rs2Inventory.get(rune[0]);
                 return runesItem.quantity >= rune[1];
             }
 

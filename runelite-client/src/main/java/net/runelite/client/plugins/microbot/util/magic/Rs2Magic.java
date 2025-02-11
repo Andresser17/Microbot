@@ -218,11 +218,11 @@ public class Rs2Magic {
      *
      * @param item
      */
-    public static void enchant(EnchantSpell enchantSpell, Rs2Item item) {
+    public static void enchant(EnchantSpell enchantSpell, Rs2ItemModel item) {
         enchant(enchantSpell, item, 300, 600);
     }
 
-    private static void enchant(EnchantSpell enchantSpell, Rs2Item item, int sleepMin, int sleepMax) {
+    private static void enchant(EnchantSpell enchantSpell, Rs2ItemModel item, int sleepMin, int sleepMax) {
         sleepUntil(() -> {
             Rs2Tab.switchToMagicTab();
             sleep(50, 150);

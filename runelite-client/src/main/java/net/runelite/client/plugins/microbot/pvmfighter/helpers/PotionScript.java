@@ -8,7 +8,7 @@ import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterScript;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.Potion;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
@@ -18,7 +18,7 @@ import java.util.List;
 
 @Slf4j
 public class PotionScript extends Script {
-    private final List<Rs2Item> potionsToDrink = new ArrayList<>();
+    private final List<Rs2ItemModel> potionsToDrink = new ArrayList<>();
 
     public void run(PvmFighterConfig config) {
         try {
@@ -36,10 +36,10 @@ public class PotionScript extends Script {
     public boolean needsToDrinkPotion(PvmFighterConfig config) {
         if (!config.usePotion()) return false;
 
-        List<Rs2Item> potions = Rs2Inventory.getPotions();
+        List<Rs2ItemModel> potions = Rs2Inventory.getPotions();
         if (potions == null || potions.isEmpty()) return false;
 
-        for (Rs2Item potionItem: potions) {
+        for (Rs2ItemModel potionItem: potions) {
             Potion potion = Potion.findPotionById(potionItem.getId());
 
             if (potion != null) {
@@ -72,7 +72,7 @@ public class PotionScript extends Script {
     }
 
     private void usePotion() {
-        Rs2Item potionItem = potionsToDrink.get(0);
+        Rs2ItemModel potionItem = potionsToDrink.get(0);
         potionsToDrink.remove(0);
         Rs2Inventory.interact(potionItem, "Drink");
         sleep(1000, 1200);

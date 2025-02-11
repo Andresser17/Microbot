@@ -14,10 +14,9 @@ import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.camera.Rs2Camera;
-import net.runelite.client.plugins.microbot.util.dialogues.Rs2Dialogue;
 import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
@@ -25,10 +24,8 @@ import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
 
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static net.runelite.client.plugins.microbot.util.Global.sleepUntilTrue;
 
 @Slf4j
 public class AutoHeatingScript extends Script {
@@ -55,7 +52,7 @@ public class AutoHeatingScript extends Script {
                     case FILLING:
                         if (currentLocation != PlayerLocation.COOKING_AREA) return;
 
-                        Rs2Item emptyRecipient = Rs2Inventory.get(config.recipientToFill().getName());
+                        Rs2ItemModel emptyRecipient = Rs2Inventory.get(config.recipientToFill().getName());
                         if (emptyRecipient != null) {
                             // find water source
                             HeatingLocation heatingLocation = config.heatingLocation();
@@ -71,7 +68,7 @@ public class AutoHeatingScript extends Script {
                     case COOKING:
                         if (currentLocation != PlayerLocation.COOKING_AREA) return;
 
-                        Rs2Item filledRecipient = Rs2Inventory.get(config.recipientToFill().getFilledName());
+                        Rs2ItemModel filledRecipient = Rs2Inventory.get(config.recipientToFill().getFilledName());
                         TileObject cookingTileObject = Rs2GameObject.findObjectById(PlayerLocation.COOKING_AREA.getCookingLocation().getCookingObjectID());
                         if (filledRecipient != null && cookingTileObject != null) {
                             GameObject cookingGameObject = Rs2GameObject.getGameObject(cookingTileObject.getWorldLocation());

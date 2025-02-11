@@ -8,7 +8,7 @@ import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
 import net.runelite.client.plugins.microbot.pvmfighter.helpers.skill.AttackStyleScript;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
 import net.runelite.client.plugins.microbot.util.misc.Rs2Food;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 
@@ -89,7 +89,7 @@ public class HelperScript extends Script {
         if (!config.useFood()) return false;
 
         // get food that heal value is less than lost health
-        Optional<Rs2Item> foodToEat = Rs2Inventory.getInventoryFood().stream().filter(food -> {
+        Optional<Rs2ItemModel> foodToEat = Rs2Inventory.getInventoryFood().stream().filter(food -> {
             Rs2Food foodValue = Rs2Food.getFoodById(food.id);
             if (foodValue == null) return false;
 

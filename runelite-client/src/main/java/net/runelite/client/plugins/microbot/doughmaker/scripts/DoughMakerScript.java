@@ -16,7 +16,7 @@ import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
@@ -128,7 +128,7 @@ public class DoughMakerScript extends Script {
 
                         while (processedGrain > 0 && fulfillConditionsToRun()) {
                             GameObject basePlantMill = Rs2GameObject.findObject(14960, new WorldPoint(3140, 3449, 0));
-                            Rs2Item pot = Rs2Inventory.get(ItemID.POT);
+                            Rs2ItemModel pot = Rs2Inventory.get(ItemID.POT);
                             if (basePlantMill != null && pot != null) {
                                 log.info("Recollecting flour from mill");
                                 Rs2GameObject.interact(basePlantMill, "Empty");
@@ -137,7 +137,7 @@ public class DoughMakerScript extends Script {
                             Rs2Random.wait(800, 1200);
 
                             GameObject sink = Rs2GameObject.findObject(ObjectID.SINK_1763, new WorldPoint(3138, 3449, 0));
-                            Rs2Item emptyBucket = Rs2Inventory.get(ItemID.BUCKET);
+                            Rs2ItemModel emptyBucket = Rs2Inventory.get(ItemID.BUCKET);
                             if (sink != null && emptyBucket != null) {
                                 // use empty bucket from inventory and then click sink
                                 log.info("Filling empty bucket with water");
@@ -196,7 +196,7 @@ public class DoughMakerScript extends Script {
 
     // check player inventory and update grainRecollected and processedGrain
     private void checkPlayerInventory() {
-        List<Rs2Item> grainItemList = Rs2Inventory.all((rs2Item) -> rs2Item.id == ItemID.GRAIN);
+        List<Rs2ItemModel> grainItemList = Rs2Inventory.all((rs2Item) -> rs2Item.id == ItemID.GRAIN);
         int newSize = grainItemList.size();
         if (newSize < recollectedGrain) {
             recollectedGrain = newSize;
@@ -208,8 +208,8 @@ public class DoughMakerScript extends Script {
     }
 
     private boolean makeDough(DoughMakerConfig config) {
-        Rs2Item bucketOfWater = Rs2Inventory.get(ItemID.BUCKET_OF_WATER);
-        Rs2Item potOfFlour = Rs2Inventory.get(ItemID.POT_OF_FLOUR);
+        Rs2ItemModel bucketOfWater = Rs2Inventory.get(ItemID.BUCKET_OF_WATER);
+        Rs2ItemModel potOfFlour = Rs2Inventory.get(ItemID.POT_OF_FLOUR);
         if (potOfFlour != null && bucketOfWater != null && !Rs2Inventory.isFull()) {
             log.info("Combining bucket of water and pot of flour");
             Rs2Inventory.combine(bucketOfWater, potOfFlour);
@@ -427,8 +427,8 @@ public class DoughMakerScript extends Script {
         }
 
         // check if bucket of water and pot flour is available in inventory
-        Rs2Item bucketOfWater = Rs2Inventory.get(ItemID.BUCKET_OF_WATER);
-        Rs2Item potOfFlour = Rs2Inventory.get(ItemID.POT_OF_FLOUR);
+        Rs2ItemModel bucketOfWater = Rs2Inventory.get(ItemID.BUCKET_OF_WATER);
+        Rs2ItemModel potOfFlour = Rs2Inventory.get(ItemID.POT_OF_FLOUR);
         if (bucketOfWater != null && potOfFlour != null && !Rs2Inventory.isFull()) {
             processedGrain++;
             return true;

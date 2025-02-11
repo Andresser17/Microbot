@@ -3,7 +3,7 @@ package net.runelite.client.plugins.microbot.pvmfighter.combat;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.pvmfighter.PvmFighterConfig;
 
@@ -25,7 +25,7 @@ public boolean run(PvmFighterConfig config) {
     return true;
 }
 
-private void processItems(boolean toggle, List<Rs2Item> items, String action) {
+private void processItems(boolean toggle, List<Rs2ItemModel> items, String action) {
     if (!toggle || items == null || items.isEmpty()) return;
     Rs2Inventory.interact(items.get(0), action);
     Rs2Player.waitForAnimation();
