@@ -21,6 +21,7 @@ import java.awt.*;
 )
 @Slf4j
 public class AutoArtefactStealingPlugin extends Plugin {
+    private boolean isRunning;
     @Inject
     public AutoArtefactStealingConfig config;
     @Provides
@@ -39,15 +40,18 @@ public class AutoArtefactStealingPlugin extends Plugin {
 
     @Override
     protected void startUp() throws AWTException {
+        if (isRunning) return;
         if (overlayManager != null) {
             overlayManager.add(autoArtefactStealingOverlay);
         }
 
         autoArtefactStealingScript.run(config);
+        isRunning = true;
     }
 
     protected void shutDown() {
         autoArtefactStealingScript.shutdown();
         overlayManager.remove(autoArtefactStealingOverlay);
+        isRunning = false;
     }
 }

@@ -174,7 +174,7 @@ public class AutoArtefactStealingScript extends Script {
                                 if (!isRunning()) break;
 
                                 Rs2Walker.walkFastCanvas(WEST_BRIDGE_SAFE_SPOT);
-                                sleepUntilFulfillCondition(() -> !Rs2Player.isWalking(), () -> Rs2Random.wait(800, 1000));
+                                sleepUntilFulfillCondition(() -> !Rs2Player.isWalking(true), () -> Rs2Random.wait(50, 60));
 
                                 Rs2Random.wait(50, 60);
                             }
@@ -206,32 +206,57 @@ public class AutoArtefactStealingScript extends Script {
                                 else if (WEST_BRIDGE_INTERPOLATION_AREA.contains(Rs2Player.getWorldLocation())) {
                                     Rs2Walker.walkFastCanvas(WEST_BRIDGE_SAFE_SPOT_EAST);
                                     sleepUntilFulfillCondition(() -> !Rs2Player.isWalking(), () -> Rs2Random.wait(100, 110));
-                                } else if (Orientation.EAST.getAngle() == westBridgePatrol.getOrientation()
-                                        && westBridgePatrol.getPoseAnimation() != -1 && Orientation.WEST.getAngle() != northCorridorPatrol.getOrientation()) {
-                                    // run first to interpolation point
+                                } else if (westBridgePatrol.getWorldLocation().equals(new WorldPoint(1759, 3755, 0))
+                                        && (northCorridorPatrol == null || Orientation.SOUTH.getAngle() == northCorridorPatrol.getOrientation() || Orientation.EAST.getAngle() == northCorridorPatrol.getOrientation())) {
+                                    sleepUntilTick(4);
                                     Rs2Walker.walkFastCanvas(WEST_BRIDGE_INTERPOLATION_SAFE_SPOT);
                                     Rs2Random.wait(800, 1200);
                                 }
+
+//                                else if (Orientation.EAST.getAngle() == westBridgePatrol.getOrientation()
+//                                        && westBridgePatrol.getPoseAnimation() != -1 && Orientation.WEST.getAngle() != northCorridorPatrol.getOrientation()) {
+//                                    // run first to interpolation point
+//                                    Rs2Walker.walkFastCanvas(WEST_BRIDGE_INTERPOLATION_SAFE_SPOT);
+//                                    Rs2Random.wait(800, 1200);
+//                                }
 
                                 Rs2Random.wait(50, 60);
                             }
                         }
 
                         // West Bridge Safe Spot east to North South SafeSpot
+//                        if (WEST_BRIDGE_SAFE_SPOT_EAST.equals(playerLocation)) {
+//                            while (!NORTH_SOUTH_BRIDGE_SAFE_SPOT.equals(Rs2Player.getWorldLocation())) {
+//                                if (!isRunning()) break;
+//
+//                                Rs2NpcModel northCorridorPatrol = Rs2Npc.getNpc(Patrolman.NORTH_CORRIDOR.getId());
+//                                int orientation = northCorridorPatrol.getCurrentOrientation();
+//                                if (Orientation.SOUTH.getAngle() != orientation || Orientation.EAST.getAngle() != orientation) {
+//                                    Rs2Walker.walkFastCanvas(NORTH_SOUTH_BRIDGE_SAFE_SPOT);
+//                                    sleepUntilFulfillCondition(() -> NORTH_SOUTH_BRIDGE_SAFE_SPOT.equals(Rs2Player.getWorldLocation()), () -> Rs2Random.wait(800, 1200));
+//                                }
+//
+//                                Rs2Random.wait(300, 500);
+//                            }
+//                        }
+
                         if (WEST_BRIDGE_SAFE_SPOT_EAST.equals(playerLocation)) {
-                            while (!NORTH_SOUTH_BRIDGE_SAFE_SPOT.equals(Rs2Player.getWorldLocation())) {
+                            while (!NORTH_EAST_BRIDGE_SAFE_SPOT.equals(Rs2Player.getWorldLocation())) {
                                 if (!isRunning()) break;
 
                                 Rs2NpcModel northCorridorPatrol = Rs2Npc.getNpc(Patrolman.NORTH_CORRIDOR.getId());
-                                int orientation = northCorridorPatrol.getCurrentOrientation();
-                                if (Orientation.SOUTH.getAngle() != orientation || Orientation.EAST.getAngle() != orientation) {
-                                    Rs2Walker.walkFastCanvas(NORTH_SOUTH_BRIDGE_SAFE_SPOT);
-                                    sleepUntilFulfillCondition(() -> NORTH_SOUTH_BRIDGE_SAFE_SPOT.equals(Rs2Player.getWorldLocation()), () -> Rs2Random.wait(800, 1200));
+
+                                if (Orientation.SOUTH.getAngle() != northCorridorPatrol.getOrientation() || Orientation.EAST.getAngle() != northCorridorPatrol.getOrientation()) {
+                                    Rs2Walker.walkFastCanvas(NORTH_EAST_BRIDGE_SAFE_SPOT);
+                                    sleepUntilFulfillCondition(() -> !Rs2Player.isWalking(true), () -> Rs2Random.wait(800, 1200));
                                 }
 
-                                Rs2Random.wait(300, 500);
+                                Rs2Random.wait(50, 60);
                             }
+
+                            Rs2Walker.walkFastCanvas(NORTH_EAST_OUTSIDE_POINT);
                         }
+
 
                         // North South Bridge SafeSpot to North East SafeSpot
                         if (NORTH_SOUTH_BRIDGE_SAFE_SPOT.equals(playerLocation)) {
