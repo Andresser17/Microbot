@@ -10,6 +10,7 @@ public enum PlayerState {
     ATTACK_STYLE(PlayerLocation.COMBAT_FIELD),
     LOOTING(PlayerLocation.COMBAT_FIELD),
     SAFEKEEPING(PlayerLocation.SAFE_SPOT),
+    RETRIEVE(PlayerLocation.BANK_LOCATION),
     BANKING(PlayerLocation.BANK_LOCATION),
     CANNON(PlayerLocation.COMBAT_FIELD),
     SLAYER_MASTER(PlayerLocation.SLAYER_MASTER),

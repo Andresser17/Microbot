@@ -9,6 +9,7 @@ import net.runelite.client.plugins.microbot.pvmfighter.helpers.skill.AttackStyle
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
+import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.misc.Rs2Food;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 
@@ -93,7 +94,7 @@ public class HelperScript extends Script {
             Rs2Food foodValue = Rs2Food.getFoodById(food.id);
             if (foodValue == null) return false;
 
-            return foodValue.getHeal() <= (Rs2Player.getMaxHealth() - Rs2Player.checkCurrentHealth());
+            return foodValue.getHeal() <= (Rs2Player.getMaxHealth() - Rs2Player.checkCurrentHealth() - Rs2Random.between(2, 8));
         }).findFirst();
 
         return foodToEat.isPresent() && !Rs2Player.isFullHealth();
