@@ -11,8 +11,10 @@ import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.camera.Rs2Camera;
+import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.menu.NewMenuEntry;
@@ -26,11 +28,13 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class AutoArtefactStealingScript extends Script {
-    public static final String version = "0.1";
+    public static final String version = "0.2";
+    private final int[] STAMINA_POTION_IDS = new int[]{ItemID.STAMINA_POTION1, ItemID.STAMINA_POTION2, ItemID.STAMINA_POTION3, ItemID.STAMINA_POTION4};
     private final int CAPTAIN_KHALED_ID = 6972;
     private final int STEALING_ARTEFACTS_TASK_VARBIT = 4903;
     private final int BASE_FLOOR_LADDER = 27634;
     private final int FIRST_FLOOR_LADDER = 27635;
+    private final WorldArea NORTH_CORRIDOR_PATROL_AVOID_AREA = new WorldArea(1763, 3754, 14, 4, 0);
     private final WorldPoint WEST_BRIDGE_PATROL_EAST_POINT = new WorldPoint(1762, 3755, 0);
     private final WorldPoint WEST_BRIDGE_SAFE_SPOT = new WorldPoint(1758, 3752, 0);
     private final WorldPoint WEST_BRIDGE_INTERPOLATION_SAFE_SPOT = new WorldPoint(1762, 3754, 0);
@@ -61,11 +65,11 @@ public class AutoArtefactStealingScript extends Script {
                 if (!fulfillConditionsToRun() || Rs2AntibanSettings.actionCooldownActive) return;
 
                 getTask();
-                log.info("task: {}", task);
                 getPlayerState(config);
                 currentLocation = PlayerLocation.checkCurrentPlayerLocation();
                 boolean desiredLocation = checkIfInDesiredLocation();
                 if (!desiredLocation) walkToDesiredLocation();
+                useStaminaPotions();
 
                 log.info("PlayerState: {}, CurrentLocation: {}", playerState, currentLocation);
                 switch (playerState) {
@@ -161,7 +165,7 @@ public class AutoArtefactStealingScript extends Script {
                                         || Orientation.EAST.getAngle() == westBridgePatrol.getOrientation() && westBridgePatrol.getPoseAnimation() != -1) {
                                     Rs2Walker.walkFastCanvas(WEST_BRIDGE_SAFE_SPOT);
                                     Rs2Random.wait(800, 1000);
-                                    sleepUntilFulfillCondition(() -> !Rs2Player.isWalking(), () -> Rs2Random.wait(800, 1000));
+                                    sleepUntilFulfillCondition(() -> !Rs2Player.isWalking(true), () -> Rs2Random.wait(800, 1000));
                                 }
 
                                 Rs2Random.wait(50, 60);
@@ -201,24 +205,18 @@ public class AutoArtefactStealingScript extends Script {
 
                                 if (WEST_BRIDGE_SAFE_SPOT_EAST_AREA.contains(Rs2Player.getWorldLocation())) {
                                     Rs2Walker.walkFastCanvas(WEST_BRIDGE_SAFE_SPOT_EAST);
-                                    sleepUntilFulfillCondition(() -> !Rs2Player.isWalking(), () -> Rs2Random.wait(100, 110));
+                                    sleepUntilFulfillCondition(() -> !Rs2Player.isWalking(true), () -> Rs2Random.wait(100, 110));
                                 }
-                                else if (WEST_BRIDGE_INTERPOLATION_AREA.contains(Rs2Player.getWorldLocation())) {
+                                else if (WEST_BRIDGE_INTERPOLATION_AREA.contains(Rs2Player.getWorldLocation())
+                                        && !WEST_BRIDGE_PATROL_EAST_POINT.equals(westBridgePatrol.getWorldLocation())) {
                                     Rs2Walker.walkFastCanvas(WEST_BRIDGE_SAFE_SPOT_EAST);
-                                    sleepUntilFulfillCondition(() -> !Rs2Player.isWalking(), () -> Rs2Random.wait(100, 110));
+                                    sleepUntilFulfillCondition(() -> !Rs2Player.isWalking(true), () -> Rs2Random.wait(100, 110));
                                 } else if (westBridgePatrol.getWorldLocation().equals(new WorldPoint(1759, 3755, 0))
-                                        && (northCorridorPatrol == null || Orientation.SOUTH.getAngle() == northCorridorPatrol.getOrientation() || Orientation.EAST.getAngle() == northCorridorPatrol.getOrientation())) {
+                                        && (northCorridorPatrol == null || !NORTH_CORRIDOR_PATROL_AVOID_AREA.contains(northCorridorPatrol.getWorldLocation()))) {
                                     sleepUntilTick(4);
-                                    Rs2Walker.walkFastCanvas(WEST_BRIDGE_INTERPOLATION_SAFE_SPOT);
-                                    Rs2Random.wait(800, 1200);
+                                    Rs2Walker.walkCanvas(WEST_BRIDGE_INTERPOLATION_SAFE_SPOT);
+                                    sleepUntilFulfillCondition(() -> !Rs2Player.isWalking(true), () -> Rs2Random.wait(100, 110));
                                 }
-
-//                                else if (Orientation.EAST.getAngle() == westBridgePatrol.getOrientation()
-//                                        && westBridgePatrol.getPoseAnimation() != -1 && Orientation.WEST.getAngle() != northCorridorPatrol.getOrientation()) {
-//                                    // run first to interpolation point
-//                                    Rs2Walker.walkFastCanvas(WEST_BRIDGE_INTERPOLATION_SAFE_SPOT);
-//                                    Rs2Random.wait(800, 1200);
-//                                }
 
                                 Rs2Random.wait(50, 60);
                             }
@@ -311,8 +309,33 @@ public class AutoArtefactStealingScript extends Script {
                     case BANKING:
                         if (playerState.getPlayerLocation() != PlayerLocation.BANK_LOCATION) return;
                         if (!Rs2Bank.isOpen()) Rs2Bank.openBank();
+                        Rs2Bank.depositAll();
+
+                        if (!Rs2Inventory.hasItem(ItemID.LOCKPICK)) {
+                            if (Rs2Bank.hasItem(ItemID.LOCKPICK)) {
+                                Rs2Bank.withdrawOne(ItemID.LOCKPICK);
+                            } else {
+                                Microbot.showMessage("Lock pick not available in bank, shutting down...");
+                                shutdown();
+                            }
+                        }
+
+                        int teleportId = config.getTeleport().getId();
+                        if (!Rs2Equipment.isWearing(teleportId)) {
+                            if (!Rs2Inventory.hasItem(teleportId)) {
+                                if (Rs2Bank.hasItem(teleportId)) {
+                                    Rs2Bank.withdrawOne(teleportId);
+                                    Rs2Random.wait(1000, 1200);
+                                    Rs2Inventory.wear(teleportId);
+                                } else {
+                                    Microbot.showMessage(config.getTeleport().getName() + " not available in bank, shutting down...");
+                                    shutdown();
+                                }
+                            }
+                        }
 
                         Rs2Bank.withdrawX(ItemID.STAMINA_POTION4, 25);
+                        Rs2Bank.closeBank();
                         break;
                 }
             } catch (Exception ex) {
@@ -322,12 +345,20 @@ public class AutoArtefactStealingScript extends Script {
         return true;
     }
 
+    private void useStaminaPotions() {
+        if (!Rs2Player.hasStaminaBuffActive() && Rs2Player.getRunEnergy() < 70) {
+            Rs2Inventory.interact("Stamina Potion", "Drink");
+            if (Rs2Inventory.hasItem(ItemID.VIAL)) Rs2Inventory.dropAll(ItemID.VIAL);
+        }
+    }
+
     private boolean checkIfInDesiredLocation() {
         return playerState.getPlayerLocation() == currentLocation;
     }
 
     private void walkToDesiredLocation() {
-        if (!Rs2Antiban.isIdle() || Rs2Player.isWalking()) return;
+        if (!Rs2Antiban.isIdle() || Rs2Player.isWalking(true)) return;
+        useStaminaPotions();
 
         if (playerState == PlayerState.DELIVER_ARTEFACT && currentLocation == PlayerLocation.OUTSIDE_POINT) {
             walkToCaptainLocation();
@@ -367,7 +398,7 @@ public class AutoArtefactStealingScript extends Script {
     }
 
     private void getPlayerState(AutoArtefactStealingConfig config) {
-        if (isReadyToBank()) {
+        if (isReadyToBank(config)) {
             playerState = PlayerState.BANKING;
             return;
         }
@@ -405,15 +436,11 @@ public class AutoArtefactStealingScript extends Script {
     }
 
     private boolean needsToGetTask() {
-//        int currentTaskVarbitValue = Microbot.getVarbitValue(STEALING_ARTEFACTS_TASK_VARBIT);
-//        return currentTaskVarbitValue == Task.NO_TASK.getVarbitValue() || currentTaskVarbitValue == Task.CAUGHT.getVarbitValue();
         return task == Task.NO_TASK || task == Task.CAUGHT;
     }
 
     private boolean isReadyToStealArtefact() {
         if (task == null) return false;
-//        return !task.equals(Task.NO_TASK) || !task.equals(Task.CAUGHT) || !task.equals(Task.RETRIEVED);
-//        return PlayerLocation.HOUSE_ZONE.getArea().contains(task.getLocation().getPoint());
         return task.getDrawers() != null;
     }
 
@@ -431,8 +458,14 @@ public class AutoArtefactStealingScript extends Script {
         return task.equals(Task.RETRIEVED) && !currentLocation.equals(PlayerLocation.HOUSE_ZONE);
     }
 
-    private boolean isReadyToBank() {
-        return !Rs2Inventory.hasItem(new int[]{ItemID.STAMINA_POTION4, ItemID.STAMINA_POTION3, ItemID.STAMINA_POTION2, ItemID.STAMINA_POTION1});
+    private boolean isReadyToBank(AutoArtefactStealingConfig config) {
+        if (config.useTeleport()) {
+            int teleportId = config.getTeleport().getId();
+            if (!Rs2Equipment.isWearing(teleportId)) return !Rs2Inventory.hasItem(teleportId);
+        }
+        if (!Rs2Inventory.hasItem(ItemID.LOCKPICK)) return true;
+
+        return !Rs2Inventory.hasItem("Stamina Potion", false);
     }
 
     @Override

@@ -115,7 +115,7 @@ public class AutoMiningScript extends Script {
     }
 
     private void walkToDesiredLocation() {
-        if (!Rs2Antiban.isIdle() || Rs2Player.isWalking()) return;
+        if (!Rs2Antiban.isIdle() || Rs2Player.isWalking(true)) return;
 
         switch (playerState) {
             case MINING:
