@@ -346,7 +346,7 @@ public class AutoArtefactStealingScript extends Script {
     }
 
     private void useStaminaPotions() {
-        if (!Rs2Player.hasStaminaBuffActive() && Rs2Player.getRunEnergy() < 70) {
+        if (!Rs2Player.hasStaminaBuffActive() && Rs2Player.getRunEnergy() < Rs2Random.between(63, 72)) {
             Rs2Inventory.interact("Stamina Potion", "Drink");
             if (Rs2Inventory.hasItem(ItemID.VIAL)) Rs2Inventory.dropAll(ItemID.VIAL);
         }
@@ -432,7 +432,9 @@ public class AutoArtefactStealingScript extends Script {
     }
 
     private void getTask() {
-        task = Task.findTaskByVarbitValue(Microbot.getVarbitValue(STEALING_ARTEFACTS_TASK_VARBIT));
+        Task currentTask = Task.findTaskByVarbitValue(Microbot.getVarbitValue(STEALING_ARTEFACTS_TASK_VARBIT));
+        if (currentTask.equals(Task.RETRIEVED) && !Artefact.hasArtefactInInventory()) task = Task.CAUGHT;
+        else task = currentTask;
     }
 
     private boolean needsToGetTask() {
