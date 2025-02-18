@@ -24,8 +24,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class AutoMiningScript extends Script {
     public static final String version = "1.5";
-    private static final int GEM_MINE_UNDERGROUND = 11410;
-    private static final int BASALT_MINE = 11425;
     private Rocks[] oresToMine;
     PlayerState playerState;
     PlayerLocation currentLocation;
@@ -73,8 +71,13 @@ public class AutoMiningScript extends Script {
 
                         GameObject rock = null;
                         for (Rocks ore : oresToMine) {
-                            rock = Rs2GameObject.findReachableObject(ore.getName(), true, config.area(), PlayerLocation.MINING_FIELD.getPoint());
-                            if (rock != null) break;
+                            GameObject localRock = Rs2GameObject.findReachableObject(ore.getName(), true, config.area(), PlayerLocation.MINING_FIELD.getPoint());
+                            if (localRock != null) {
+                                if (PlayerLocation.MINING_FIELD.getArea().contains(localRock.getWorldLocation())) {
+                                    rock = localRock;
+                                    break;
+                                }
+                            }
                         }
 
                         if (rock != null) {
