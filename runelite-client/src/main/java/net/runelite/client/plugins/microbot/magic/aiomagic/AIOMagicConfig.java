@@ -31,6 +31,8 @@ public interface AIOMagicConfig extends Config {
 	String herbsToClean = "herbsToClean";
 	String toggleCleanAllHerbs = "toggleCleanAllHerbs";
 	String excludedHerbsToClean = "excludedHerbsToClean";
+	String leatherStaff = "leatherStaff";
+	String leatherToTan = "leatherToTan";
 
 	@ConfigSection(
 			name = "General Settings",
@@ -87,6 +89,13 @@ public interface AIOMagicConfig extends Config {
 			position = 5
 	)
 	String degrimeSection = "degrime";
+
+	@ConfigSection(
+			name = "Tan Leather Settings",
+			description = "Configure tan leather settings",
+			position = 6
+	)
+	String tanLeatherSection = "tanLeatherSection";
 
 	@ConfigItem(
 			keyName = activity,
@@ -261,5 +270,27 @@ public interface AIOMagicConfig extends Config {
 	)
 	default String excludedHerbsToClean() {
 		return "";
+	}
+
+	@ConfigItem(
+			keyName = leatherStaff,
+			name = "Staff",
+			description = "Staff to use",
+			position = 0,
+			section = tanLeatherSection
+	)
+	default Staff leatherStaff() {
+		return Staff.FIRE;
+	}
+
+	@ConfigItem(
+			keyName = leatherToTan,
+			name = "Leather to Tan",
+			description = "Type of leather to tan",
+			position = 1,
+			section = tanLeatherSection
+	)
+	default Leather leatherToTan() {
+		return Leather.GREEN_DRAGONHIDE;
 	}
 }

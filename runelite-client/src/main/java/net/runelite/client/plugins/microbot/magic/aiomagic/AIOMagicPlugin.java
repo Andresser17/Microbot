@@ -4,6 +4,7 @@ import com.google.inject.Provides;
 import lombok.Getter;
 
 import net.runelite.api.Skill;
+import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -63,6 +64,8 @@ public class AIOMagicPlugin extends Plugin {
 	private EnchantScript enchantScript;
 	@Inject
 	private DegrimeScript degrimeScript;
+	@Inject
+	private TanLeatherScript tanLeatherScript;
 
 	public static String version = "1.1.0";
 	
@@ -91,6 +94,10 @@ public class AIOMagicPlugin extends Plugin {
 	@Getter
 	private EarthStaff degrimeStaff;
 	@Getter
+	private Staff leatherStaff;
+	@Getter
+	private Leather leatherToTan;
+	@Getter
 	private String herbsToClean;
 	@Getter
 	private boolean toggleCleanAllHerbs;
@@ -116,8 +123,8 @@ public class AIOMagicPlugin extends Plugin {
 		herbsToClean = config.herbsToClean();
 		toggleCleanAllHerbs = config.toggleCleanAllHerbs();
 		excludedHerbsToClean = config.excludedHerbsToClean();
-
-
+		leatherStaff = config.leatherStaff();
+		leatherToTan = config.leatherToTan();
 
 		if (overlayManager != null) {
 			overlayManager.add(aioMagicOverlay);
@@ -148,6 +155,9 @@ public class AIOMagicPlugin extends Plugin {
 			case DEGRIME:
 				degrimeScript.run();
 				break;
+			case TAN_LEATHER:
+				tanLeatherScript.run();
+				break;
 		}
 	}
 
@@ -160,6 +170,7 @@ public class AIOMagicPlugin extends Plugin {
 		enchantScript.shutdown();
 		stunAlchScript.shutdown();
 		degrimeScript.shutdown();
+		tanLeatherScript.shutdown();
 		overlayManager.remove(aioMagicOverlay);
 	}
 

@@ -152,7 +152,7 @@ public class BlastoiseFurnaceScript extends Script {
 //                        Rs2Random.wait(800, 1200);
 //                        sleepUntil(() -> !Rs2Player.isMoving());
                         Rs2GameObject.interact(BAR_DISPENSER_ID, "Take");
-                        sleepUntil(() -> !Rs2Player.isMoving());
+                        sleepUntil(() -> !Rs2Player.isWalking(true));
                         Rs2Random.wait(800, 1200);
                         boolean howManyWidget = Rs2Widget.hasWidget("How many would you like");
                         boolean whatTakeWidget = Rs2Widget.hasWidget("What would you like to take");

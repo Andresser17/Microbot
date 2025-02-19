@@ -9,4 +9,5 @@ public enum MagicActivity {
     ENCHANT,
     STUNALCH,
     DEGRIME,
+    TAN_LEATHER
 }
