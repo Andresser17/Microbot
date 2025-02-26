@@ -2,9 +2,12 @@ package net.runelite.client.plugins.microbot.breakhandler;
 
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.GameState;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.SessionOpen;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -67,6 +70,13 @@ public class BreakHandlerPlugin extends Plugin {
         overlayManager.remove(breakHandlerOverlay);
     }
 
+    @Subscribe
+    public void onGameStateChanged(final GameStateChanged event) {
+       if (event.getGameState().getState() == GameState.LOGGED_IN.getState()) {
+           breakHandlerScript.reset();
+       }
+    }
+
     // on settings change
     @Subscribe
     public void onConfigChanged(final ConfigChanged event) {
@@ -76,9 +86,9 @@ public class BreakHandlerPlugin extends Plugin {
             }
         }
 
-            if (event.getKey().equals(BreakHandlerConfig.hideOverlay)) {
-                hideOverlay = config.isHideOverlay();
-                toggleOverlay(hideOverlay);
-            }
+        if (event.getKey().equals(BreakHandlerConfig.hideOverlay)) {
+            hideOverlay = config.isHideOverlay();
+            toggleOverlay(hideOverlay);
         }
     }
+}

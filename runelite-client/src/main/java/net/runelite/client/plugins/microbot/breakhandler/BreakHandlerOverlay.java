@@ -34,6 +34,9 @@ public class BreakHandlerOverlay extends OverlayPanel {
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Total breaks: " + BreakHandlerScript.totalBreaks)
                     .build());
+            panelComponent.getChildren().add(LineComponent.builder()
+                    .left("Total sessions: " + BreakHandlerScript.totalSessions)
+                    .build());
 
             long hours = BreakHandlerScript.duration.toHours();
             long minutes = BreakHandlerScript.duration.toMinutes() % 60;

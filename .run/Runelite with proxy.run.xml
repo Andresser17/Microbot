@@ -7,7 +7,7 @@
     </envs>
     <option name="MAIN_CLASS_NAME" value="net.runelite.client.RuneLite" />
     <module name="client" />
-    <option name="PROGRAM_PARAMETERS" value="-developer-mode --insecure-write-credentials -proxy=127.0.0.1:9050 -proxy-type=socks5" />
+    <option name="PROGRAM_PARAMETERS" value="-developer-mode -proxy=154.36.110.199:6853 -proxy-type=http" />
     <option name="VM_PARAMETERS" value="-ea" />
     <option name="WORKING_DIRECTORY" value="$USER_HOME$/.runelite" />
     <method v="2">

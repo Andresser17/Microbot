@@ -9,5 +9,6 @@ public enum PlayerState {
     REFILL_COFFER,
     DEPOSIT_ORES,
     COLLECT_BARS,
-    IDLE;
+    BREAK,
+    IDLE
 }

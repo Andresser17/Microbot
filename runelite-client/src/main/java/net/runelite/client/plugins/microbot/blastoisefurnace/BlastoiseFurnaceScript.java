@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
+import net.runelite.api.coords.WorldArea;
+import net.runelite.client.plugins.microbot.breakhandler.BreakHandlerScript;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 
@@ -24,7 +26,6 @@ import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
-import net.runelite.client.plugins.microbot.util.npc.Rs2NpcModel;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
@@ -39,6 +40,7 @@ public class BlastoiseFurnaceScript extends Script {
     private static final int BLAST_FURNACE_COAL_VARBIT = Varbits.BLAST_FURNACE_COAL;
     private static final int BLAST_FURNACE_COFFER_VARBIT = Varbits.BLAST_FURNACE_COFFER;
     private static final int BLAST_FURNACE_FOREMAN_ID = 2923;
+    private static final WorldArea BLAST_FURNACE_OUTSIDE_AREA = new WorldArea(0, 0, 0, 0, 0);
     public static double version = 1.0;
     public static boolean waitingXpDrop = false;
     private BlastoiseFurnaceConfig config;
@@ -81,6 +83,8 @@ public class BlastoiseFurnaceScript extends Script {
                             Rs2Bank.depositAll("bar");
                             Rs2Random.wait(800, 1200);
                         }
+
+                        if (!Rs2Inventory.hasItem("Coal bag")) Rs2Bank.withdrawOne("Coal bag");
 
                         if (!hasRequiredOresInBank(config)) {
                             Microbot.showMessage("Not required ores for smithing");
@@ -160,6 +164,13 @@ public class BlastoiseFurnaceScript extends Script {
                             Rs2Keyboard.keyPress(32);
                             Rs2Random.wait(1400, 1600);
                         }
+                        break;
+                    case BREAK:
+                        if (!BLAST_FURNACE_OUTSIDE_AREA.contains(Rs2Player.getWorldLocation())) {
+                            Rs2Walker.walkTo(BLAST_FURNACE_OUTSIDE_AREA.toWorldPoint());
+                            sleepUntilFulfillCondition(() -> Rs2Player.isWalking(true), () -> Rs2Random.wait(800, 1200));
+                        }
+                        break;
                 }
             } catch (Exception ex) {
                 log.error(ex.getMessage());
@@ -170,6 +181,10 @@ public class BlastoiseFurnaceScript extends Script {
     }
 
     private void getPlayerState(BlastoiseFurnaceConfig config) {
+        if (needsToTakeBreak()) {
+            playerState = PlayerState.BREAK;
+            return;
+        }
 
         if (config.hasToPayFee() && (needsToPayFee() || needsToPayFee)) {
             playerState = PlayerState.PAY_FEE;
@@ -198,6 +213,11 @@ public class BlastoiseFurnaceScript extends Script {
         }
 
         playerState = PlayerState.IDLE;
+    }
+
+    private boolean needsToTakeBreak() {
+        if (!BreakHandlerScript.scriptIsTurnedOn) return false;
+        return BreakHandlerScript.isBreakActive() || BreakHandlerScript.breakIn < 60;
     }
 
     private boolean needsToPayFee() {
@@ -256,11 +276,11 @@ public class BlastoiseFurnaceScript extends Script {
 
     private void useRunEnergyPotions() {
         // Drink energy potions and stamina potions until energy is above 71%, else only stamina potion
-        if (Rs2Player.getRunEnergy() < 69) {
+        if (Rs2Player.getRunEnergy() < Rs2Random.between(62, 69)) {
             drinkEnergyPotion();
             Rs2Random.wait(1000, 1200);
             drinkStaminaPotion();
-        } else if (Rs2Player.getRunEnergy() < 81 && !Rs2Player.hasStaminaBuffActive()) {
+        } else if (Rs2Player.getRunEnergy() < Rs2Random.between(75, 81) && !Rs2Player.hasStaminaBuffActive()) {
             drinkStaminaPotion();
         }
     }

@@ -10,31 +10,54 @@ import net.runelite.client.plugins.microbot.util.antiban.enums.PlaySchedule;
 public interface BreakHandlerConfig extends Config {
     String configGroup = "break-handler";
     String hideOverlay = "hideOverlay";
+    String gameSessions = "gameSessions";
 
-    @ConfigItem(
-            keyName = "hideOverlay",
-            name = "Overlay Hider",
-            description = "Select this if you want to hide overlay"
+    // Play Schedule section
+    @ConfigSection(
+            name = "General",
+            description = "General Settings",
+            position = 0
     )
-    default boolean isHideOverlay() {
-        return false;
-    }
+    String generalSection = "generalSection";
 
     // Play Schedule section
     @ConfigSection(
             name = "Play Schedule",
             description = "Options related to using a play schedule",
-            position = 51
+            position = 1
     )
     String usePlaySchedule = "usePlaySchedule";
+
+    @ConfigItem(
+            keyName = "hideOverlay",
+            name = "Overlay Hider",
+            description = "Select this if you want to hide overlay",
+            position = 0,
+            section = generalSection
+    )
+    default boolean isHideOverlay() {
+        return false;
+    }
+
+    @ConfigItem(
+            keyName = gameSessions,
+            name = "Game sessions",
+            description = "Amount of sessions to play before log out",
+            position = 1,
+            section = generalSection
+    )
+    default int gameSessions() {
+        return 4;
+    }
 
     @ConfigItem(
             keyName = "Min Playtime",
             name = "Min Playtime",
             description = "Time until break start in minutes",
-            position = 0
+            position = 2,
+            section = generalSection
     )
-    default int timeUntilBreakStart() {
+    default int minPlayTime() {
         return 60;
     }
 
@@ -42,9 +65,10 @@ public interface BreakHandlerConfig extends Config {
             keyName = "Max Playtime",
             name = "Max Playtime",
             description = "Time until break ends in minutes",
-            position = 1
+            position = 3,
+            section = generalSection
     )
-    default int timeUntilBreakEnd() {
+    default int maxPlayTime() {
         return 120;
     }
 
@@ -52,9 +76,10 @@ public interface BreakHandlerConfig extends Config {
             keyName = "Min BreakTime",
             name = "Min BreakTime",
             description = "Break duration start in minutes",
-            position = 2
+            position = 4,
+            section = generalSection
     )
-    default int breakDurationStart() {
+    default int minBreakTime() {
         return 10;
     }
 
@@ -62,9 +87,10 @@ public interface BreakHandlerConfig extends Config {
             keyName = "Max BreakTime",
             name = "Max BreakTime",
             description = "Break duration end in minutes",
-            position = 3
+            position = 5,
+            section = generalSection
     )
-    default int breakDurationEnd() {
+    default int maxBreakTime() {
         return 15;
     }
 
@@ -73,7 +99,8 @@ public interface BreakHandlerConfig extends Config {
             keyName = "OnlyMicroBreaks",
             name = "Micro Breaks Only",
             description = "Only use micro breaks if enabled",
-            position = 4
+            position = 6,
+            section = generalSection
     )
     default boolean onlyMicroBreaks() {
         return false;
@@ -83,7 +110,8 @@ public interface BreakHandlerConfig extends Config {
             keyName = "Logout",
             name = "Logout",
             description = "Logout when taking a break",
-            position = 5
+            position = 7,
+            section = generalSection
     )
     default boolean logoutAfterBreak() {
         return true;
@@ -93,7 +121,8 @@ public interface BreakHandlerConfig extends Config {
             keyName = "useRandomWorld",
             name = "Use RandomWorld",
             description = "Change to a random world once break is finished",
-            position = 6
+            position = 8,
+            section = generalSection
     )
     default boolean useRandomWorld() {
         return false;

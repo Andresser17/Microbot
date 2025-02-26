@@ -15,11 +15,13 @@ import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 public class BreakHandlerScript extends Script {
-    public static String version = "1.0.0";
+    public static String version = "1.1.0";
 
     public static int breakIn = -1;
     public static int breakDuration = -1;
 
+    public static int totalSessions = 0;
+    public static int totalPlayTime = 0;
     public static int totalBreaks = 0;
 
     public static Duration duration;
@@ -28,10 +30,11 @@ public class BreakHandlerScript extends Script {
     @Getter
     public static boolean lockState = false;
     private String title = "";
-
+    private boolean showMessage;
     public static boolean isBreakActive() {
         return breakDuration > 0;
     }
+    public static boolean scriptIsTurnedOn;
 
     public static String formatDuration(Duration duration, String header) {
         long hours = duration.toHours();
@@ -41,12 +44,21 @@ public class BreakHandlerScript extends Script {
     }
 
     public boolean run(BreakHandlerConfig config) {
-
         Microbot.enableAutoRunOn = false;
         title = ClientUI.getFrame().getTitle();
-        breakIn = Rs2Random.between(config.timeUntilBreakStart() * 60, config.timeUntilBreakEnd() * 60);
+        breakIn = Rs2Random.between(config.minPlayTime() * 60, config.maxPlayTime() * 60);
+        totalPlayTime = breakIn;
+        scriptIsTurnedOn = true;
+
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
+                if (totalSessions >= config.gameSessions() && !showMessage) {
+                    Rs2Player.logout();
+                    Microbot.showMessage(String.format("Game sessions completed (%d). %s", totalSessions, formatDuration(Duration.ofSeconds(totalPlayTime), "Total play time: ")));
+                    showMessage = true;
+                    lockState = true;
+                    return;
+                }
 
                 if (config.playSchedule().isOutsideSchedule() && config.usePlaySchedule() && !isLockState()) {
                     Duration untilNextSchedule = config.playSchedule().timeUntilNextSchedule();
@@ -77,12 +89,14 @@ public class BreakHandlerScript extends Script {
                     }
                 }
 
-                if (breakDuration <= 0 && Microbot.pauseAllScripts) {
+                if (breakDuration <= 0 && Microbot.pauseAllScripts && !isLockState()) {
                     if (Rs2AntibanSettings.universalAntiban && Rs2AntibanSettings.actionCooldownActive)
                         return;
                     Microbot.pauseAllScripts = false;
-                    if (breakIn <= 0)
-                        breakIn = Rs2Random.between(config.timeUntilBreakStart() * 60, config.timeUntilBreakEnd() * 60);
+                    if (breakIn <= 0) {
+                        breakIn = Rs2Random.between(config.minPlayTime() * 60, config.maxPlayTime() * 60);
+                        totalPlayTime += breakIn;
+                    }
 
                     if (config.useRandomWorld()) {
                         new Login(Login.getRandomWorld(Login.activeProfile.isMember()));
@@ -106,9 +120,8 @@ public class BreakHandlerScript extends Script {
                         Rs2Player.logout();
                         return;
                     }
-
-
-                    breakDuration = Rs2Random.between(config.breakDurationStart() * 60, config.breakDurationEnd() * 60);
+                    totalSessions++;
+                    breakDuration = Rs2Random.between(config.minBreakTime() * 60, config.maxBreakTime() * 60);
 
                     if (config.logoutAfterBreak()) {
                         Rs2Player.logout();
@@ -126,6 +139,11 @@ public class BreakHandlerScript extends Script {
     public void shutdown() {
         breakIn = 0;
         breakDuration = 0;
+        totalSessions = 1;
+        totalPlayTime = 0;
+        showMessage = false;
+        lockState = false;
+        scriptIsTurnedOn = false;
         ClientUI.getFrame().setTitle(title);
         super.shutdown();
     }
@@ -133,6 +151,10 @@ public class BreakHandlerScript extends Script {
     public void reset() {
         breakIn = 0;
         breakDuration = 0;
+        totalSessions = 1;
+        totalPlayTime = 0;
+        showMessage = false;
+        lockState = false;
         ClientUI.getFrame().setTitle(title);
     }
 }
