@@ -125,6 +125,15 @@ public class Rs2InventorySetup {
         return doesInventoryMatch();
     }
 
+    private static boolean isBarrowsItem(String lowerCaseName) {
+        boolean isBarrowsItem = !lowerCaseName.endsWith(" 0") &&  (lowerCaseName.contains("dharok's")
+                || lowerCaseName.contains("ahrim's")
+                || lowerCaseName.contains("guthan's")
+                || lowerCaseName.contains("torag's")
+                || lowerCaseName.contains("verac's"));
+        return isBarrowsItem;
+    }
+
     /**
      * Calculates the quantity of an item to withdraw based on the current inventory state.
      *
@@ -197,6 +206,14 @@ public class Rs2InventorySetup {
         for (InventorySetupsItem inventorySetupsItem : inventorySetup.getEquipment()) {
             if (isMainSchedulerCancelled()) break;
             if (InventorySetupsItem.itemIsDummy(inventorySetupsItem)) continue;
+
+            String lowerCaseName = inventorySetupsItem.getName().toLowerCase();
+
+            boolean isBarrowsItem = isBarrowsItem(lowerCaseName);
+
+            if (isBarrowsItem) {
+                inventorySetupsItem.setName(lowerCaseName.replaceAll("\\s+[1-9]\\d*$", ""));
+            }
 
             if (inventorySetupsItem.isFuzzy()) {
 
