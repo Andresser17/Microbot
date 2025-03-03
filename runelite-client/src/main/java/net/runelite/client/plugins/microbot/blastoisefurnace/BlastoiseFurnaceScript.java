@@ -140,9 +140,13 @@ public class BlastoiseFurnaceScript extends Script {
                     case DEPOSIT_ORES:
                         Rs2GameObject.interact(ObjectID.CONVEYOR_BELT, "Put-ore-on");
                         Rs2Random.wait(800, 1200);
-                        sleepUntilFulfillCondition(() -> !Rs2Inventory.hasItem(oreInInventoryCurrentTrip), () -> Rs2Random.wait(800, 1200));
+                        sleepUntilFulfillCondition(() -> {
+                            if (needsToRefillCoffer() || needsToPayFee()) return true;
 
-                        if (this.config.getBars().isRequiresCoalBag()) {
+                            return !Rs2Inventory.hasItem(oreInInventoryCurrentTrip);
+                        }, () -> Rs2Random.wait(800, 1200));
+
+                        if (this.config.getBars().isRequiresCoalBag() && (!needsToRefillCoffer() || !needsToPayFee())) {
                             Rs2Inventory.interact(ItemID.COAL_BAG_12019, "Empty");
                             coalBagIsFull = false;
                             Rs2Random.wait(1200, 1500);
