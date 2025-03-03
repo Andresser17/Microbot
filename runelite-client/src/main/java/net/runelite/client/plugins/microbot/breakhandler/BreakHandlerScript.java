@@ -139,7 +139,7 @@ public class BreakHandlerScript extends Script {
     public void shutdown() {
         breakIn = 0;
         breakDuration = 0;
-        totalSessions = 1;
+        totalSessions = 0;
         totalPlayTime = 0;
         showMessage = false;
         lockState = false;
@@ -151,7 +151,7 @@ public class BreakHandlerScript extends Script {
     public void reset() {
         breakIn = 0;
         breakDuration = 0;
-        totalSessions = 1;
+        totalSessions = 0;
         totalPlayTime = 0;
         showMessage = false;
         lockState = false;
