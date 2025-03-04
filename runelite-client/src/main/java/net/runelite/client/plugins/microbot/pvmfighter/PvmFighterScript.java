@@ -154,7 +154,7 @@ public class PvmFighterScript extends Script {
     }
 
     private void walkToDesiredLocation() {
-        if (!Rs2Antiban.isIdle() || Rs2Player.isWalking()) return;
+        if (!Rs2Antiban.isIdle() || Rs2Player.isWalking(true)) return;
 
         switch (playerState) {
             case ATTACKING:
@@ -163,9 +163,6 @@ public class PvmFighterScript extends Script {
                 break;
             case SLAYER_MASTER:
                 walkToSlayerMaster();
-                break;
-            case SAFEKEEPING:
-                walkToSafeSpot();
                 break;
             case BANKING:
                 walkToSelectedBank();
@@ -189,12 +186,6 @@ public class PvmFighterScript extends Script {
         WorldPoint point = PlayerLocation.SLAYER_MASTER.getPoint();
         Rs2Walker.walkTo(point, 3);
         sleepUntil(() -> PlayerLocation.SLAYER_MASTER.getArea().contains(Rs2Player.getWorldLocation()));
-    }
-
-    private void walkToSafeSpot() {
-        WorldPoint point = PlayerLocation.SAFE_SPOT.getPoint();
-        Rs2Walker.walkTo(point, 0);
-        sleepUntil(() -> point.equals(Rs2Player.getWorldLocation()));
     }
 
     private void getPlayerState(PvmFighterConfig config) {
@@ -232,11 +223,6 @@ public class PvmFighterScript extends Script {
             return;
         }
 
-        if (needsToReturnToSafeSpot(config)) {
-            playerState = PlayerState.SAFEKEEPING;
-            return;
-        }
-
         if (config.toggleCombat()) {
             playerState = PlayerState.ATTACKING;
             return;
@@ -263,16 +249,6 @@ public class PvmFighterScript extends Script {
         }
         TileObject brokenCannon = Rs2GameObject.findObjectById(14916);
         return (Microbot.getVarbitPlayerValue(VarPlayer.CANNON_AMMO) == 0 || brokenCannon != null) && currentLocation.equals(PlayerLocation.COMBAT_FIELD);
-    }
-
-    private boolean needsToReturnToSafeSpot(PvmFighterConfig config) {
-        if (!config.useSafeSpot()) return false;
-
-        if (PlayerLocation.SAFE_SPOT.getPoint() != null) {
-            return !Rs2Player.getWorldLocation().equals(PlayerLocation.SAFE_SPOT.getPoint());
-        }
-
-        return false;
     }
 
     private boolean areGroundItemsToLoot(PvmFighterConfig config) {
@@ -308,9 +284,7 @@ public class PvmFighterScript extends Script {
     private boolean isReadyToBank(PvmFighterConfig config) {
         if (!config.toggleBanking()) return false;
 
-//        log.info("minimum health: {}", config.minimumHealthToRetrieve());
-//        log.info("player needs to retrieve: {}", Rs2Player.getHealthPercentageInt() <= config.minimumHealthToRetrieve());
-        return (Rs2Inventory.isFull() && Rs2Inventory.getInventoryFood().isEmpty()) || needsToRetreat(config);
+        return Rs2Inventory.isFull() && Rs2Inventory.getInventoryFood().isEmpty();
     }
 
     public boolean equipmentMatch(PvmFighterConfig config) {

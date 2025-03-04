@@ -9,8 +9,6 @@ import net.runelite.client.plugins.microbot.hunter.AutoHunterConfig;
 import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.microbot.util.grounditem.Rs2GroundItem;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
-import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
-import net.runelite.client.plugins.microbot.util.npc.Rs2NpcManager;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 
@@ -152,7 +150,7 @@ public class AutoChinScript extends Script {
     }
 
     public void handleBreaks() {
-         int secondsUntilBreak = BreakHandlerScript.breakIn; // Time until the break
+         int secondsUntilBreak = BreakHandlerScript.sessionTime; // Time until the break
 
         //Clear list incase user changed trap layout This should run about 2-4 minutes before break
         if(secondsUntilBreak > 61 && secondsUntilBreak <200){

@@ -1,7 +1,9 @@
 package net.runelite.client.plugins.microbot.pvmfighter;
 
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.microbot.Script;
+import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerLocation;
 import net.runelite.client.plugins.microbot.pvmfighter.helpers.FoodScript;
 import net.runelite.client.plugins.microbot.pvmfighter.helpers.PotionScript;
 import net.runelite.client.plugins.microbot.pvmfighter.enums.PlayerState;
@@ -12,6 +14,7 @@ import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.misc.Rs2Food;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
+import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -47,6 +50,9 @@ public class HelperScript extends Script {
                     case POTION:
                         potionScript.run(config);
                         break;
+                    case SAFEKEEPING:
+                        walkToSafeSpot();
+                        break;
                     case ATTACK_STYLE:
                         attackStyleScript.run(config);
                         break;
@@ -57,6 +63,12 @@ public class HelperScript extends Script {
         }, 0, 1000, TimeUnit.MILLISECONDS);
 
         return true;
+    }
+
+    private void walkToSafeSpot() {
+        WorldPoint point = PlayerLocation.SAFE_SPOT.getPoint();
+        Rs2Walker.walkTo(point, 0);
+        sleepUntilFulfillCondition(() -> point.equals(Rs2Player.getWorldLocation()), () -> Rs2Random.wait(800, 1200));
     }
 
     @Override
@@ -83,6 +95,11 @@ public class HelperScript extends Script {
             return;
         }
 
+        if (needsToReturnToSafeSpot(config)) {
+            helperState = PlayerState.SAFEKEEPING;
+            return;
+        }
+
         helperState = PlayerState.IDLE;
     }
 
@@ -98,5 +115,15 @@ public class HelperScript extends Script {
         }).findFirst();
 
         return foodToEat.isPresent() && !Rs2Player.isFullHealth();
+    }
+
+    private boolean needsToReturnToSafeSpot(PvmFighterConfig config) {
+        if (!config.useSafeSpot() || PvmFighterScript.playerState != PlayerState.ATTACKING) return false;
+
+        if (PlayerLocation.SAFE_SPOT.getPoint() != null) {
+            return !Rs2Player.getWorldLocation().equals(PlayerLocation.SAFE_SPOT.getPoint());
+        }
+
+        return false;
     }
 }

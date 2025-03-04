@@ -1,6 +1,5 @@
 package net.runelite.client.plugins.microbot.breakhandler;
 
-import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.components.LineComponent;
@@ -32,24 +31,19 @@ public class BreakHandlerOverlay extends OverlayPanel {
             panelComponent.getChildren().add(LineComponent.builder().build());
 
             panelComponent.getChildren().add(LineComponent.builder()
-                    .left("Total breaks: " + BreakHandlerScript.totalBreaks)
+                    .left("Completed breaks: " + BreakHandlerScript.completedBreaks)
                     .build());
             panelComponent.getChildren().add(LineComponent.builder()
-                    .left("Total sessions: " + BreakHandlerScript.totalSessions)
+                    .left("Completed sessions: " + BreakHandlerScript.completedSessions)
                     .build());
 
-            long hours = BreakHandlerScript.duration.toHours();
-            long minutes = BreakHandlerScript.duration.toMinutes() % 60;
-            long seconds = BreakHandlerScript.duration.getSeconds() % 60;
-
-            if (BreakHandlerScript.breakIn > 0) {
+            if (BreakHandlerScript.scriptState == ScriptState.SESSION) {
                 panelComponent.getChildren().add(LineComponent.builder()
-                        .left((Rs2AntibanSettings.takeMicroBreaks && config.onlyMicroBreaks()) ? "Only Micro Breaks" : BreakHandlerScript.formatDuration(BreakHandlerScript.breakInDuration, "Break in:"))
+                        .left(BreakHandlerScript.formatDuration(BreakHandlerScript.sessionDuration, "Break in:"))
                         .build());
-            }
-            if (BreakHandlerScript.breakDuration > 0) {
+            } else {
                 panelComponent.getChildren().add(LineComponent.builder()
-                        .left(BreakHandlerScript.formatDuration(BreakHandlerScript.duration, "Break duration:"))
+                        .left(BreakHandlerScript.formatDuration(BreakHandlerScript.breakDuration, "Break duration:"))
                         .build());
             }
 

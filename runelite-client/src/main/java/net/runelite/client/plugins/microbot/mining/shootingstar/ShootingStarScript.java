@@ -386,7 +386,7 @@ public class ShootingStarScript extends Script {
     private boolean shouldBreak() {
         if (!plugin.isBreakHandlerEnabled()) return false;
 
-        return BreakHandlerScript.breakIn <= 1;
+        return BreakHandlerScript.sessionTime <= 1;
     }
 
     public void toggleLockState(boolean lock) {

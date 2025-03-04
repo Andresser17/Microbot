@@ -26,7 +26,6 @@ import net.runelite.client.plugins.microbot.util.magic.Rs2Magic;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
 import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
-import net.runelite.client.plugins.microbot.util.player.Rs2PlayerModel;
 import net.runelite.client.plugins.microbot.util.player.Rs2Pvp;
 import net.runelite.client.plugins.microbot.util.prayer.Rs2Prayer;
 import net.runelite.client.plugins.microbot.util.prayer.Rs2PrayerEnum;
@@ -138,7 +137,7 @@ public class WildyKillerScript extends Script {
 
                 Microbot.log("SoL " + state);
 
-                if (isRunning() && BreakHandlerScript.breakIn <= 120 && Rs2Player.getWorldLocation().getY() < 3520) {
+                if (isRunning() && BreakHandlerScript.sessionTime <= 120 && Rs2Player.getWorldLocation().getY() < 3520) {
                     Microbot.log("On a break and not in wilderness");
                     if (isRunning()) {
                         sleep(10000);
@@ -152,7 +151,7 @@ public class WildyKillerScript extends Script {
                         return;
                     }
                     return;
-                } else if (isRunning() && BreakHandlerScript.breakIn <= 120 && Rs2Player.getWorldLocation().getY() > 3520) {
+                } else if (isRunning() && BreakHandlerScript.sessionTime <= 120 && Rs2Player.getWorldLocation().getY() > 3520) {
                     Microbot.log("On a break and in wilderness");
                     if (isRunning()) {
                         Rs2Walker.walkTo(ZERO_WILD);
@@ -1298,7 +1297,7 @@ public class WildyKillerScript extends Script {
 
         WorldPoint playerLocation = Rs2Player.getWorldLocation();
 
-        if (!Rs2Inventory.contains(FOOD) || BreakHandlerScript.breakIn <= 120) {
+        if (!Rs2Inventory.contains(FOOD) || BreakHandlerScript.sessionTime <= 120) {
             Microbot.log("Inventory does not contains FOOD or break in less than 120");
             state = MossKillerState.TELEPORT;
             return;
@@ -2097,7 +2096,7 @@ public class WildyKillerScript extends Script {
         if (Rs2Walker.getDistanceBetween(playerLocation, TWENTY_WILD) > 5
                 && !MOSS_GIANT_AREA.contains(playerLocation)
                 || Rs2Inventory.contains(MOSSY_KEY)
-                || BreakHandlerScript.breakIn <= 120
+                || BreakHandlerScript.sessionTime <= 120
                 || !Rs2Inventory.contains(FOOD)
                 || !Rs2Inventory.hasItemAmount(MIND_RUNE, 15)) {
             if (scheduledFuture.isDone() && !Rs2Inventory.hasItemAmount(FOOD, 17)) { // Only initiate if not already walking to Twenty Wild

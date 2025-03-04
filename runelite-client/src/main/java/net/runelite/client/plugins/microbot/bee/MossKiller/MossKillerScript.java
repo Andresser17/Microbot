@@ -219,10 +219,10 @@ public class MossKillerScript extends Script {
 
         WorldPoint playerLocation = Rs2Player.getWorldLocation();
 
-        if (!Rs2Inventory.contains(FOOD) || BreakHandlerScript.breakIn <= 15){
+        if (!Rs2Inventory.contains(FOOD) || BreakHandlerScript.sessionTime <= 15){
             Microbot.log("Inventory does not contains FOOD or break in less than 15");
             if (Rs2Inventory.contains(FOOD)) {Microbot.log("We have food");}
-                if (BreakHandlerScript.breakIn <= 15) {Microbot.log("Break in less than 15");}
+                if (BreakHandlerScript.sessionTime <= 15) {Microbot.log("Break in less than 15");}
             state = MossKillerState.TELEPORT;
             return;
         }

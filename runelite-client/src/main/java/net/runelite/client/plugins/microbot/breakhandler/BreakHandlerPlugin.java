@@ -73,8 +73,9 @@ public class BreakHandlerPlugin extends Plugin {
     @Subscribe
     public void onGameStateChanged(final GameStateChanged event) {
        if (event.getGameState().getState() == GameState.LOGGED_IN.getState()) {
+           BreakHandlerScript.setLockState(false);
            breakHandlerScript.reset();
-       }
+       } else BreakHandlerScript.setLockState(true);
     }
 
     // on settings change

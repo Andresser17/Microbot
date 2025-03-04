@@ -221,7 +221,7 @@ public class BlastoiseFurnaceScript extends Script {
 
     private boolean needsToTakeBreak() {
         if (!BreakHandlerScript.scriptIsTurnedOn) return false;
-        return BreakHandlerScript.isBreakActive() || BreakHandlerScript.breakIn < 60;
+        return BreakHandlerScript.isBreakActive() || BreakHandlerScript.sessionTime < 60;
     }
 
     private boolean needsToPayFee() {
