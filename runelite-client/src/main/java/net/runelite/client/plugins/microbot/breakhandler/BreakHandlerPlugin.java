@@ -88,11 +88,7 @@ public class BreakHandlerPlugin extends Plugin {
             if (event.getKey().equals("UsePlaySchedule")) {
                 breakHandlerScript.reset();
             }
-            
-            if (event.getKey().equals("breakNow")) {
-                boolean breakNowValue = config.breakNow();
-                log.debug("Break Now toggled: {}", breakNowValue);
-            }
+        }
 
         if (event.getKey().equals(BreakHandlerConfig.hideOverlay)) {
             hideOverlay = config.isHideOverlay();
