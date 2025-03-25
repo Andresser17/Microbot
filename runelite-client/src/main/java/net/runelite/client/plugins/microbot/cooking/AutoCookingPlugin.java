@@ -2,13 +2,9 @@ package net.runelite.client.plugins.microbot.cooking;
 
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.AnimationID;
 import net.runelite.api.Client;
-import net.runelite.api.Player;
-import net.runelite.api.events.AnimationChanged;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
-import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.microbot.Microbot;
@@ -20,6 +16,7 @@ import net.runelite.client.plugins.microbot.cooking.scripts.AutoCookingScript;
 import net.runelite.client.plugins.microbot.cooking.scripts.AutoHeatingScript;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.bank.enums.BankLocation;
+import net.runelite.client.plugins.microbot.cooking.scripts.BurnBakingScript;
 import net.runelite.client.plugins.microbot.util.mouse.VirtualMouse;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -35,7 +32,7 @@ import java.awt.*;
 )
 @Slf4j
 public class AutoCookingPlugin extends Plugin {
-    public static double version = 1.0;
+    public static double version = 1.1;
     @Inject
     AutoCookingScript autoCookingScript;
     @Inject
@@ -43,11 +40,9 @@ public class AutoCookingPlugin extends Plugin {
     @Inject
     AutoHeatingScript autoHeatingScript;
     @Inject
+    BurnBakingScript burnBakingScript;
+    @Inject
     private AutoCookingConfig config;
-    @Inject
-    private Client client;
-    @Inject
-    private ClientThread clientThread;
     @Inject
     private OverlayManager overlayManager;
     @Inject
@@ -107,6 +102,10 @@ public class AutoCookingPlugin extends Plugin {
 
                 autoHeatingScript.run(config);
                 break;
+                break;
+            case BURN_BAKING:
+                burnBakingScript.run(config);
+                break;
             default:
                 Microbot.log("Invalid Cooking Activity");
         }
@@ -118,6 +117,7 @@ public class AutoCookingPlugin extends Plugin {
         autoCookingScript.shutdown();
         autoCombiningScript.shutdown();
         autoHeatingScript.shutdown();
+        burnBakingScript.shutdown();
         overlayManager.remove(overlay);
         isRunning = false;
     }

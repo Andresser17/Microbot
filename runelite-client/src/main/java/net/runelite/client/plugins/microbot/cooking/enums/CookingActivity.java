@@ -8,6 +8,7 @@ public enum CookingActivity {
     COMBINING,
     COMBINE_COOK,
     HEATING,
+    BURN_BAKING
 //    REFILLING,
 //    WINE,
 //    BAKING,
