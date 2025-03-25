@@ -62,9 +62,9 @@ public class AutoCookingPlugin extends Plugin {
         }
 
         Microbot.pauseAllScripts = false;
-        Microbot.setClient(client);
-        Microbot.setClientThread(clientThread);
-        Microbot.setMouse(new VirtualMouse());
+//        Microbot.setClient(client);
+//        Microbot.setClientThread(clientThread);
+//        Microbot.setMouse(new VirtualMouse());
         if (overlayManager != null) {
             overlayManager.add(overlay);
         }
@@ -101,7 +101,6 @@ public class AutoCookingPlugin extends Plugin {
                 PlayerLocation.BANK_LOCATION.setWorldPoint(heatingLocation.getBankLocation().getWorldPoint(), 10);
 
                 autoHeatingScript.run(config);
-                break;
                 break;
             case BURN_BAKING:
                 burnBakingScript.run(config);
