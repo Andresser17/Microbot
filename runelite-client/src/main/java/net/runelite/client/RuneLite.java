@@ -275,9 +275,15 @@ public class RuneLite
                 System.setProperty("socksProxyPort", proxy[1]);
             }
 
-            if (socksProxy && proxy.length >= 4) {
-                System.setProperty("java.net.socks.username", proxy[2]);
-                System.setProperty("java.net.socks.password", proxy[3]);
+			// Password and user provided
+            if (proxy.length >= 4) {
+				if (socksProxy) {
+					System.setProperty("java.net.socks.username", proxy[2]);
+					System.setProperty("java.net.socks.password", proxy[3]);
+				} else {
+					System.setProperty("http.proxyUser", proxy[2]);
+					System.setProperty("http.proxyPass", proxy[3]);
+				}
 
                 final String user = proxy[2];
                 final char[] pass = proxy[3].toCharArray();
